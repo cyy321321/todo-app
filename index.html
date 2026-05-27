@@ -434,12 +434,13 @@ function cHex(code){return COLORS[getColor(code)];}
 function cBg(code){return COLOR_BG[getColor(code)];}
 function cMid(code){return COLOR_MID[getColor(code)];}
 
+// 優先載入 localStorage 作為基底
 let S={
   view:'list',inputOpen:false,itab:'paste',
   calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),
   weekOffset:0,
-  projects:[{code:'0000X',name:'待確認 / 其他'}],
-  tasks:[],
+  projects: JSON.parse(localStorage.getItem('tm-projs') || 'null') || [{code:'0000X',name:'待確認 / 其他'}],
+  tasks: JSON.parse(localStorage.getItem('tm-tasks') || '[]'),
   pending:[],calToken:null,sheetsToken:null,
   expandedProjs:new Set(),
   expandedCards:new Set(),
@@ -461,14 +462,13 @@ window.onload=()=>{
     google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onLogin});
     google.accounts.id.renderButton(document.getElementById('g-btn'),{theme:'outline',size:'large',width:240});
     
-    // 將權限合併請求避免遭彈出視窗攔截
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: CFG.CLIENT_ID,
       scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets',
       callback: async r => {
         S.calToken = r.access_token;
         S.sheetsToken = r.access_token;
-        await syncSheet(); 
+        await initAndSyncSheet(); 
       }
     });
 
@@ -506,70 +506,84 @@ function setSyncStatus(state,msg){
   txt.textContent=msg;
 }
 
-async function syncSheet(){
-  setSyncStatus('syncing','同步資料中…');
-  try{
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.SHEET_ID}/values:batchGet?ranges=Tasks!A2:Z&ranges=Projects!A2:Z`;
-    const r = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${S.sheetsToken}`, 'Cache-Control': 'no-cache' }
-    });
-    if(!r.ok) throw new Error();
-    const data = await r.json();
+// 封裝共用 API 請求
+async function sheetsFetch(method, path, body) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.SHEET_ID}${path}`;
+  const opts = { method, headers: { 'Authorization': `Bearer ${S.sheetsToken}`, 'Content-Type': 'application/json' }};
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if(!r.ok) throw new Error(await r.text());
+  return r.status === 204 ? null : r.json();
+}
+
+// 包含防呆與雙向初始化的同步邏輯
+async function initAndSyncSheet() {
+  setSyncStatus('syncing', '讀取本機資料與初始化雲端…');
+  renderView(); // 立即渲染從 S 中已經讀取的本機 localStorage 資料
+
+  try {
+    const info = await sheetsFetch('GET', '');
+    const sheetTitles = info.sheets.map(s => s.properties.title);
     
-    // 任務資料處理與本地轉移邏輯
+    // 檢查並建立所需的工作表分頁，防止 400 錯誤
+    if (!sheetTitles.includes('Tasks')) {
+      await sheetsFetch('POST', ':batchUpdate', { requests: [{ addSheet: { properties: { title: 'Tasks' } } }] });
+    }
+    if (!sheetTitles.includes('Projects')) {
+      await sheetsFetch('POST', ':batchUpdate', { requests: [{ addSheet: { properties: { title: 'Projects' } } }] });
+    }
+
+    // 嘗試讀取雲端資料
+    const data = await sheetsFetch('GET', '/values:batchGet?ranges=Tasks!A2:Z&ranges=Projects!A2:Z');
     const tRows = data.valueRanges[0].values || [];
-    if (tRows.length > 0) {
-        S.tasks = tRows.map(r=>({
-            id: parseInt(r[0]), type: r[1], title: r[2], code: r[3]||null,
-            date: r[4], endDate: r[5]||null, time: r[6]||null, timeEnd: r[7]||null,
-            loc: r[8]||'', priority: r[9], done: r[10]==='true', calEventId: r[11]||null,
-            note: r[12]||'', rawInfo: r[13]||''
-        }));
-    } else {
-        const localTasks = JSON.parse(localStorage.getItem('tm-tasks')||'[]');
-        if (localTasks.length > 0) {
-            S.tasks = localTasks;
-            saveToSheet();
-        }
-    }
-    
-    // 專案資料處理與本地轉移邏輯
     const pRows = data.valueRanges[1].values || [];
-    if (pRows.length > 0) {
-        S.projects = pRows.map(r=>({code: r[0], name: r[1]}));
+
+    if (tRows.length > 0 || pRows.length > 0) {
+        // 若雲端有資料，以雲端為主覆寫本機 (雙裝置切換情境)
+        if (tRows.length > 0) {
+            S.tasks = tRows.map(r => ({
+                id: parseInt(r[0]), type: r[1], title: r[2], code: r[3]||null,
+                date: r[4], endDate: r[5]||null, time: r[6]||null, timeEnd: r[7]||null,
+                loc: r[8]||'', priority: r[9], done: r[10]==='true', calEventId: r[11]||null,
+                note: r[12]||'', rawInfo: r[13]||''
+            }));
+        }
+        if (pRows.length > 0) {
+            S.projects = pRows.map(r => ({code: r[0], name: r[1]}));
+        }
+        localStorage.setItem('tm-tasks', JSON.stringify(S.tasks));
+        localStorage.setItem('tm-projs', JSON.stringify(S.projects));
+        setSyncStatus('ok', '已同步雲端資料');
     } else {
-        const localProjs = JSON.parse(localStorage.getItem('tm-projs')||'null');
-        if (localProjs && localProjs.length > 0) {
-            S.projects = localProjs;
-            saveToSheet();
+        // 若雲端無資料 (新建立的表)，將本機資料推播至雲端 (轉移情境)
+        if (S.tasks.length > 0 || S.projects.length > 1) {
+            await saveToSheet(); 
+        } else {
+            setSyncStatus('ok', '已連線 (無資料)');
         }
     }
-    S.projects.forEach(p=>{if(p.code!=='0000X')getColor(p.code);});
-    
-    setSyncStatus('ok','已同步');
-    fillCodeSel(); renderView(); buildSuggestion();
   } catch(e) {
-    setSyncStatus('err','讀取失敗');
+    setSyncStatus('err', '雲端連線異常，目前為離線模式');
+    console.error(e);
   }
+  
+  S.projects.forEach(p => { if(p.code!=='0000X') getColor(p.code); });
+  fillCodeSel(); 
+  renderView(); 
+  buildSuggestion();
 }
 
 async function saveToSheet(){
   if(!S.sheetsToken) return;
   setSyncStatus('syncing','儲存中…');
   try{
-    const tData = S.tasks.map(t=>[t.id, t.type, t.title, t.code||'', t.date, t.endDate||'', t.time||'', t.timeEnd||'', t.loc, t.priority, t.done, t.calEventId||'', t.note, t.rawInfo]);
+    const tData = S.tasks.map(t=>[t.id, t.type, t.title, t.code||'', t.date, t.endDate||'', t.time||'', t.timeEnd||'', t.loc||'', t.priority, t.done, t.calEventId||'', t.note||'', t.rawInfo||'']);
     const pData = S.projects.map(p=>[p.code, p.name]);
     
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CFG.SHEET_ID}/values/Tasks!A2:Z?valueInputOption=RAW`, {
-        method: 'PUT', headers: { 'Authorization': `Bearer ${S.sheetsToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values: tData })
-    });
-    await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${CFG.SHEET_ID}/values/Projects!A2:Z?valueInputOption=RAW`, {
-        method: 'PUT', headers: { 'Authorization': `Bearer ${S.sheetsToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ values: pData })
-    });
+    await sheetsFetch('PUT', '/values/Tasks!A2:Z?valueInputOption=RAW', { values: tData });
+    await sheetsFetch('PUT', '/values/Projects!A2:Z?valueInputOption=RAW', { values: pData });
     
-    // 同步儲存至本地以備不時之需
+    // 雙重保險寫入本機
     localStorage.setItem('tm-projs', JSON.stringify(S.projects));
     localStorage.setItem('tm-tasks', JSON.stringify(S.tasks));
     setSyncStatus('ok','已同步 ✓');
