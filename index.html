@@ -474,7 +474,7 @@ async function commitTasks(){
   closeModal('confirm-modal');
   document.getElementById('paste-box').value='';
   renderView();buildSuggestion();
-  toast(`✅ 已新增 ${newT.length} 個任務${S.calToken?'並推送至 Google Calendar':''}','ok');
+  toast(`✅ 已新增 ${newT.length} 個任務${S.calToken?' 並推送至 Google Calendar':''}`, 'ok');
 }
 
 function fillCodeSel(){const s=document.getElementById('w-code');if(!s)return;s.innerHTML=S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');}
