@@ -461,6 +461,7 @@ window.onload=()=>{
     google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onLogin});
     google.accounts.id.renderButton(document.getElementById('g-btn'),{theme:'outline',size:'large',width:240});
     
+    // 將權限合併請求避免遭彈出視窗攔截
     tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: CFG.CLIENT_ID,
       scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets',
@@ -515,17 +516,33 @@ async function syncSheet(){
     if(!r.ok) throw new Error();
     const data = await r.json();
     
+    // 任務資料處理與本地轉移邏輯
     const tRows = data.valueRanges[0].values || [];
-    S.tasks = tRows.map(r=>({
-        id: parseInt(r[0]), type: r[1], title: r[2], code: r[3]||null,
-        date: r[4], endDate: r[5]||null, time: r[6]||null, timeEnd: r[7]||null,
-        loc: r[8]||'', priority: r[9], done: r[10]==='true', calEventId: r[11]||null,
-        note: r[12]||'', rawInfo: r[13]||''
-    }));
+    if (tRows.length > 0) {
+        S.tasks = tRows.map(r=>({
+            id: parseInt(r[0]), type: r[1], title: r[2], code: r[3]||null,
+            date: r[4], endDate: r[5]||null, time: r[6]||null, timeEnd: r[7]||null,
+            loc: r[8]||'', priority: r[9], done: r[10]==='true', calEventId: r[11]||null,
+            note: r[12]||'', rawInfo: r[13]||''
+        }));
+    } else {
+        const localTasks = JSON.parse(localStorage.getItem('tm-tasks')||'[]');
+        if (localTasks.length > 0) {
+            S.tasks = localTasks;
+            saveToSheet();
+        }
+    }
     
+    // 專案資料處理與本地轉移邏輯
     const pRows = data.valueRanges[1].values || [];
-    if(pRows.length){
+    if (pRows.length > 0) {
         S.projects = pRows.map(r=>({code: r[0], name: r[1]}));
+    } else {
+        const localProjs = JSON.parse(localStorage.getItem('tm-projs')||'null');
+        if (localProjs && localProjs.length > 0) {
+            S.projects = localProjs;
+            saveToSheet();
+        }
     }
     S.projects.forEach(p=>{if(p.code!=='0000X')getColor(p.code);});
     
@@ -551,6 +568,10 @@ async function saveToSheet(){
         method: 'PUT', headers: { 'Authorization': `Bearer ${S.sheetsToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ values: pData })
     });
+    
+    // 同步儲存至本地以備不時之需
+    localStorage.setItem('tm-projs', JSON.stringify(S.projects));
+    localStorage.setItem('tm-tasks', JSON.stringify(S.tasks));
     setSyncStatus('ok','已同步 ✓');
   } catch(e) {
     setSyncStatus('err','儲存失敗');
