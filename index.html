@@ -476,19 +476,15 @@ const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-$
 const addH=t=>{const[h,m]=t.split(':').map(Number);return`${String((h+1)%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;};
 
 // ── GOOGLE AUTH ──
-let tokenClient,sheetsTokenClient;
+let tokenClient;
 window.onload=()=>{
   google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onLogin});
   google.accounts.id.renderButton(document.getElementById('g-btn'),{theme:'outline',size:'large',width:240});
   tokenClient=google.accounts.oauth2.initTokenClient({
     client_id:CFG.CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/calendar.events',
-    callback:r=>{S.calToken=r.access_token;},
-  });
-  sheetsTokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:CFG.CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+    scope:'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
     callback:async r=>{
+      S.calToken=r.access_token;
       S.sheetsToken=r.access_token;
       setSyncStatus('syncing','同步資料中…');
       await initSheet();
@@ -512,7 +508,6 @@ function onLogin(resp){
   document.getElementById('u-em').textContent=pl.email;
   document.getElementById('u-av').textContent=pl.email[0].toUpperCase();
   tokenClient.requestAccessToken({prompt:''});
-  sheetsTokenClient.requestAccessToken({prompt:''});
 }
 
 function setSyncStatus(state,msg){
