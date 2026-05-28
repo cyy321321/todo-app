@@ -485,9 +485,18 @@ const COLOR_BG=['#FFF0F0','#E3F2FD','#E8F5E9','#F3E5F5','#FBE9E7','#E0F2F1','#E8
 const COLOR_MID=['#FFCDD2','#BBDEFB','#C8E6C9','#E1BEE7','#FFCCBC','#B2DFDB','#C5CAE9','#FFF9C4'];
 let colorMap={},colorIdx=0;
 function getCI(code){if(code===null||code===undefined)return -1;if(!colorMap[code]){colorMap[code]=colorIdx%COLORS.length;colorIdx++;}return colorMap[code];}
+const PRIV_COLORS=['#546E7A','#607D8B','#78909C','#455A64','#37474F','#4DB6AC','#5C6BC0','#6D4C41'];
+const PRIV_BG=['#ECEFF1','#E8EAF6','#E0F2F1','#E3F2FD','#F3E5F5','#E8F5E9','#EDE7F6','#EFEBE9'];
+const PRIV_MID=['#CFD8DC','#C5CAE9','#B2DFDB','#BBDEFB','#E1BEE7','#C8E6C9','#D1C4E9','#D7CCC8'];
+let privColorMap={},privColorIdx=0;
+function getPrivCI(id){if(privColorMap[id]===undefined){privColorMap[id]=privColorIdx%PRIV_COLORS.length;privColorIdx++;}return privColorMap[id];}
+function privHex(id){return PRIV_COLORS[getPrivCI(id)];}
+function privBg(id){return PRIV_BG[getPrivCI(id)];}
+function privMid(id){return PRIV_MID[getPrivCI(id)];}
+
 function cHex(code){const i=getCI(code);return i<0?'#607D8B':COLORS[i]||'#888';}
-function cBg(code){const i=getCI(code);return i<0?'#FFF3E0':COLOR_BG[i]||'#f5f5f5';}
-function cMid(code){const i=getCI(code);return i<0?'#FFE0B2':COLOR_MID[i]||'#ddd';}
+function cBg(code){const i=getCI(code);return i<0?'#ECEFF1':COLOR_BG[i]||'#f5f5f5';}
+function cMid(code){const i=getCI(code);return i<0?'#CFD8DC':COLOR_MID[i]||'#ddd';}
 
 let S={
   view:'list',inputOpen:false,itab:'paste',
@@ -1017,7 +1026,7 @@ function renderList(){
         <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-__priv__">▶</span>
       </div>
       <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-__priv__">
-        ${ptFiltered.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,'#607D8B')).join('')}
+        ${ptFiltered.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,privHex(t.id))).join('')}
       </div>
     </div>`;
   }
@@ -1146,83 +1155,102 @@ function renderWeek(){
   document.getElementById('nav-label').textContent=`${monday.getMonth()+1}/${monday.getDate()} — ${endD.getMonth()+1}/${endD.getDate()}`;
 
   const dayNames=['一','二','三','四','五','六','日'];
-
-  // Find all spanning tasks for this week
   const weekDates=days.map(d=>fmtDate(d));
+  const HOURS=['09','10','11','12','13','14','15','16','17','18'];
+  const CELL_H=52;
+
+  // Separate spanning vs single-day tasks
   const spanTasks=S.tasks.filter(t=>t.endDate&&t.endDate!==t.date&&getTaskDates(t).some(d=>weekDates.includes(d)));
+  const singleTasks=S.tasks.filter(t=>weekDates.includes(t.date)&&(!t.endDate||t.endDate===t.date));
 
   const el=document.getElementById('main-view');
-  el.innerHTML=`<div class="week-wrap">
-    <div style="display:grid;grid-template-columns:44px repeat(7,1fr);gap:4px;min-width:560px">
 
-      <!-- Header row -->
-      <div></div>
-      ${days.map(d=>{
-        const ds=fmtDate(d);
-        const isToday=ds===todayStr;
-        return`<div style="text-align:center;padding:6px 4px;font-size:11px;font-weight:500;color:${isToday?'var(--ora2)':'var(--text2)'};border-radius:8px 8px 0 0;background:${isToday?'var(--ora-bg)':'var(--bg)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-bottom:none">
-          ${dayNames[(d.getDay()+6)%7]} ${d.getMonth()+1}/${d.getDate()}
-        </div>`;
-      }).join('')}
+  // Build grid
+  let html=`<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;min-width:560px;table-layout:fixed">
+  <colgroup><col style="width:44px">${days.map(()=>'<col>').join('')}</colgroup>
 
-      <!-- Span task rows -->
-      ${spanTasks.length?`<div style="font-size:9px;color:var(--text3);padding-top:4px;text-align:right;padding-right:4px"></div>
-      ${days.map(d=>{
-        const ds=fmtDate(d);
-        const isToday=ds===todayStr;
-        const daySpan=spanTasks.filter(t=>getTaskDates(t).includes(ds));
-        return`<div style="background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-bottom:none;padding:3px 0;min-height:28px">
-          ${daySpan.map(t=>{
-            const isPriv=t.type==='private';
-            const c=isPriv?'#607D8B':cHex(t.code);
-            const cb=isPriv?'#CFD8DC':cMid(t.code);
-            const dates=getTaskDates(t);
-            const isFirst=ds===dates[0];
-            const isLast=ds===dates[dates.length-1];
-            const radius=isFirst&&isLast?'5px':isFirst?'5px 0 0 5px':isLast?'0 5px 5px 0':'0';
-            const ml=isFirst?'2px':'-1px';
-            const mr=isLast?'2px':'-1px';
-            return`<div style="background:${cb};color:${c};font-size:9px;font-weight:500;padding:2px 5px;margin:1px ${mr} 1px ${ml};border-radius:${radius};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:${isFirst?`2px solid ${c}`:'none'}" title="${t.title}">
-              ${isFirst?t.title:''}
-            </div>`;
-          }).join('')}
-        </div>`;
-      }).join('')}`:''}
+  <!-- Day headers -->
+  <tr>
+    <td></td>
+    ${days.map(d=>{
+      const ds=fmtDate(d);
+      const isToday=ds===todayStr;
+      return`<td style="text-align:center;padding:5px 2px;font-size:11px;font-weight:500;color:${isToday?'var(--ora2)':'var(--text2)'};background:${isToday?'var(--ora-bg)':'var(--bg)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-bottom:none;border-radius:8px 8px 0 0">${dayNames[(d.getDay()+6)%7]} ${d.getMonth()+1}/${d.getDate()}</td>`;
+    }).join('')}
+  </tr>
 
-      <!-- Time + events -->
-      ${['09','10','11','12','13','14','15','16','17'].map(h=>`
-        <div style="height:52px;display:flex;align-items:flex-start;justify-content:flex-end;padding-right:5px;font-size:10px;color:var(--text3);padding-top:2px;font-family:'JetBrains Mono',monospace">${h}:00</div>
-        ${days.map(d=>{
-          const ds=fmtDate(d);
-          const isToday=ds===todayStr;
-          // Only show non-spanning tasks in time slots
-          const slotTasks=S.tasks.filter(t=>t.date===ds&&(!t.endDate||t.endDate===t.date)&&!t.done).sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
-          return`<div style="height:52px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:${h==='09'?'none':'1px solid var(--border)'};border-bottom:none;padding:2px 3px;overflow:hidden">
-            ${h==='09'?slotTasks.map(t=>{
-              const isPriv=t.type==='private';
-              const c=isPriv?'#607D8B':cHex(t.code);
-              const cb=isPriv?'#ECEFF1':cBg(t.code);
-              const tt2=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;
-              return`<div class="week-ev ${t.done?'done-ev':''}" style="background:${cb};--c:${c};border-left:2px solid ${c}" onclick="openCalLink(${JSON.stringify(t).replace(/"/g,'&quot;')})">
-                <div class="week-ev-time">${t.time||'全天'}${t.timeEnd?' — '+t.timeEnd:''}</div>
-                <div class="week-ev-title">${t.title}</div>
-                ${tt2?`<div class="week-ev-sub">${tt2.icon} ${tt2.name}</div>`:''}
-                ${t.code?`<div class="week-ev-sub">${t.code}</div>`:''}
-                ${t.calEventId?`<div class="week-ev-synced">✓ 已同步</div>`:''}
-              </div>`;
-            }).join(''):''}
+  <!-- Span tasks row -->
+  <tr>
+    <td style="font-size:9px;color:var(--text3);text-align:right;padding-right:3px;vertical-align:top;padding-top:3px"></td>
+    ${days.map(d=>{
+      const ds=fmtDate(d);
+      const isToday=ds===todayStr;
+      const daySpan=spanTasks.filter(t=>getTaskDates(t).includes(ds));
+      return`<td style="background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-bottom:none;padding:2px 0;min-height:${daySpan.length?28:8}px;vertical-align:top">
+        ${daySpan.map(t=>{
+          const isPriv=t.type==='private';
+          const c=isPriv?privHex(t.id):cHex(t.code);
+          const cm=isPriv?privMid(t.id):cMid(t.code);
+          const dates=getTaskDates(t);
+          const isFirst=ds===dates[0];
+          const isLast=ds===dates[dates.length-1];
+          const ml=isFirst?'2px':'0';
+          const mr=isLast?'2px':'0';
+          const br=isFirst&&isLast?'4px':isFirst?'4px 0 0 4px':isLast?'0 4px 4px 0':'0';
+          return`<div style="background:${cm};color:${c};font-size:9px;font-weight:600;padding:3px 5px;margin:1px ${mr} 1px ${ml};border-radius:${br};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:20px;border-left:${isFirst?`2px solid ${c}`:'none'}" title="${t.title}">
+            ${isFirst?t.title:'&nbsp;'}
           </div>`;
         }).join('')}
-      `).join('')}
+      </td>`;
+    }).join('')}
+  </tr>
 
-      <!-- Bottom border -->
-      <div></div>
-      ${days.map(d=>{
-        const isToday=fmtDate(d)===todayStr;
-        return`<div style="height:4px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-radius:0 0 8px 8px"></div>`;
-      }).join('')}
-    </div>
-  </div>`;
+  <!-- Time slots -->
+  ${HOURS.map(h=>`
+  <tr>
+    <td style="font-size:10px;color:var(--text3);text-align:right;padding-right:4px;padding-top:2px;vertical-align:top;font-family:'JetBrains Mono',monospace;height:${CELL_H}px">${h}:00</td>
+    ${days.map(d=>{
+      const ds=fmtDate(d);
+      const isToday=ds===todayStr;
+      // Show tasks that start in this hour
+      const slotTasks=singleTasks
+        .filter(t=>t.date===ds)
+        .filter(t=>{
+          if(!t.time)return h==='09'; // no time -> show in first slot
+          const taskH=t.time.split(':')[0];
+          return taskH===h;
+        })
+        .sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
+      return`<td style="height:${CELL_H}px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:1px solid var(--border);border-bottom:none;padding:2px 3px;vertical-align:top;overflow:visible">
+        ${slotTasks.map(t=>{
+          const isPriv=t.type==='private';
+          const c=isPriv?privHex(t.id):cHex(t.code);
+          const cb=isPriv?privBg(t.id):cBg(t.code);
+          const tt2=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;
+          const done=t.done?'opacity:.4;text-decoration:line-through':'';
+          return`<div style="background:${cb};border-left:2px solid ${c};border-radius:4px;padding:2px 4px;margin-bottom:2px;cursor:pointer;${done}" onclick="openCalLink(${JSON.stringify(t).replace(/"/g,'&quot;')})" title="${t.title}">
+            <div style="font-size:9px;color:${c};font-family:'JetBrains Mono',monospace">${t.time||'全天'}${t.timeEnd?' — '+t.timeEnd:''}</div>
+            <div style="font-size:10px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.title}</div>
+            ${tt2?`<div style="font-size:9px;color:var(--text3)">${tt2.icon} ${tt2.name}</div>`:''}
+            ${t.code?`<div style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace">${t.code}</div>`:''}
+          </div>`;
+        }).join('')}
+      </td>`;
+    }).join('')}
+  </tr>`).join('')}
+
+  <!-- Bottom border -->
+  <tr>
+    <td></td>
+    ${days.map(d=>{
+      const isToday=fmtDate(d)===todayStr;
+      return`<td style="height:4px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-radius:0 0 8px 8px"></td>`;
+    }).join('')}
+  </tr>
+
+  </table></div>`;
+
+  el.innerHTML=html;
 }
 
 function renderCal(){
@@ -1265,8 +1293,8 @@ function renderCal(){
           <div class="cal-num">${parseInt(c.date.split('-')[2])}</div>
           ${dayTasks.slice(0,3).map(t=>{
             const isPriv=t.type==='private';
-            const c2=isPriv?'#607D8B':cHex(t.code);
-            const cm2=isPriv?'#CFD8DC':cMid(t.code);
+            const c2=isPriv?privHex(t.id):cHex(t.code);
+            const cm2=isPriv?privMid(t.id):cMid(t.code);
             const dates=getTaskDates(t);
             const isSpan=dates.length>1;
             const isFirst=c.date===dates[0];
@@ -1274,14 +1302,24 @@ function renderCal(){
             const inMiddle=isSpan&&!isFirst&&!isLast;
             // Span styling: continuous block
             let spanStyle='';
+            let spanText='';
             if(isSpan){
-              if(isFirst)spanStyle='border-radius:5px 0 0 5px;margin-right:-5px;padding-right:0';
-              else if(isLast)spanStyle='border-radius:0 5px 5px 0;margin-left:-5px;padding-left:4px';
-              else spanStyle='border-radius:0;margin-left:-5px;margin-right:-5px;padding-left:4px;padding-right:0';
+              if(isFirst){
+                spanStyle='border-radius:5px 0 0 5px;margin-right:-4px;padding-right:2px';
+                spanText=t.title.substring(0,7)+(t.title.length>7?'…':'');
+              } else if(isLast){
+                spanStyle='border-radius:0 5px 5px 0;margin-left:-4px;padding-left:4px;opacity:.85';
+                spanText=' ';
+              } else {
+                spanStyle='border-radius:0;margin-left:-4px;margin-right:-4px;padding:0 2px;opacity:.85';
+                spanText=' ';
+              }
+            } else {
+              spanText=t.title.substring(0,7)+(t.title.length>7?'…':'');
             }
             return`<div class="cal-ev-dot ${t.done?'done-dot':''}"
-              style="background:${cm2};color:${c2};${spanStyle}"
-              title="${t.title}">${isFirst||!isSpan?t.title.substring(0,7)+(t.title.length>7?'…':''):(inMiddle?'':'')}
+              style="background:${cm2};color:${c2};${spanStyle};min-height:14px;line-height:14px"
+              title="${t.title}">${spanText}
             </div>`;
           }).join('')}
           ${dayTasks.length>3?`<div style="font-size:9px;color:var(--text3)">+${dayTasks.length-3}</div>`:''}
