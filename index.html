@@ -532,8 +532,10 @@ function onLogin(resp){
 async function showApp(email){
   document.getElementById('login-screen').style.display='none';
   const app=document.getElementById('app');app.style.display='flex';app.style.flexDirection='column';
-  document.getElementById('u-em').textContent=email;
-  document.getElementById('u-av').textContent=email[0].toUpperCase();
+  const uem=document.getElementById('u-em');
+  if(uem)uem.textContent=email;
+  const uav=document.getElementById('u-av');
+  if(uav)uav.textContent=email[0].toUpperCase();
 
   // 先載入 Firebase 資料（不等 Calendar token）
   setSyncStatus('syncing','載入資料中…');
