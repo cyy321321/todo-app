@@ -534,14 +534,13 @@ async function sheetsFetch(method,path,body){
 
 async function initSheet(){
   try{
-    const info=await sheetsFetch('GET','');
-    const sheets=info.sheets.map(s=>s.properties.title);
-    if(!sheets.includes('Tasks')){
-      await sheetsFetch('POST',':batchUpdate',{requests:[{addSheet:{properties:{title:'Tasks'}}}]});
+    // 確認標題列存在，若空白則寫入
+    const tr=await sheetsFetch('GET','/values/Tasks!A1:P1');
+    if(!tr.values||!tr.values[0]||!tr.values[0][0]){
       await sheetsFetch('PUT','/values/Tasks!A1:P1?valueInputOption=RAW',{values:[['id','type','title','code','date','endDate','time','timeEnd','loc','priority','done','calEventId','note','rawInfo','createdAt','updatedAt']]});
     }
-    if(!sheets.includes('Projects')){
-      await sheetsFetch('POST',':batchUpdate',{requests:[{addSheet:{properties:{title:'Projects'}}}]});
+    const pr=await sheetsFetch('GET','/values/Projects!A1:B1');
+    if(!pr.values||!pr.values[0]||!pr.values[0][0]){
       await sheetsFetch('PUT','/values/Projects!A1:B1?valueInputOption=RAW',{values:[['code','name']]});
       await saveProjectsToSheet();
     }
