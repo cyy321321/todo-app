@@ -365,8 +365,9 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
           <div class="fld"><label>計畫代碼</label><select id="w-code"></select></div>
           <div class="fld"><label>開始日期</label><input type="date" id="w-date"></div>
           <div class="fld"><label>結束日期（選填）</label><input type="date" id="w-edate"></div>
-          <div class="fld"><label>開始時間</label><input type="time" id="w-start" value="09:00"></div>
-          <div class="fld"><label>結束時間</label><input type="time" id="w-end" value="10:00"></div>
+          <div class="fld"><label>任務類型（選填）</label><select id="w-type"><option value="">－ 選填 －</option></select></div>
+          <div class="fld"><label>開始時間（選填）</label><input type="time" id="w-start"></div>
+          <div class="fld"><label>結束時間（選填）</label><input type="time" id="w-end"></div>
           <button class="btn btn-ora" onclick="addWork()" style="align-self:flex-end">新增</button>
         </div>
       </div>
@@ -375,8 +376,8 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
           <div class="fld"><label>行程名稱</label><input type="text" id="p-title" placeholder="例：台中旅遊、看診"></div>
           <div class="fld"><label>開始日期</label><input type="date" id="p-date"></div>
           <div class="fld"><label>結束日期（選填）</label><input type="date" id="p-edate"></div>
-          <div class="fld"><label>開始時間</label><input type="time" id="p-start" value="18:00"></div>
-          <div class="fld"><label>結束時間</label><input type="time" id="p-end" value="20:00"></div>
+          <div class="fld"><label>開始時間（選填）</label><input type="time" id="p-start"></div>
+          <div class="fld"><label>結束時間（選填）</label><input type="time" id="p-end"></div>
           <div class="fld"><label>地點（選填）</label><input type="text" id="p-loc" placeholder="例：台中"></div>
           <button class="btn btn-grn" onclick="addPriv()" style="align-self:flex-end">新增</button>
         </div>
@@ -424,7 +425,23 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <input type="text" id="new-name" placeholder="案子名稱">
       <button class="btn btn-ora" onclick="addProj()">新增</button>
     </div>
-    <div class="modal-actions"><button class="btn btn-ora" onclick="closeModal('proj-modal')">完成</button></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-soft" onclick="closeModal('proj-modal');openTypeModal()">管理任務類型</button>
+      <button class="btn btn-ora" onclick="closeModal('proj-modal')">完成</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="type-modal">
+  <div class="modal">
+    <div class="modal-title">📌 管理任務類型</div>
+    <div id="type-list"></div>
+    <div class="padd-row">
+      <input type="text" id="new-type-icon" placeholder="📋" maxlength="2" style="max-width:50px;text-align:center">
+      <input type="text" id="new-type-name" placeholder="類型名稱">
+      <button class="btn btn-ora" onclick="addTaskType()">新增</button>
+    </div>
+    <div class="modal-actions"><button class="btn btn-ora" onclick="closeModal('type-modal')">完成</button></div>
   </div>
 </div>
 
@@ -477,6 +494,18 @@ let S={
   calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),
   weekOffset:0,
   projects:JSON.parse(localStorage.getItem('tm-projs')||'null')||[{code:'0000X',name:'待確認 / 其他'}],
+  taskTypes:JSON.parse(localStorage.getItem('tm-types')||'null')||[
+    {id:'meeting',icon:'📅',name:'會議'},
+    {id:'report',icon:'📝',name:'交報告'},
+    {id:'slides',icon:'📊',name:'交簡報'},
+    {id:'review',icon:'🔍',name:'審查意見'},
+    {id:'deliver',icon:'📤',name:'交付'},
+    {id:'reply',icon:'✉️',name:'回覆'},
+    {id:'other',icon:'📌',name:'其他'},
+  ],
+  filterType:null,
+  showUrgentOnly:false,
+  _autoExpandDone:false,
   tasks:[],
   pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
   editingProj:null,
@@ -613,6 +642,7 @@ async function saveProjectsToFirebase(){
 function saveLocal(){
   localStorage.setItem('tm-projs',JSON.stringify(S.projects));
   localStorage.setItem('tm-tasks',JSON.stringify(S.tasks));
+  localStorage.setItem('tm-types',JSON.stringify(S.taskTypes));
 }
 
 async function save(){
@@ -714,18 +744,32 @@ async function commitTasks(){
   toast(`✅ 已新增 ${newT.length} 個任務`,'ok');
 }
 
-function fillCodeSel(){const s=document.getElementById('w-code');if(!s)return;s.innerHTML=S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');}
+function fillCodeSel(){
+  const s=document.getElementById('w-code');
+  if(!s)return;
+  s.innerHTML=S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
+  // Fill task type selectors
+  ['w-type','filter-type'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const cur=el.value;
+    el.innerHTML='<option value="">－ 全部 / 選填 －</option>'+S.taskTypes.map(t=>`<option value="${t.id}">${t.icon} ${t.name}</option>`).join('');
+    if(cur)el.value=cur;
+  });
+}
 
 async function addWork(){
   const title=document.getElementById('w-title').value.trim();
   const code=document.getElementById('w-code').value;
   const date=document.getElementById('w-date').value;
-  const edate=document.getElementById('w-edate').value||null;
+  let edate=document.getElementById('w-edate').value||null;
   const start=document.getElementById('w-start').value||null;
   const end=document.getElementById('w-end').value||null;
+  const taskType=document.getElementById('w-type')?.value||null;
   if(!title){toast('請輸入任務名稱','err');return;}
   if(!date){toast('請選擇日期','err');return;}
-  const task={id:Date.now(),type:'work',title,code,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:'medium',done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
+  if(edate&&edate<date){toast('結束日期不可早於開始日期，已自動清除','info');edate=null;}
+  const task={id:Date.now(),type:'work',title,code,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:'medium',taskType:taskType,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
   const evId=await pushCal(task);if(evId)task.calEventId=evId;
   S.tasks.push(task);await save();renderView();buildSuggestion();
   document.getElementById('w-title').value='';
@@ -735,12 +779,13 @@ async function addWork(){
 async function addPriv(){
   const title=document.getElementById('p-title').value.trim();
   const date=document.getElementById('p-date').value;
-  const edate=document.getElementById('p-edate').value||null;
-  const start=document.getElementById('p-start').value;
-  const end=document.getElementById('p-end').value;
+  let edate=document.getElementById('p-edate').value||null;
+  const start=document.getElementById('p-start').value||null;
+  const end=document.getElementById('p-end').value||null;
   const loc=document.getElementById('p-loc').value.trim();
   if(!title){toast('請輸入行程名稱','err');return;}
   if(!date){toast('請選擇日期','err');return;}
+  if(edate&&edate<date){toast('結束日期不可早於開始日期，已自動清除','info');edate=null;}
   const task={id:Date.now(),type:'private',title,date,endDate:edate,time:start,timeEnd:end,loc,code:null,priority:'medium',done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
   const evId=await pushCal(task);if(evId)task.calEventId=evId;
   S.tasks.push(task);await save();renderView();buildSuggestion();
@@ -791,24 +836,64 @@ function getTaskDates(task){
 }
 
 // ── LIST ──
+function toggleUrgent(){
+  S.showUrgentOnly=!S.showUrgentOnly;
+  // Auto-expand all urgent projects when turning on
+  if(S.showUrgentOnly){
+    const today=new Date().toISOString().split('T')[0];
+    S.projects.forEach(p=>{
+      const pts=S.tasks.filter(t=>t.code===p.code&&!t.done);
+      if(pts.some(t=>t.date<today||t.priority==='high'))S.expandedProjs.add(p.code);
+    });
+    S.expandedProjs.add('__priv__');
+  }
+  renderView();
+}
+
 function renderList(){
   document.getElementById('nav-label').textContent='';
   const el=document.getElementById('main-view');
   const today=new Date().toISOString().split('T')[0];
+  const allPending=S.tasks.filter(t=>!t.done);
+  const urgentCount=allPending.filter(t=>t.date<today||t.priority==='high').length;
   const wt=S.tasks.filter(t=>t.type==='work');
   const pt=S.tasks.filter(t=>t.type==='private');
-  if(!wt.length&&!pt.length){el.innerHTML=`<div class="empty"><div class="empty-ico">🍊</div>還沒有任務，點上方「新增任務」開始吧！</div>`;return;}
+  // Filter bar HTML
+  const filterBar=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <button onclick="toggleUrgent()" id="urgent-btn" style="display:flex;align-items:center;gap:6px;background:${S.showUrgentOnly?'var(--red)':'var(--red-bg)'};color:${S.showUrgentOnly?'#fff':'var(--red)'};border:1.5px solid var(--red-mid);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
+      🚨 緊急事項${urgentCount?` (${urgentCount})`:''}
+    </button>
+    <select id="filter-type" onchange="S.filterType=this.value||null;renderView()" style="font-size:12px;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;background:var(--white);color:var(--text2);font-family:inherit;outline:none;cursor:pointer">
+      <option value="">📌 全部類型</option>
+    </select>
+  </div>`;
+
+  if(!wt.length&&!pt.length){el.innerHTML=filterBar+`<div class="empty"><div class="empty-ico">🍊</div>還沒有任務，點上方「新增任務」開始吧！</div>`;fillCodeSel();return;}
   S.projects.forEach(p=>{const pts=wt.filter(t=>t.code===p.code&&!t.done);if(pts.some(t=>t.date<today||t.priority==='high'))S.expandedProjs.add(p.code);});
-  let html='';
+  // Apply type filter
+  const ftasks=t=>(!S.filterType||t.taskType===S.filterType);
+  // Apply urgent filter
+  const furgent=t=>(!S.showUrgentOnly||(t.date<today||t.priority==='high'));
+
+  // Auto-expand urgent projects only on first render
+  if(!S._autoExpandDone){
+    S._autoExpandDone=true;
+    S.projects.forEach(p=>{
+      const pts=S.tasks.filter(t=>t.code===p.code&&!t.done);
+      if(pts.some(t=>t.date<today||t.priority==='high'))S.expandedProjs.add(p.code);
+    });
+  }
+
+  let html=filterBar;
   if(wt.length){
     const projWithDate=S.projects.map(p=>{
-      const all=wt.filter(t=>t.code===p.code);if(!all.length)return null;
+      const all=wt.filter(t=>t.code===p.code&&ftasks(t)&&furgent(t));if(!all.length)return null;
       const pending=all.filter(t=>!t.done);
       const minDate=pending.length?pending.map(t=>t.date).sort()[0]:'9999';
       return{...p,tasks:all,pendingTasks:pending,minDate};
     }).filter(Boolean).sort((a,b)=>a.minDate>b.minDate?1:-1);
     const known=S.projects.map(p=>p.code);
-    const unk=wt.filter(t=>!known.includes(t.code));
+    const unk=wt.filter(t=>!known.includes(t.code)&&ftasks(t)&&furgent(t));
     if(unk.length)projWithDate.push({code:'???',name:'未知代碼',tasks:unk,pendingTasks:unk.filter(t=>!t.done),minDate:'9999'});
     html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務</div>`;
     projWithDate.forEach(p=>{
@@ -836,9 +921,10 @@ function renderList(){
       </div>`;
     });
   }
-  if(pt.length){
+  const ptFiltered=pt.filter(t=>furgent(t));
+  if(ptFiltered.length){
     const isOpen=S.expandedProjs.has('__priv__');
-    const pending=pt.filter(t=>!t.done);
+    const pending=ptFiltered.filter(t=>!t.done);
     const urgentCnt=pending.filter(t=>t.priority==='high'||t.date<today).length;
     const nextDate=pending.length?pending.map(t=>t.date).sort()[0]:null;
     html+=`<div style="margin-top:14px;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏠 私人行程</div>
@@ -855,7 +941,7 @@ function renderList(){
         <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-__priv__">▶</span>
       </div>
       <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-__priv__">
-        ${pt.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,'#FB8C00')).join('')}
+        ${ptFiltered.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,'#FB8C00')).join('')}
       </div>
     </div>`;
   }
@@ -892,6 +978,7 @@ function taskCardHTML(t,today,color){
         <span class="task-date">${dateDisplay}</span>
         <span class="prio ${pc}">${pl}</span>
         ${t.code?`<span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">${t.code}</span>`:''}
+        ${(()=>{const tt=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;return tt?`<span style="font-size:10px;background:var(--border);color:var(--text2);padding:1px 6px;border-radius:6px">${tt.icon} ${tt.name}</span>`:''})()}
         ${t.calEventId?`<span class="synced">✓ 已同步</span>`:''}
       </div>
     </div>
@@ -911,6 +998,10 @@ function taskCardHTML(t,today,color){
           <option value="medium" ${t.priority==='medium'?'selected':''}>🟡 一般</option>
           <option value="low" ${t.priority==='low'?'selected':''}>🟢 低</option>
         </select></div>
+      <div class="edit-field"><label>任務類型</label><select id="e-type-${t.id}">
+        <option value="">－ 選填 －</option>
+        ${S.taskTypes.map(x=>`<option value="${x.id}" ${t.taskType===x.id?'selected':''}>${x.icon} ${x.name}</option>`).join('')}
+      </select></div>
       </div>
       <div class="edit-row">
         <div class="edit-field"><label>開始日期</label><input type="date" id="e-date-${t.id}" value="${t.date}"></div>
@@ -947,6 +1038,7 @@ async function saveEdit(id){
   t.time=document.getElementById(`e-start-${id}`).value||null;
   t.timeEnd=document.getElementById(`e-end-${id}`).value||null;
   t.priority=document.getElementById(`e-prio-${id}`).value;
+  t.taskType=document.getElementById(`e-type-${id}`)?.value||null;
   t.note=document.getElementById(`e-note-${id}`).value;
   t.loc=document.getElementById(`e-loc-${id}`)?.value||'';
   if(t.type==='work')t.code=document.getElementById(`e-code-${id}`).value;
@@ -977,7 +1069,7 @@ function renderWeek(){
     <div class="time-col">${['09','10','11','12','13','14','15','16','17'].map(h=>`<div class="time-slot">${h}:00</div>`).join('')}</div>
     ${days.map(d=>{
       const ds=fmtDate(d);
-      const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(ds)).sort((a,b)=>a.done===b.done?0:a.done?1:-1);
+      const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(ds)).sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;if(a.type!==b.type)return a.type==='private'?-1:1;return 0;});
       const isToday=ds===todayStr;
       const dayNames=['一','二','三','四','五','六','日'];
       const dayName=dayNames[(d.getDay()+6)%7];
@@ -985,12 +1077,13 @@ function renderWeek(){
         <div class="week-day-hdr">${dayName} ${d.getMonth()+1}/${d.getDate()}</div>
         <div class="week-events">
           ${dayTasks.map(t=>{
-            const c=cHex(t.type==='private'?null:t.code);
-            const cb=cBg(t.type==='private'?null:t.code);
+            const c=t.type==='private'?'#FB8C00':cHex(t.code);
+            const cb=t.type==='private'?'#FFF3E0':cBg(t.code);
             const isSpan=t.endDate&&t.endDate!==t.date;
             return`<div class="week-ev ${t.done?'done-ev':''}" style="background:${cb};--c:${c}" onclick="openCalLink(${JSON.stringify(t).replace(/"/g,'&quot;')})">
               <div class="week-ev-time">${isSpan?'跨日行程':t.time||'全天'}${!isSpan&&t.timeEnd?' — '+t.timeEnd:''}</div>
               <div class="week-ev-title">${t.title}</div>
+              ${(()=>{const tt=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;return tt?`<div class="week-ev-sub">${tt.icon} ${tt.name}</div>`:''})()}
               ${t.code?`<div class="week-ev-sub">${t.code}</div>`:''}
               ${t.calEventId?`<div class="week-ev-synced">✓ 已同步</div>`:''}
             </div>`;
@@ -1035,8 +1128,8 @@ function renderCal(){
         return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}">
           <div class="cal-num">${parseInt(c.date.split('-')[2])}</div>
           ${dayTasks.slice(0,2).map(t=>{
-            const c2=cHex(t.type==='private'?null:t.code);
-            const cm2=cMid(t.type==='private'?null:t.code);
+            const c2=t.type==='private'?'#FB8C00':cHex(t.code);
+            const cm2=t.type==='private'?'#FFE0B2':cMid(t.code);
             const dates=getTaskDates(t);
             const isSpan=dates.length>1;
             const isFirst=c.date===dates[0];
@@ -1137,6 +1230,31 @@ async function delProj(code){
   saveLocal();await saveProjectsToFirebase();renderProjList();fillCodeSel();
 }
 function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+function openTypeModal(){renderTypeList();document.getElementById('type-modal').classList.add('show');}
+function renderTypeList(){
+  document.getElementById('type-list').innerHTML=S.taskTypes.map((t,i)=>`
+  <div class="proj-item-row">
+    <span style="font-size:16px">${t.icon}</span>
+    <span class="proj-nm">${t.name}</span>
+    <button class="pdel" onclick="delTaskType('${t.id}')">✕</button>
+  </div>`).join('');
+}
+function addTaskType(){
+  const icon=document.getElementById('new-type-icon').value.trim()||'📌';
+  const name=document.getElementById('new-type-name').value.trim();
+  if(!name){toast('請輸入類型名稱','err');return;}
+  const id='type_'+Date.now();
+  S.taskTypes.push({id,icon,name});
+  saveLocal();renderTypeList();fillCodeSel();
+  document.getElementById('new-type-icon').value='';
+  document.getElementById('new-type-name').value='';
+  toast('✅ 類型已新增','ok');
+}
+function delTaskType(id){
+  S.taskTypes=S.taskTypes.filter(t=>t.id!==id);
+  saveLocal();renderTypeList();fillCodeSel();
+}
 async function refreshData(){
   if(!db){toast('尚未連線','err');return;}
   setSyncStatus('syncing','重新整理中…');
