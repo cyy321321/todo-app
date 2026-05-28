@@ -32,7 +32,7 @@
 .cc5{--c:#00897B;--cb:#E0F2F1;--cm:#B2DFDB}
 .cc6{--c:#3949AB;--cb:#E8EAF6;--cm:#C5CAE9}
 .cc7{--c:#F9A825;--cb:#FFFDE7;--cm:#FFF9C4}
-.cc-priv{--c:#FB8C00;--cb:#FFF3E0;--cm:#FFE0B2}
+.cc-priv{--c:#607D8B;--cb:#ECEFF1;--cm:#CFD8DC}
 
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .mono{font-family:'JetBrains Mono',monospace}
@@ -157,7 +157,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 /* TASK CARD */
 .task-card{background:var(--white);border-radius:var(--r-sm);border:1px solid var(--border);padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start;transition:all .15s;border-left:3px solid var(--c)}
 .task-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-.task-card.priv{border-left-color:#FB8C00}
+.task-card.priv{border-left-color:#607D8B}
 .task-card.done-card{opacity:.4}
 .task-card.done-card .task-title{text-decoration:line-through;color:var(--text3)}
 .task-card.overdue-card{border-left-color:var(--red)}
@@ -485,7 +485,7 @@ const COLOR_BG=['#FFF0F0','#E3F2FD','#E8F5E9','#F3E5F5','#FBE9E7','#E0F2F1','#E8
 const COLOR_MID=['#FFCDD2','#BBDEFB','#C8E6C9','#E1BEE7','#FFCCBC','#B2DFDB','#C5CAE9','#FFF9C4'];
 let colorMap={},colorIdx=0;
 function getCI(code){if(code===null||code===undefined)return -1;if(!colorMap[code]){colorMap[code]=colorIdx%COLORS.length;colorIdx++;}return colorMap[code];}
-function cHex(code){const i=getCI(code);return i<0?'#FB8C00':COLORS[i]||'#888';}
+function cHex(code){const i=getCI(code);return i<0?'#607D8B':COLORS[i]||'#888';}
 function cBg(code){const i=getCI(code);return i<0?'#FFF3E0':COLOR_BG[i]||'#f5f5f5';}
 function cMid(code){const i=getCI(code);return i<0?'#FFE0B2':COLOR_MID[i]||'#ddd';}
 
@@ -506,6 +506,7 @@ let S={
   filterType:null,
   showUrgentOnly:false,
   _autoExpandDone:false,
+  sortMode:'proj',
   tasks:[],
   pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
   editingProj:null,
@@ -697,7 +698,7 @@ function showConfirmModal(){
   <div class="parsed-item">
     <div class="pi-head">
       <span style="font-size:13px">${t.type==='private'?'🏠':'🏢'}</span>
-      <span style="color:${t.type==='private'?'#FB8C00':'#1E88E5'}">${t.type==='private'?'私人行程':'公事任務'}</span>
+      <span style="color:${t.type==='private'?'#607D8B':'#1E88E5'}">${t.type==='private'?'私人行程':'公事任務'}</span>
       <span style="font-size:11px;color:var(--text3);font-weight:400">${t.note||''}</span>
     </div>
     <div class="fi"><label>任務名稱</label><input type="text" value="${t.title}" id="pt${i}-title"></div>
@@ -836,6 +837,12 @@ function getTaskDates(task){
 }
 
 // ── LIST ──
+function setSortMode(mode){
+  S.sortMode=mode;
+  S._autoExpandDone=false;
+  renderView();
+}
+
 function toggleUrgent(){
   S.showUrgentOnly=!S.showUrgentOnly;
   // Auto-expand all urgent projects when turning on
@@ -856,26 +863,12 @@ function renderList(){
   const today=new Date().toISOString().split('T')[0];
   const allPending=S.tasks.filter(t=>!t.done);
   const urgentCount=allPending.filter(t=>t.date<today||t.priority==='high').length;
-  const wt=S.tasks.filter(t=>t.type==='work');
-  const pt=S.tasks.filter(t=>t.type==='private');
-  // Filter bar HTML
-  const filterBar=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
-    <button onclick="toggleUrgent()" id="urgent-btn" style="display:flex;align-items:center;gap:6px;background:${S.showUrgentOnly?'var(--red)':'var(--red-bg)'};color:${S.showUrgentOnly?'#fff':'var(--red)'};border:1.5px solid var(--red-mid);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-      🚨 緊急事項${urgentCount?` (${urgentCount})`:''}
-    </button>
-    <select id="filter-type" onchange="S.filterType=this.value||null;renderView()" style="font-size:12px;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;background:var(--white);color:var(--text2);font-family:inherit;outline:none;cursor:pointer">
-      <option value="">📌 全部類型</option>
-    </select>
-  </div>`;
 
-  if(!wt.length&&!pt.length){el.innerHTML=filterBar+`<div class="empty"><div class="empty-ico">🍊</div>還沒有任務，點上方「新增任務」開始吧！</div>`;fillCodeSel();return;}
-  S.projects.forEach(p=>{const pts=wt.filter(t=>t.code===p.code&&!t.done);if(pts.some(t=>t.date<today||t.priority==='high'))S.expandedProjs.add(p.code);});
-  // Apply type filter
+  // Filters
   const ftasks=t=>(!S.filterType||t.taskType===S.filterType);
-  // Apply urgent filter
   const furgent=t=>(!S.showUrgentOnly||(t.date<today||t.priority==='high'));
 
-  // Auto-expand urgent projects only on first render
+  // Auto-expand urgent on first render
   if(!S._autoExpandDone){
     S._autoExpandDone=true;
     S.projects.forEach(p=>{
@@ -884,51 +877,134 @@ function renderList(){
     });
   }
 
-  let html=filterBar;
-  if(wt.length){
-    const projWithDate=S.projects.map(p=>{
-      const all=wt.filter(t=>t.code===p.code&&ftasks(t)&&furgent(t));if(!all.length)return null;
-      const pending=all.filter(t=>!t.done);
-      const minDate=pending.length?pending.map(t=>t.date).sort()[0]:'9999';
-      return{...p,tasks:all,pendingTasks:pending,minDate};
-    }).filter(Boolean).sort((a,b)=>a.minDate>b.minDate?1:-1);
-    const known=S.projects.map(p=>p.code);
-    const unk=wt.filter(t=>!known.includes(t.code)&&ftasks(t)&&furgent(t));
-    if(unk.length)projWithDate.push({code:'???',name:'未知代碼',tasks:unk,pendingTasks:unk.filter(t=>!t.done),minDate:'9999'});
-    html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務</div>`;
-    projWithDate.forEach(p=>{
-      const c=cHex(p.code==='0000X'?null:p.code==='???'?null:p.code);
-      const cb=cBg(p.code==='0000X'?null:p.code==='???'?null:p.code);
-      const cm=cMid(p.code==='0000X'?null:p.code==='???'?null:p.code);
-      const isOpen=S.expandedProjs.has(p.code);
-      const urgentCnt=p.pendingTasks.filter(t=>t.priority==='high'||t.date<today).length;
-      const nextDate=p.pendingTasks.length?p.pendingTasks.map(t=>t.date).sort()[0]:null;
-      html+=`<div class="proj-block" style="--c:${c};--cb:${cb};--cm:${cm}">
-        <div class="proj-header" onclick="toggleProj('${p.code}')">
-          <div class="proj-color-dot"></div>
-          <span class="proj-code-badge">${p.code}</span>
-          <span class="proj-name-text">${p.name}</span>
-          <div class="proj-stats">
-            ${urgentCnt?`<span class="stat-pill stat-urgent">⚠ ${urgentCnt}</span>`:''}
-            <span class="stat-pill stat-count">${p.pendingTasks.length} 件</span>
-            ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
-          </div>
-          <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-${p.code}">▶</span>
-        </div>
-        <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-${p.code}">
-          ${p.tasks.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,c)).join('')}
-        </div>
-      </div>`;
-    });
+  const sortBtnStyle=(m)=>`padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1.5px solid var(--border2);background:${S.sortMode===m?'var(--ora)':'var(--white)'};color:${S.sortMode===m?'#fff':'var(--text2)'}`;
+  const filterBar=`<div style="margin-bottom:14px">
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+      <button onclick="setSortMode('proj')" style="${sortBtnStyle('proj')}">📁 依計畫</button>
+      <button onclick="setSortMode('date')" style="${sortBtnStyle('date')}">📅 依日期</button>
+      <button onclick="setSortMode('type')" style="${sortBtnStyle('type')}">📌 依類型</button>
+      <div style="flex:1"></div>
+      <button onclick="toggleUrgent()" style="display:flex;align-items:center;gap:5px;background:${S.showUrgentOnly?'var(--red)':'var(--red-bg)'};color:${S.showUrgentOnly?'#fff':'var(--red)'};border:1.5px solid var(--red-mid);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
+        🚨 緊急${urgentCount?' ('+urgentCount+')':''}
+      </button>
+    </div>
+    <select id="filter-type" onchange="S.filterType=this.value||null;renderView()" style="font-size:12px;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;background:var(--white);color:var(--text2);font-family:inherit;outline:none;cursor:pointer">
+      <option value="">📌 全部類型</option>
+    </select>
+  </div>`;
+
+  const wt=S.tasks.filter(t=>t.type==='work'&&ftasks(t)&&furgent(t));
+  const pt=S.tasks.filter(t=>t.type==='private'&&furgent(t));
+
+  if(!S.tasks.length){
+    el.innerHTML=filterBar+`<div class="empty"><div class="empty-ico">🍊</div>還沒有任務，點上方「新增任務」開始吧！</div>`;
+    fillCodeSel();return;
   }
-  const ptFiltered=pt.filter(t=>furgent(t));
+
+  let html=filterBar;
+
+  // ── 依計畫 ──
+  if(S.sortMode==='proj'){
+    if(wt.length){
+      const projWithDate=S.projects.map(p=>{
+        const all=wt.filter(t=>t.code===p.code);if(!all.length)return null;
+        const pending=all.filter(t=>!t.done);
+        const minDate=pending.length?pending.map(t=>t.date).sort()[0]:'9999';
+        return{...p,tasks:all,pendingTasks:pending,minDate};
+      }).filter(Boolean).sort((a,b)=>a.minDate>b.minDate?1:-1);
+      const known=S.projects.map(p=>p.code);
+      const unk=wt.filter(t=>!known.includes(t.code));
+      if(unk.length)projWithDate.push({code:'???',name:'未知代碼',tasks:unk,pendingTasks:unk.filter(t=>!t.done),minDate:'9999'});
+      html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務</div>`;
+      projWithDate.forEach(p=>{
+        const c=cHex(p.code==='0000X'||p.code==='???'?null:p.code);
+        const cb=cBg(p.code==='0000X'||p.code==='???'?null:p.code);
+        const cm=cMid(p.code==='0000X'||p.code==='???'?null:p.code);
+        const isOpen=S.expandedProjs.has(p.code);
+        const urgentCnt=p.pendingTasks.filter(t=>t.priority==='high'||t.date<today).length;
+        const nextDate=p.pendingTasks.length?p.pendingTasks.map(t=>t.date).sort()[0]:null;
+        html+=`<div class="proj-block" style="--c:${c};--cb:${cb};--cm:${cm}">
+          <div class="proj-header" onclick="toggleProj('${p.code}')">
+            <div class="proj-color-dot"></div>
+            <span class="proj-code-badge">${p.code}</span>
+            <span class="proj-name-text">${p.name}</span>
+            <div class="proj-stats">
+              ${urgentCnt?`<span class="stat-pill stat-urgent">⚠ ${urgentCnt}</span>`:''}
+              <span class="stat-pill stat-count">${p.pendingTasks.length} 件</span>
+              ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
+            </div>
+            <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-${p.code}">▶</span>
+          </div>
+          <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-${p.code}">
+            ${p.tasks.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,c)).join('')}
+          </div>
+        </div>`;
+      });
+    }
+  }
+
+  // ── 依日期 ──
+  else if(S.sortMode==='date'){
+    if(wt.length){
+      html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務（依日期）</div>`;
+      const sorted=wt.sort((a,b)=>a.done===b.done?(a.date>b.date?1:-1):a.done?1:-1);
+      sorted.forEach(t=>{
+        const c=cHex(t.code);
+        html+=taskCardHTML(t,today,c);
+      });
+    }
+  }
+
+  // ── 依類型 ──
+  else if(S.sortMode==='type'){
+    if(wt.length){
+      html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務（依類型）</div>`;
+      // Group by taskType
+      const typeGroups=[];
+      S.taskTypes.forEach(tt=>{
+        const tts=wt.filter(t=>t.taskType===tt.id);
+        if(tts.length)typeGroups.push({...tt,tasks:tts});
+      });
+      // Untyped
+      const untyped=wt.filter(t=>!t.taskType);
+      if(untyped.length)typeGroups.push({id:'_none',icon:'⬜',name:'未分類',tasks:untyped});
+
+      typeGroups.forEach(grp=>{
+        const isOpen=S.expandedProjs.has('type_'+grp.id);
+        const pending=grp.tasks.filter(t=>!t.done);
+        const urgentCnt=pending.filter(t=>t.priority==='high'||t.date<today).length;
+        const nextDate=pending.length?pending.map(t=>t.date).sort()[0]:null;
+        html+=`<div class="proj-block" style="--c:#78909C;--cb:#ECEFF1;--cm:#CFD8DC">
+          <div class="proj-header" onclick="toggleProj('type_${grp.id}')">
+            <span style="font-size:16px">${grp.icon}</span>
+            <span class="proj-name-text" style="font-weight:600">${grp.name}</span>
+            <div class="proj-stats">
+              ${urgentCnt?`<span class="stat-pill stat-urgent">⚠ ${urgentCnt}</span>`:''}
+              <span class="stat-pill stat-count">${pending.length} 件</span>
+              ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
+            </div>
+            <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-type_${grp.id}">▶</span>
+          </div>
+          <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-type_${grp.id}">
+            ${grp.tasks.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>{
+              const c=cHex(t.code);
+              return taskCardHTML(t,today,c);
+            }).join('')}
+          </div>
+        </div>`;
+      });
+    }
+  }
+
+  // ── 私人行程（固定在下方）──
+  const ptFiltered=pt;
   if(ptFiltered.length){
     const isOpen=S.expandedProjs.has('__priv__');
     const pending=ptFiltered.filter(t=>!t.done);
     const urgentCnt=pending.filter(t=>t.priority==='high'||t.date<today).length;
     const nextDate=pending.length?pending.map(t=>t.date).sort()[0]:null;
     html+=`<div style="margin-top:14px;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏠 私人行程</div>
-    <div class="proj-block" style="--c:#FB8C00;--cb:#FFF3E0;--cm:#FFE0B2">
+    <div class="proj-block" style="--c:#607D8B;--cb:#ECEFF1;--cm:#CFD8DC">
       <div class="proj-header" onclick="toggleProj('__priv__')">
         <div class="proj-color-dot"></div>
         <span class="proj-code-badge">私人</span>
@@ -941,11 +1017,13 @@ function renderList(){
         <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-__priv__">▶</span>
       </div>
       <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-__priv__">
-        ${ptFiltered.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,'#FB8C00')).join('')}
+        ${ptFiltered.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,'#607D8B')).join('')}
       </div>
     </div>`;
   }
+
   el.innerHTML=html;
+  fillCodeSel();
 }
 
 function toggleProj(code){
@@ -1059,50 +1137,100 @@ async function delTask(id){
 // ── WEEK ──
 function renderWeek(){
   const today=new Date();
-  const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7)+S.weekOffset*7);
-  const days=[];for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);days.push(d);}
+  const monday=new Date(today);
+  monday.setDate(today.getDate()-((today.getDay()+6)%7)+S.weekOffset*7);
+  const days=[];
+  for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);days.push(d);}
   const todayStr=fmtDate(new Date());
   const endD=new Date(monday);endD.setDate(monday.getDate()+6);
   document.getElementById('nav-label').textContent=`${monday.getMonth()+1}/${monday.getDate()} — ${endD.getMonth()+1}/${endD.getDate()}`;
+
+  const dayNames=['一','二','三','四','五','六','日'];
+
+  // Find all spanning tasks for this week
+  const weekDates=days.map(d=>fmtDate(d));
+  const spanTasks=S.tasks.filter(t=>t.endDate&&t.endDate!==t.date&&getTaskDates(t).some(d=>weekDates.includes(d)));
+
   const el=document.getElementById('main-view');
-  el.innerHTML=`<div class="week-wrap"><div class="week-grid" style="grid-template-columns:44px repeat(7,1fr)">
-    <div class="time-col">${['09','10','11','12','13','14','15','16','17'].map(h=>`<div class="time-slot">${h}:00</div>`).join('')}</div>
-    ${days.map(d=>{
-      const ds=fmtDate(d);
-      const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(ds)).sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;if(a.type!==b.type)return a.type==='private'?-1:1;return 0;});
-      const isToday=ds===todayStr;
-      const dayNames=['一','二','三','四','五','六','日'];
-      const dayName=dayNames[(d.getDay()+6)%7];
-      return`<div class="week-day-col${isToday?' today-col':''}">
-        <div class="week-day-hdr">${dayName} ${d.getMonth()+1}/${d.getDate()}</div>
-        <div class="week-events">
-          ${dayTasks.map(t=>{
-            const c=t.type==='private'?'#FB8C00':cHex(t.code);
-            const cb=t.type==='private'?'#FFF3E0':cBg(t.code);
-            const isSpan=t.endDate&&t.endDate!==t.date;
-            return`<div class="week-ev ${t.done?'done-ev':''}" style="background:${cb};--c:${c}" onclick="openCalLink(${JSON.stringify(t).replace(/"/g,'&quot;')})">
-              <div class="week-ev-time">${isSpan?'跨日行程':t.time||'全天'}${!isSpan&&t.timeEnd?' — '+t.timeEnd:''}</div>
-              <div class="week-ev-title">${t.title}</div>
-              ${(()=>{const tt=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;return tt?`<div class="week-ev-sub">${tt.icon} ${tt.name}</div>`:''})()}
-              ${t.code?`<div class="week-ev-sub">${t.code}</div>`:''}
-              ${t.calEventId?`<div class="week-ev-synced">✓ 已同步</div>`:''}
+  el.innerHTML=`<div class="week-wrap">
+    <div style="display:grid;grid-template-columns:44px repeat(7,1fr);gap:4px;min-width:560px">
+
+      <!-- Header row -->
+      <div></div>
+      ${days.map(d=>{
+        const ds=fmtDate(d);
+        const isToday=ds===todayStr;
+        return`<div style="text-align:center;padding:6px 4px;font-size:11px;font-weight:500;color:${isToday?'var(--ora2)':'var(--text2)'};border-radius:8px 8px 0 0;background:${isToday?'var(--ora-bg)':'var(--bg)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-bottom:none">
+          ${dayNames[(d.getDay()+6)%7]} ${d.getMonth()+1}/${d.getDate()}
+        </div>`;
+      }).join('')}
+
+      <!-- Span task rows -->
+      ${spanTasks.length?`<div style="font-size:9px;color:var(--text3);padding-top:4px;text-align:right;padding-right:4px"></div>
+      ${days.map(d=>{
+        const ds=fmtDate(d);
+        const isToday=ds===todayStr;
+        const daySpan=spanTasks.filter(t=>getTaskDates(t).includes(ds));
+        return`<div style="background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-bottom:none;padding:3px 0;min-height:28px">
+          ${daySpan.map(t=>{
+            const isPriv=t.type==='private';
+            const c=isPriv?'#607D8B':cHex(t.code);
+            const cb=isPriv?'#CFD8DC':cMid(t.code);
+            const dates=getTaskDates(t);
+            const isFirst=ds===dates[0];
+            const isLast=ds===dates[dates.length-1];
+            const radius=isFirst&&isLast?'5px':isFirst?'5px 0 0 5px':isLast?'0 5px 5px 0':'0';
+            const ml=isFirst?'2px':'-1px';
+            const mr=isLast?'2px':'-1px';
+            return`<div style="background:${cb};color:${c};font-size:9px;font-weight:500;padding:2px 5px;margin:1px ${mr} 1px ${ml};border-radius:${radius};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:${isFirst?`2px solid ${c}`:'none'}" title="${t.title}">
+              ${isFirst?t.title:''}
             </div>`;
           }).join('')}
-        </div>
-      </div>`;
-    }).join('')}
-  </div></div>`;
+        </div>`;
+      }).join('')}`:''}
+
+      <!-- Time + events -->
+      ${['09','10','11','12','13','14','15','16','17'].map(h=>`
+        <div style="height:52px;display:flex;align-items:flex-start;justify-content:flex-end;padding-right:5px;font-size:10px;color:var(--text3);padding-top:2px;font-family:'JetBrains Mono',monospace">${h}:00</div>
+        ${days.map(d=>{
+          const ds=fmtDate(d);
+          const isToday=ds===todayStr;
+          // Only show non-spanning tasks in time slots
+          const slotTasks=S.tasks.filter(t=>t.date===ds&&(!t.endDate||t.endDate===t.date)&&!t.done).sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
+          return`<div style="height:52px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:${h==='09'?'none':'1px solid var(--border)'};border-bottom:none;padding:2px 3px;overflow:hidden">
+            ${h==='09'?slotTasks.map(t=>{
+              const isPriv=t.type==='private';
+              const c=isPriv?'#607D8B':cHex(t.code);
+              const cb=isPriv?'#ECEFF1':cBg(t.code);
+              const tt2=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;
+              return`<div class="week-ev ${t.done?'done-ev':''}" style="background:${cb};--c:${c};border-left:2px solid ${c}" onclick="openCalLink(${JSON.stringify(t).replace(/"/g,'&quot;')})">
+                <div class="week-ev-time">${t.time||'全天'}${t.timeEnd?' — '+t.timeEnd:''}</div>
+                <div class="week-ev-title">${t.title}</div>
+                ${tt2?`<div class="week-ev-sub">${tt2.icon} ${tt2.name}</div>`:''}
+                ${t.code?`<div class="week-ev-sub">${t.code}</div>`:''}
+                ${t.calEventId?`<div class="week-ev-synced">✓ 已同步</div>`:''}
+              </div>`;
+            }).join(''):''}
+          </div>`;
+        }).join('')}
+      `).join('')}
+
+      <!-- Bottom border -->
+      <div></div>
+      ${days.map(d=>{
+        const isToday=fmtDate(d)===todayStr;
+        return`<div style="height:4px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-radius:0 0 8px 8px"></div>`;
+      }).join('')}
+    </div>
+  </div>`;
 }
 
-// ── CAL ──
 function renderCal(){
   const mn=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
   const today=fmtDate(new Date());
-
-  // Build two months
   const months=[];
   for(let m=0;m<2;m++){
-    let yr=S.calYear, mo=S.calMonth+m;
+    let yr=S.calYear,mo=S.calMonth+m;
     if(mo>11){mo-=12;yr++;}
     months.push({yr,mo});
   }
@@ -1117,26 +1245,46 @@ function renderCal(){
     for(let d=1;d<=last.getDate();d++)cells.push({date:`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,other:false});
     while(cells.length%7!==0)cells.push({date:'',other:true});
 
+    // Pre-compute which tasks appear on which dates
+    const rows=[];
+    for(let r=0;r<cells.length/7;r++)rows.push(cells.slice(r*7,(r+1)*7));
+
     return `
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:24px">
       <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;text-align:center">${yr} ${mn[mo]}</div>
       <div class="cal-week-hdr">${['一','二','三','四','五','六','日'].map(d=>`<div class="cal-wday">${d}</div>`).join('')}</div>
       <div class="cal-grid">${cells.map(c=>{
         if(!c.date)return`<div class="cal-cell other-month"></div>`;
-        const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(c.date));
         const isToday=c.date===today;
+        // Sort: private first, then by start date
+        const dayTasks=S.tasks
+          .filter(t=>getTaskDates(t).includes(c.date))
+          .sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
+
         return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}">
           <div class="cal-num">${parseInt(c.date.split('-')[2])}</div>
-          ${dayTasks.slice(0,2).map(t=>{
-            const c2=t.type==='private'?'#FB8C00':cHex(t.code);
-            const cm2=t.type==='private'?'#FFE0B2':cMid(t.code);
+          ${dayTasks.slice(0,3).map(t=>{
+            const isPriv=t.type==='private';
+            const c2=isPriv?'#607D8B':cHex(t.code);
+            const cm2=isPriv?'#CFD8DC':cMid(t.code);
             const dates=getTaskDates(t);
             const isSpan=dates.length>1;
             const isFirst=c.date===dates[0];
-            const spanClass=isSpan?(isFirst?'span-start':'span-dot'):'';
-            return`<div class="cal-ev-dot ${spanClass} ${t.done?'done-dot':''}" style="background:${cm2};color:${c2}" title="${t.title}">${isFirst||!isSpan?t.title.substring(0,6)+(t.title.length>6?'…':''):'↔'}</div>`;
+            const isLast=c.date===dates[dates.length-1];
+            const inMiddle=isSpan&&!isFirst&&!isLast;
+            // Span styling: continuous block
+            let spanStyle='';
+            if(isSpan){
+              if(isFirst)spanStyle='border-radius:5px 0 0 5px;margin-right:-5px;padding-right:0';
+              else if(isLast)spanStyle='border-radius:0 5px 5px 0;margin-left:-5px;padding-left:4px';
+              else spanStyle='border-radius:0;margin-left:-5px;margin-right:-5px;padding-left:4px;padding-right:0';
+            }
+            return`<div class="cal-ev-dot ${t.done?'done-dot':''}"
+              style="background:${cm2};color:${c2};${spanStyle}"
+              title="${t.title}">${isFirst||!isSpan?t.title.substring(0,7)+(t.title.length>7?'…':''):(inMiddle?'':'')}
+            </div>`;
           }).join('')}
-          ${dayTasks.length>2?`<div style="font-size:9px;color:var(--text3)">+${dayTasks.length-2}</div>`:''}
+          ${dayTasks.length>3?`<div style="font-size:9px;color:var(--text3)">+${dayTasks.length-3}</div>`:''}
         </div>`;
       }).join('')}</div>
     </div>`;
