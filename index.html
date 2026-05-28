@@ -499,7 +499,15 @@ window.onload=async()=>{
   tokenClient=google.accounts.oauth2.initTokenClient({
     client_id:CFG.CLIENT_ID,
     scope:'https://www.googleapis.com/auth/calendar.events',
-    callback:r=>{S.calToken=r.access_token;},
+    callback:r=>{
+      if(r.access_token){
+        S.calToken=r.access_token;
+        console.log('Calendar token OK');
+      }
+    },
+    error_callback:e=>{
+      console.log('Calendar token error (non-fatal):',e);
+    },
   });
 
   // Check if already logged in via sessionStorage
@@ -527,14 +535,18 @@ async function showApp(email){
   const app=document.getElementById('app');app.style.display='flex';app.style.flexDirection='column';
   document.getElementById('u-em').textContent=email;
   document.getElementById('u-av').textContent=email[0].toUpperCase();
-  // Request Calendar token (popup is fine for calendar only)
-  tokenClient.requestAccessToken({prompt:''});
-  // Load data from Firebase
+
+  // 先載入 Firebase 資料（不等 Calendar token）
   setSyncStatus('syncing','載入資料中…');
   await loadFromFirebase();
-  setSyncStatus('ok','已連線 Firebase ✓');
+  setSyncStatus('ok','已同步 Firebase ✓');
   S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
   fillCodeSel();renderView();buildSuggestion();
+
+  // Calendar token 背景取得（不阻塞主流程）
+  try{
+    if(tokenClient)tokenClient.requestAccessToken({prompt:''});
+  }catch(e){console.log('Calendar token skipped:',e);}
 }
 
 function setSyncStatus(state,msg){
