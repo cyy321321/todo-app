@@ -300,7 +300,6 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       </div>
       <div class="hdr-right">
         <div class="avatar" id="u-av">U</div>
-        <span class="hdr-email" id="u-em"></span>
         <button class="pill-btn" onclick="refreshData()">↻ 重新整理</button>
         <button class="pill-btn" onclick="openProjModal()">⚙ 管理案子</button>
       </div>
@@ -389,7 +388,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
     <div class="view-bar-inner">
       <div class="view-tabs">
         <button class="vtab on" id="vt-list" onclick="setView('list')">📋 清單</button>
-        <button class="vtab" id="vt-week" onclick="setView('week')">📆 週視圖</button>
+        <button class="vtab" id="vt-week" onclick="setView('week')">📆 週曆</button>
         <button class="vtab" id="vt-cal" onclick="setView('cal')">📅 月曆</button>
       </div>
       <div class="view-nav">
@@ -559,31 +558,31 @@ function setSyncStatus(state,msg){
 // ── FIREBASE API ──
 async function loadFromFirebase(){
   if(!db)return;
-  try{
-    // Load tasks
-    const tasksSnap=await db.ref('tasks').get();
-    S.tasks=[];
-    if(tasksSnap.exists()){
-      const data=tasksSnap.val();
-      S.tasks=Object.values(data).map(t=>({
-        ...t,
-        done:t.done===true||t.done==='true',
-      }));
-    }
-    // Load projects
-    const projSnap=await db.ref('projects').get();
-    if(projSnap.exists()){
-      const data=projSnap.val();
-      const loaded=Object.values(data);
-      if(loaded.length>0)S.projects=loaded;
-    }
-    localStorage.setItem('tm-projs',JSON.stringify(S.projects));
-  }catch(e){
-    console.error('loadFromFirebase',e);
-    // Fallback to localStorage
-    const local=localStorage.getItem('tm-tasks');
-    if(local)S.tasks=JSON.parse(local);
-  }
+  return new Promise((resolve)=>{
+    // 即時監聽 tasks
+    db.ref('cyy321_todo_9x7k/tasks').on('value',snap=>{
+      S.tasks=[];
+      if(snap.exists()){
+        const data=snap.val();
+        S.tasks=Object.values(data).map(t=>({...t,done:t.done===true||t.done==='true'}));
+      }
+      saveLocal();
+      renderView();buildSuggestion();
+      setSyncStatus('ok','已同步 ✓');
+      resolve();
+    });
+    // 即時監聽 projects
+    db.ref('cyy321_todo_9x7k/projects').on('value',snap=>{
+      if(snap.exists()){
+        const loaded=Object.values(snap.val());
+        if(loaded.length>0){
+          S.projects=loaded;
+          localStorage.setItem('tm-projs',JSON.stringify(S.projects));
+          fillCodeSel();
+        }
+      }
+    });
+  });
 }
 
 async function saveTasksToFirebase(){
@@ -592,7 +591,7 @@ async function saveTasksToFirebase(){
     setSyncStatus('syncing','儲存中…');
     const obj={};
     S.tasks.forEach(t=>{obj[t.id]=t;});
-    await db.ref('tasks').set(obj);
+    await db.ref('cyy321_todo_9x7k/tasks').set(obj);
     setSyncStatus('ok','已同步 Firebase ✓');
   }catch(e){
     setSyncStatus('err','同步失敗');
@@ -605,7 +604,7 @@ async function saveProjectsToFirebase(){
   try{
     const obj={};
     S.projects.forEach((p,i)=>{obj[i]=p;});
-    await db.ref('projects').set(obj);
+    await db.ref('cyy321_todo_9x7k/projects').set(obj);
   }catch(e){console.error('saveProjectsToFirebase',e);}
 }
 
@@ -827,9 +826,9 @@ function renderList(){
             <span class="stat-pill stat-count">${p.pendingTasks.length} 件</span>
             ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
           </div>
-          <span class="proj-arrow ${isOpen?'open':''}">▶</span>
+          <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-${p.code}">▶</span>
         </div>
-        <div class="proj-tasks ${isOpen?'open':''}">
+        <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-${p.code}">
           ${p.tasks.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,c)).join('')}
         </div>
       </div>`;
@@ -851,9 +850,9 @@ function renderList(){
           <span class="stat-pill stat-count">${pending.length} 件</span>
           ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
         </div>
-        <span class="proj-arrow ${isOpen?'open':''}">▶</span>
+        <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-__priv__">▶</span>
       </div>
-      <div class="proj-tasks ${isOpen?'open':''}">
+      <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-__priv__">
         ${pt.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,'#FB8C00')).join('')}
       </div>
     </div>`;
@@ -861,7 +860,19 @@ function renderList(){
   el.innerHTML=html;
 }
 
-function toggleProj(code){if(S.expandedProjs.has(code))S.expandedProjs.delete(code);else S.expandedProjs.add(code);renderView();}
+function toggleProj(code){
+  if(S.expandedProjs.has(code))S.expandedProjs.delete(code);
+  else S.expandedProjs.add(code);
+  const isOpen=S.expandedProjs.has(code);
+  const tasksEl=document.getElementById('proj-tasks-'+code);
+  const arrowEl=document.getElementById('proj-arrow-'+code);
+  if(tasksEl&&arrowEl){
+    tasksEl.className='proj-tasks'+(isOpen?' open':'');
+    arrowEl.className='proj-arrow'+(isOpen?' open':'');
+  } else {
+    renderView();
+  }
+}
 
 function taskCardHTML(t,today,color){
   const overdue=t.date<today&&!t.done;
@@ -955,19 +966,21 @@ async function delTask(id){
 function renderWeek(){
   const today=new Date();
   const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7)+S.weekOffset*7);
-  const days=[];for(let i=0;i<5;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);days.push(d);}
+  const days=[];for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);days.push(d);}
   const todayStr=fmtDate(new Date());
-  const endD=new Date(monday);endD.setDate(monday.getDate()+4);
+  const endD=new Date(monday);endD.setDate(monday.getDate()+6);
   document.getElementById('nav-label').textContent=`${monday.getMonth()+1}/${monday.getDate()} — ${endD.getMonth()+1}/${endD.getDate()}`;
   const el=document.getElementById('main-view');
-  el.innerHTML=`<div class="week-wrap"><div class="week-grid">
+  el.innerHTML=`<div class="week-wrap"><div class="week-grid" style="grid-template-columns:44px repeat(7,1fr)">
     <div class="time-col">${['09','10','11','12','13','14','15','16','17'].map(h=>`<div class="time-slot">${h}:00</div>`).join('')}</div>
     ${days.map(d=>{
       const ds=fmtDate(d);
       const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(ds)).sort((a,b)=>a.done===b.done?0:a.done?1:-1);
       const isToday=ds===todayStr;
+      const dayNames=['一','二','三','四','五','六','日'];
+      const dayName=dayNames[(d.getDay()+6)%7];
       return`<div class="week-day-col${isToday?' today-col':''}">
-        <div class="week-day-hdr">${['一','二','三','四','五'][d.getDay()-1]||''} ${d.getMonth()+1}/${d.getDate()}</div>
+        <div class="week-day-hdr">${dayName} ${d.getMonth()+1}/${d.getDate()}</div>
         <div class="week-events">
           ${dayTasks.map(t=>{
             const c=cHex(t.type==='private'?null:t.code);
@@ -989,36 +1002,53 @@ function renderWeek(){
 // ── CAL ──
 function renderCal(){
   const mn=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-  document.getElementById('nav-label').textContent=`${S.calYear} / ${mn[S.calMonth]}`;
   const today=fmtDate(new Date());
-  const first=new Date(S.calYear,S.calMonth,1);
-  const last=new Date(S.calYear,S.calMonth+1,0);
-  let startDay=first.getDay()-1;if(startDay<0)startDay=6;
-  let cells=[];
-  for(let i=0;i<startDay;i++){const d=new Date(S.calYear,S.calMonth,1-startDay+i);cells.push({date:fmtDate(d),other:true});}
-  for(let d=1;d<=last.getDate();d++)cells.push({date:`${S.calYear}-${String(S.calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,other:false});
-  while(cells.length%7!==0)cells.push({date:'',other:true});
-  const el=document.getElementById('main-view');
-  el.innerHTML=`<div class="cal-week-hdr">${['一','二','三','四','五','六','日'].map(d=>`<div class="cal-wday">${d}</div>`).join('')}</div>
-  <div class="cal-grid">${cells.map(c=>{
-    if(!c.date)return`<div class="cal-cell other-month"></div>`;
-    const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(c.date));
-    const isToday=c.date===today;
-    return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}">
-      <div class="cal-num">${parseInt(c.date.split('-')[2])}</div>
-      ${dayTasks.slice(0,3).map(t=>{
-        const c2=cHex(t.type==='private'?null:t.code);
-        const cm2=cMid(t.type==='private'?null:t.code);
-        const dates=getTaskDates(t);
-        const isSpan=dates.length>1;
-        const isFirst=c.date===dates[0];
-        const isLast=c.date===dates[dates.length-1];
-        const spanClass=isSpan?(isFirst?'span-start':isLast?'span-end':'span-dot'):'';
-        return`<div class="cal-ev-dot ${spanClass} ${t.done?'done-dot':''}" style="background:${cm2};color:${c2}">${isFirst||!isSpan?t.title:'↔'}</div>`;
-      }).join('')}
-      ${dayTasks.length>3?`<div style="font-size:9px;color:var(--text3)">+${dayTasks.length-3}</div>`:''}
+
+  // Build two months
+  const months=[];
+  for(let m=0;m<2;m++){
+    let yr=S.calYear, mo=S.calMonth+m;
+    if(mo>11){mo-=12;yr++;}
+    months.push({yr,mo});
+  }
+  document.getElementById('nav-label').textContent=`${months[0].yr}/${mn[months[0].mo]} — ${mn[months[1].mo]}`;
+
+  function buildMonthHTML(yr,mo){
+    const first=new Date(yr,mo,1);
+    const last=new Date(yr,mo+1,0);
+    let startDay=first.getDay()-1;if(startDay<0)startDay=6;
+    let cells=[];
+    for(let i=0;i<startDay;i++){const d=new Date(yr,mo,1-startDay+i);cells.push({date:fmtDate(d),other:true});}
+    for(let d=1;d<=last.getDate();d++)cells.push({date:`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,other:false});
+    while(cells.length%7!==0)cells.push({date:'',other:true});
+
+    return `
+    <div style="margin-bottom:20px">
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;text-align:center">${yr} ${mn[mo]}</div>
+      <div class="cal-week-hdr">${['一','二','三','四','五','六','日'].map(d=>`<div class="cal-wday">${d}</div>`).join('')}</div>
+      <div class="cal-grid">${cells.map(c=>{
+        if(!c.date)return`<div class="cal-cell other-month"></div>`;
+        const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(c.date));
+        const isToday=c.date===today;
+        return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}">
+          <div class="cal-num">${parseInt(c.date.split('-')[2])}</div>
+          ${dayTasks.slice(0,2).map(t=>{
+            const c2=cHex(t.type==='private'?null:t.code);
+            const cm2=cMid(t.type==='private'?null:t.code);
+            const dates=getTaskDates(t);
+            const isSpan=dates.length>1;
+            const isFirst=c.date===dates[0];
+            const spanClass=isSpan?(isFirst?'span-start':'span-dot'):'';
+            return`<div class="cal-ev-dot ${spanClass} ${t.done?'done-dot':''}" style="background:${cm2};color:${c2}" title="${t.title}">${isFirst||!isSpan?t.title.substring(0,6)+(t.title.length>6?'…':''):'↔'}</div>`;
+          }).join('')}
+          ${dayTasks.length>2?`<div style="font-size:9px;color:var(--text3)">+${dayTasks.length-2}</div>`:''}
+        </div>`;
+      }).join('')}</div>
     </div>`;
-  }).join('')}</div>`;
+  }
+
+  const el=document.getElementById('main-view');
+  el.innerHTML=months.map(m=>buildMonthHTML(m.yr,m.mo)).join('');
 }
 
 function openCalLink(task){
@@ -1108,16 +1138,11 @@ function closeModal(id){document.getElementById(id).classList.remove('show');}
 async function refreshData(){
   if(!db){toast('尚未連線','err');return;}
   setSyncStatus('syncing','重新整理中…');
-  try{
-    await loadFromFirebase();
-    setSyncStatus('ok','已同步 Firebase ✓');
-    S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
-    fillCodeSel();renderView();buildSuggestion();
-    toast('✅ 資料已重新整理','ok');
-  }catch(e){
-    setSyncStatus('err','同步失敗');
-    toast('重新整理失敗，請稍後再試','err');
-  }
+  // Firebase 即時監聽已自動同步，這裡只需要重新渲染
+  S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
+  fillCodeSel();renderView();buildSuggestion();
+  setSyncStatus('ok','已同步 ✓');
+  toast('✅ 已重新整理','ok');
 }
 function toast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.className=`toast ${type}`,3000);}
 </script>
