@@ -477,23 +477,40 @@ const addH=t=>{const[h,m]=t.split(':').map(Number);return`${String((h+1)%24).pad
 
 // ── GOOGLE AUTH ──
 let tokenClient;
-window.onload=()=>{
+window.onload=async()=>{
+  // Check if we're returning from OAuth redirect with token in URL hash
+  const hash=Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+  if(hash.access_token){
+    // Store token and clean URL
+    sessionStorage.setItem('gtoken',hash.access_token);
+    sessionStorage.setItem('gtoken_exp', Date.now()+3500000);
+    history.replaceState(null,'',location.pathname);
+  }
+
   google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onLogin});
   google.accounts.id.renderButton(document.getElementById('g-btn'),{theme:'outline',size:'large',width:240});
-  tokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:CFG.CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
-    callback:async r=>{
-      S.calToken=r.access_token;
-      S.sheetsToken=r.access_token;
-      setSyncStatus('syncing','同步資料中…');
-      await initSheet();
-      await loadFromSheet();
-      setSyncStatus('ok','已同步');
-      S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
-      fillCodeSel();renderView();buildSuggestion();
-    },
-  });
+
+  // If already have token in session, try auto-login
+  const storedToken=sessionStorage.getItem('gtoken');
+  const storedUser=sessionStorage.getItem('guser');
+  if(storedToken && storedUser && Date.now() < parseInt(sessionStorage.getItem('gtoken_exp')||0)){
+    S.calToken=storedToken;
+    S.sheetsToken=storedToken;
+    const userInfo=JSON.parse(storedUser);
+    document.getElementById('login-screen').style.display='none';
+    const app=document.getElementById('app');app.style.display='flex';app.style.flexDirection='column';
+    document.getElementById('u-em').textContent=userInfo.email;
+    document.getElementById('u-av').textContent=userInfo.email[0].toUpperCase();
+    setSyncStatus('syncing','同步資料中…');
+    await initSheet();
+    await loadFromSheet();
+    setSyncStatus('ok','已同步 ✓');
+    S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
+    fillCodeSel();renderView();buildSuggestion();
+    return;
+  }
+
+  tokenClient=null; // will use redirect flow
   const td=new Date().toISOString().split('T')[0];
   ['w-date','p-date','w-edate','p-edate'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('w-date')&&(document.getElementById('w-date').value=td);
@@ -503,11 +520,17 @@ window.onload=()=>{
 function onLogin(resp){
   const pl=JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
   if(pl.email!==CFG.ALLOWED_EMAIL){document.getElementById('login-err').style.display='block';return;}
-  document.getElementById('login-screen').style.display='none';
-  const app=document.getElementById('app');app.style.display='flex';app.style.flexDirection='column';
-  document.getElementById('u-em').textContent=pl.email;
-  document.getElementById('u-av').textContent=pl.email[0].toUpperCase();
-  tokenClient.requestAccessToken({prompt:''});
+  // Store user info, then redirect for OAuth token
+  sessionStorage.setItem('guser',JSON.stringify({email:pl.email}));
+  // Use implicit grant redirect flow - avoids COOP/popup issues
+  const scopes=encodeURIComponent([
+    'https://www.googleapis.com/auth/calendar.events',
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive.file'
+  ].join(' '));
+  const redirectUri=encodeURIComponent(location.origin+location.pathname);
+  const url=`https://accounts.google.com/o/oauth2/v2/auth?client_id=${CFG.CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=${scopes}&include_granted_scopes=true&login_hint=${encodeURIComponent(pl.email)}`;
+  location.href=url;
 }
 
 function setSyncStatus(state,msg){
@@ -1067,13 +1090,20 @@ async function delProj(code){
 }
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 async function refreshData(){
-  if(!S.sheetsToken){location.reload();return;}
+  if(!S.sheetsToken){
+    toast('尚未連線，請重新登入','err');return;
+  }
   setSyncStatus('syncing','重新整理中…');
-  await loadFromSheet();
-  setSyncStatus('ok','已同步');
-  S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
-  fillCodeSel();renderView();buildSuggestion();
-  toast('✅ 資料已重新整理','ok');
+  try{
+    await loadFromSheet();
+    setSyncStatus('ok','已同步 ✓');
+    S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
+    fillCodeSel();renderView();buildSuggestion();
+    toast('✅ 資料已從 Google Sheets 重新整理','ok');
+  }catch(e){
+    setSyncStatus('err','同步失敗');
+    toast('重新整理失敗，請稍後再試','err');
+  }
 }
 function toast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.className=`toast ${type}`,3000);}
 </script>
