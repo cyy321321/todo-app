@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My To Do List</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -433,8 +435,18 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 const CFG={
   CLIENT_ID:'622489782668-81884uub8oh42pqofhl0psh03cloc3so.apps.googleusercontent.com',
   ALLOWED_EMAIL:'uoii910986@gmail.com',
-  SHEET_ID:'1hyT0xPGhdKfW7lhg_UU4Fi3T-SpL2wcyZ9yNOsbn2Ic',
 };
+
+// Firebase 設定
+const firebaseConfig={
+  apiKey:'AIzaSyC3AUR1YQkmDS5oVHVOZVjJrjpgX2tze_E',
+  authDomain:'my-todo-list-f90b8.firebaseapp.com',
+  databaseURL:'https://my-todo-list-f90b8-default-rtdb.firebaseio.com',
+  projectId:'my-todo-list-f90b8',
+  appId:'1:372805580919:web:5097b978044d67f0bb6e72',
+};
+firebase.initializeApp(firebaseConfig);
+let db=null;
 
 const CLAUDE_PROMPT=`請幫我整理以下信件或訊息中的待辦事項，輸出格式如下，每個任務用 --- 分隔：
 
@@ -467,8 +479,7 @@ let S={
   weekOffset:0,
   projects:JSON.parse(localStorage.getItem('tm-projs')||'null')||[{code:'0000X',name:'待確認 / 其他'}],
   tasks:[],
-  pending:[],calToken:null,sheetsToken:null,
-  expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
+  pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
   editingProj:null,
 };
 
@@ -478,39 +489,26 @@ const addH=t=>{const[h,m]=t.split(':').map(Number);return`${String((h+1)%24).pad
 // ── GOOGLE AUTH ──
 let tokenClient;
 window.onload=async()=>{
-  // Check if we're returning from OAuth redirect with token in URL hash
-  const hash=Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
-  if(hash.access_token){
-    // Store token and clean URL
-    sessionStorage.setItem('gtoken',hash.access_token);
-    sessionStorage.setItem('gtoken_exp', Date.now()+3500000);
-    history.replaceState(null,'',location.pathname);
-  }
-
   google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onLogin});
   google.accounts.id.renderButton(document.getElementById('g-btn'),{theme:'outline',size:'large',width:240});
 
-  // If already have token in session, try auto-login
-  const storedToken=sessionStorage.getItem('gtoken');
+  // Init Firebase DB
+  db=firebase.database();
+
+  // Calendar token client (only Calendar, no Sheets needed)
+  tokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:CFG.CLIENT_ID,
+    scope:'https://www.googleapis.com/auth/calendar.events',
+    callback:r=>{S.calToken=r.access_token;},
+  });
+
+  // Check if already logged in via sessionStorage
   const storedUser=sessionStorage.getItem('guser');
-  if(storedToken && storedUser && Date.now() < parseInt(sessionStorage.getItem('gtoken_exp')||0)){
-    S.calToken=storedToken;
-    S.sheetsToken=storedToken;
-    const userInfo=JSON.parse(storedUser);
-    document.getElementById('login-screen').style.display='none';
-    const app=document.getElementById('app');app.style.display='flex';app.style.flexDirection='column';
-    document.getElementById('u-em').textContent=userInfo.email;
-    document.getElementById('u-av').textContent=userInfo.email[0].toUpperCase();
-    setSyncStatus('syncing','同步資料中…');
-    await initSheet();
-    await loadFromSheet();
-    setSyncStatus('ok','已同步 ✓');
-    S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
-    fillCodeSel();renderView();buildSuggestion();
+  const storedEmail=storedUser?JSON.parse(storedUser).email:null;
+  if(storedEmail===CFG.ALLOWED_EMAIL){
+    showApp(storedEmail);
     return;
   }
-
-  tokenClient=null; // will use redirect flow
   const td=new Date().toISOString().split('T')[0];
   ['w-date','p-date','w-edate','p-edate'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('w-date')&&(document.getElementById('w-date').value=td);
@@ -520,17 +518,23 @@ window.onload=async()=>{
 function onLogin(resp){
   const pl=JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
   if(pl.email!==CFG.ALLOWED_EMAIL){document.getElementById('login-err').style.display='block';return;}
-  // Store user info, then redirect for OAuth token
   sessionStorage.setItem('guser',JSON.stringify({email:pl.email}));
-  // Use implicit grant redirect flow - avoids COOP/popup issues
-  const scopes=encodeURIComponent([
-    'https://www.googleapis.com/auth/calendar.events',
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/drive.file'
-  ].join(' '));
-  const redirectUri=encodeURIComponent(location.origin+location.pathname);
-  const url=`https://accounts.google.com/o/oauth2/v2/auth?client_id=${CFG.CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=${scopes}&include_granted_scopes=true&login_hint=${encodeURIComponent(pl.email)}`;
-  location.href=url;
+  showApp(pl.email);
+}
+
+async function showApp(email){
+  document.getElementById('login-screen').style.display='none';
+  const app=document.getElementById('app');app.style.display='flex';app.style.flexDirection='column';
+  document.getElementById('u-em').textContent=email;
+  document.getElementById('u-av').textContent=email[0].toUpperCase();
+  // Request Calendar token (popup is fine for calendar only)
+  tokenClient.requestAccessToken({prompt:''});
+  // Load data from Firebase
+  setSyncStatus('syncing','載入資料中…');
+  await loadFromFirebase();
+  setSyncStatus('ok','已連線 Firebase ✓');
+  S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
+  fillCodeSel();renderView();buildSuggestion();
 }
 
 function setSyncStatus(state,msg){
@@ -540,68 +544,68 @@ function setSyncStatus(state,msg){
   txt.textContent=msg;
 }
 
-// ── SHEETS API ──
-async function sheetsFetch(method,path,body){
-  const url=`https://sheets.googleapis.com/v4/spreadsheets/${CFG.SHEET_ID}${path}`;
-  const opts={method,headers:{'Authorization':`Bearer ${S.sheetsToken}`,'Content-Type':'application/json'}};
-  if(body)opts.body=JSON.stringify(body);
-  const r=await fetch(url,opts);
-  if(!r.ok)throw new Error(await r.text());
-  return r.status===204?null:r.json();
-}
-
-async function initSheet(){
+// ── FIREBASE API ──
+async function loadFromFirebase(){
+  if(!db)return;
   try{
-    // 確認標題列存在，若空白則寫入
-    const tr=await sheetsFetch('GET','/values/Tasks!A1:P1');
-    if(!tr.values||!tr.values[0]||!tr.values[0][0]){
-      await sheetsFetch('PUT','/values/Tasks!A1:P1?valueInputOption=RAW',{values:[['id','type','title','code','date','endDate','time','timeEnd','loc','priority','done','calEventId','note','rawInfo','createdAt','updatedAt']]});
+    // Load tasks
+    const tasksSnap=await db.ref('tasks').get();
+    S.tasks=[];
+    if(tasksSnap.exists()){
+      const data=tasksSnap.val();
+      S.tasks=Object.values(data).map(t=>({
+        ...t,
+        done:t.done===true||t.done==='true',
+      }));
     }
-    const pr=await sheetsFetch('GET','/values/Projects!A1:B1');
-    if(!pr.values||!pr.values[0]||!pr.values[0][0]){
-      await sheetsFetch('PUT','/values/Projects!A1:B1?valueInputOption=RAW',{values:[['code','name']]});
-      await saveProjectsToSheet();
+    // Load projects
+    const projSnap=await db.ref('projects').get();
+    if(projSnap.exists()){
+      const data=projSnap.val();
+      const loaded=Object.values(data);
+      if(loaded.length>0)S.projects=loaded;
     }
-  }catch(e){console.error('initSheet',e);}
-}
-
-async function loadFromSheet(){
-  try{
-    const tr=await sheetsFetch('GET','/values/Tasks!A2:P');
-    const rows=tr.values||[];
-    S.tasks=rows.map(r=>({
-      id:parseInt(r[0])||Date.now(),type:r[1]||'work',title:r[2]||'',code:r[3]||null,
-      date:r[4]||'',endDate:r[5]||null,time:r[6]||null,timeEnd:r[7]||null,
-      loc:r[8]||'',priority:r[9]||'medium',done:r[10]==='true',
-      calEventId:r[11]||null,note:r[12]||'',rawInfo:r[13]||'',
-    }));
-    const pr=await sheetsFetch('GET','/values/Projects!A2:B');
-    const prows=(pr.values||[]).filter(r=>r[0]);
-    if(prows.length)S.projects=prows.map(r=>({code:r[0],name:r[1]||''}));
     localStorage.setItem('tm-projs',JSON.stringify(S.projects));
-  }catch(e){console.error('loadFromSheet',e);}
+  }catch(e){
+    console.error('loadFromFirebase',e);
+    // Fallback to localStorage
+    const local=localStorage.getItem('tm-tasks');
+    if(local)S.tasks=JSON.parse(local);
+  }
 }
 
-async function saveTasksToSheet(){
+async function saveTasksToFirebase(){
+  if(!db)return;
   try{
     setSyncStatus('syncing','儲存中…');
-    await sheetsFetch('PUT','/values/Tasks!A2:P?valueInputOption=RAW',{
-      values:S.tasks.map(t=>[t.id,t.type,t.title,t.code||'',t.date,t.endDate||'',t.time||'',t.timeEnd||'',t.loc||'',t.priority,t.done,t.calEventId||'',t.note||'',t.rawInfo||'',t.createdAt||'',Date.now()])
-    });
-    setSyncStatus('ok','已同步至 Google Sheets ✓');
-  }catch(e){setSyncStatus('err','同步失敗');console.error(e);}
+    const obj={};
+    S.tasks.forEach(t=>{obj[t.id]=t;});
+    await db.ref('tasks').set(obj);
+    setSyncStatus('ok','已同步 Firebase ✓');
+  }catch(e){
+    setSyncStatus('err','同步失敗');
+    console.error('saveTasksToFirebase',e);
+  }
 }
 
-async function saveProjectsToSheet(){
+async function saveProjectsToFirebase(){
+  if(!db)return;
   try{
-    await sheetsFetch('PUT','/values/Projects!A2:B?valueInputOption=RAW',{
-      values:S.projects.map(p=>[p.code,p.name])
-    });
-  }catch(e){console.error(e);}
+    const obj={};
+    S.projects.forEach((p,i)=>{obj[i]=p;});
+    await db.ref('projects').set(obj);
+  }catch(e){console.error('saveProjectsToFirebase',e);}
 }
 
-function saveLocal(){localStorage.setItem('tm-projs',JSON.stringify(S.projects));}
-async function save(){saveLocal();await saveTasksToSheet();}
+function saveLocal(){
+  localStorage.setItem('tm-projs',JSON.stringify(S.projects));
+  localStorage.setItem('tm-tasks',JSON.stringify(S.tasks));
+}
+
+async function save(){
+  saveLocal();
+  await saveTasksToFirebase();
+}
 
 // ── INPUT ──
 function toggleInput(){S.inputOpen=!S.inputOpen;document.getElementById('input-panel').classList.toggle('open',S.inputOpen);document.getElementById('t-arrow').classList.toggle('open',S.inputOpen);}
@@ -1071,7 +1075,7 @@ async function saveProjEdit(oldCode){
   const p=S.projects.find(p=>p.code===oldCode);if(!p)return;
   p.code=newCode;p.name=newName;
   if(newCode!==oldCode){S.tasks.forEach(t=>{if(t.code===oldCode)t.code=newCode;});if(colorMap[oldCode]!==undefined){colorMap[newCode]=colorMap[oldCode];delete colorMap[oldCode];}}
-  S.editingProj=null;saveLocal();await saveProjectsToSheet();await saveTasksToSheet();renderProjList();fillCodeSel();renderView();
+  S.editingProj=null;saveLocal();await saveProjectsToFirebase();await saveTasksToFirebase();renderProjList();fillCodeSel();renderView();
   toast('✅ 案子已更新','ok');
 }
 async function addProj(){
@@ -1080,26 +1084,24 @@ async function addProj(){
   if(!code||!name){toast('請填寫代碼和名稱','err');return;}
   if(!/^\d{4}[A-Z]$/.test(code)){toast('格式：4數字+1大寫英文，例如 1234A','err');return;}
   if(S.projects.find(p=>p.code===code)){toast('此代碼已存在','err');return;}
-  S.projects.push({code,name});getCI(code);saveLocal();await saveProjectsToSheet();renderProjList();fillCodeSel();
+  S.projects.push({code,name});getCI(code);saveLocal();await saveProjectsToFirebase();renderProjList();fillCodeSel();
   document.getElementById('new-code').value='';document.getElementById('new-name').value='';
   toast('✅ 案子已新增','ok');
 }
 async function delProj(code){
   S.projects=S.projects.filter(p=>p.code!==code);
-  saveLocal();await saveProjectsToSheet();renderProjList();fillCodeSel();
+  saveLocal();await saveProjectsToFirebase();renderProjList();fillCodeSel();
 }
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 async function refreshData(){
-  if(!S.sheetsToken){
-    toast('尚未連線，請重新登入','err');return;
-  }
+  if(!db){toast('尚未連線','err');return;}
   setSyncStatus('syncing','重新整理中…');
   try{
-    await loadFromSheet();
-    setSyncStatus('ok','已同步 ✓');
+    await loadFromFirebase();
+    setSyncStatus('ok','已同步 Firebase ✓');
     S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
     fillCodeSel();renderView();buildSuggestion();
-    toast('✅ 資料已從 Google Sheets 重新整理','ok');
+    toast('✅ 資料已重新整理','ok');
   }catch(e){
     setSyncStatus('err','同步失敗');
     toast('重新整理失敗，請稍後再試','err');
