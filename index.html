@@ -1628,28 +1628,23 @@ function genXunSummary(){
 
   S.projects.forEach(p=>{
     if(!grouped[p.code])return;
-    text+=`${p.code}  ${p.name}
-`;
+    text+=p.code+'  '+p.name+'\n';
     grouped[p.code].forEach(t=>{
       const dateStr=t.date+(t.endDate&&t.endDate!==t.date?` ～ ${t.endDate}`:'');
       const timeStr=t.time?(` ${t.time}${t.timeEnd?' - '+t.timeEnd:''}`): '';
       const doneStr=t.done?'  ✓':'';
-      text+=`  • ${dateStr}${timeStr}  ${t.title}${doneStr}
-`;
+      text+='  • '+dateStr+timeStr+'  '+t.title+doneStr+'\n';
     });
-    text+='
-';
+    text+='\n';
   });
 
   // Unknown codes
   const known=S.projects.map(p=>p.code);
   const unk=inRange.filter(t=>!known.includes(t.code));
   if(unk.length){
-    text+=`（未分類）
-`;
+    text+='（未分類）\n';
     unk.forEach(t=>{
-      text+=`  • ${t.date}  ${t.title}
-`;
+      text+='  • '+t.date+'  '+t.title+'\n';
     });
   }
 
