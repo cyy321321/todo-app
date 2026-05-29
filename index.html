@@ -274,6 +274,33 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:var(--ora-mid);border-radius:2px}
 
+/* NOTES */
+.note-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s;border-left:3px solid var(--ora)}
+.note-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.note-card:hover .note-del{opacity:1!important}
+.note-card.priv-note{border-left-color:#607D8B}
+.note-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px}
+.note-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.note-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.note-type{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:500;background:var(--ora-bg);color:var(--ora2)}
+.note-preview{font-size:12px;color:var(--text2);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.note-editor{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:20px;margin-bottom:12px}
+.note-editor-title{width:100%;border:none;font-size:18px;font-weight:700;color:var(--text);font-family:inherit;outline:none;margin-bottom:12px;background:transparent}
+.note-section{margin-bottom:16px}
+.note-section-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;margin-bottom:6px;text-transform:uppercase}
+.note-section-input{width:100%;border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--white);resize:vertical;min-height:60px;transition:border .15s}
+.note-section-input:focus{border-color:var(--ora)}
+.note-free-input{width:100%;border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--white);resize:vertical;min-height:200px;line-height:1.7;transition:border .15s}
+.note-free-input:focus{border-color:var(--ora)}
+.search-input{width:100%;border:1.5px solid var(--border2);border-radius:var(--r);padding:12px 16px;font-size:14px;font-family:inherit;color:var(--text);outline:none;background:var(--white);transition:border .15s;margin-bottom:16px}
+.search-input:focus{border-color:var(--ora)}
+.search-result{background:var(--white);border-radius:var(--r-sm);border:1.5px solid var(--border);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.search-result:hover{border-color:var(--ora);box-shadow:var(--shadow)}
+.search-result-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.search-result-meta{font-size:11px;color:var(--text3);margin-bottom:4px}
+.search-highlight{background:#FFF3CD;color:var(--text);border-radius:2px;padding:0 2px}
+.search-result-preview{font-size:12px;color:var(--text2);line-height:1.5}
+
 @media(max-width:600px){
   .hdr-email{display:none}
   .man-row{flex-direction:column}
@@ -397,6 +424,8 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
         <button class="vtab on" id="vt-list" onclick="setView('list')">📋 清單</button>
         <button class="vtab" id="vt-week" onclick="setView('week')">📆 週曆</button>
         <button class="vtab" id="vt-cal" onclick="setView('cal')">📅 月曆</button>
+        <button class="vtab" id="vt-notes" onclick="setView('notes')">📝 筆記</button>
+        <button class="vtab" id="vt-search" onclick="setView('search')">🔍 搜尋</button>
       </div>
       <div class="view-nav">
         <button class="nav-btn" onclick="navPrev()">‹</button>
@@ -448,6 +477,76 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <button class="btn btn-ora" onclick="addTaskType()">新增</button>
     </div>
     <div class="modal-actions"><button class="btn btn-ora" onclick="closeModal('type-modal')">完成</button></div>
+  </div>
+</div>
+
+<!-- NOTE EDITOR MODAL -->
+<div class="modal-overlay" id="note-modal">
+  <div class="modal" style="max-width:620px;max-height:92vh">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" style="margin:0" id="note-modal-title">新增筆記</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-soft" onclick="closeModal('note-modal')" style="font-size:12px;padding:6px 12px">取消</button>
+        <button class="btn btn-ora" onclick="saveNote()" style="font-size:12px;padding:6px 12px">儲存</button>
+      </div>
+    </div>
+
+    <!-- Basic fields -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="fld"><label>日期</label><input type="date" id="n-date"></div>
+      <div class="fld"><label>計畫代碼</label>
+        <select id="n-code">
+          <option value="">私人備忘</option>
+        </select>
+      </div>
+      <div class="fld"><label>筆記類型</label>
+        <select id="n-type" onchange="toggleNoteType()">
+          <option value="meeting">📅 會議紀錄</option>
+          <option value="free">📝 工作筆記</option>
+          <option value="decision">✅ 決議事項</option>
+          <option value="info">📌 重要資訊</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fld" style="margin-bottom:14px">
+      <label>標題</label>
+      <input type="text" id="n-title" placeholder="例：第60次協調會議、專案重要聯絡人…" style="font-size:14px;font-weight:500">
+    </div>
+
+    <!-- Meeting format -->
+    <div id="n-meeting-fields">
+      <div class="note-section">
+        <div class="note-section-label">出席人員</div>
+        <textarea class="note-section-input" id="n-attendees" placeholder="例：王工程師、李主任、陳顧問…" rows="2"></textarea>
+      </div>
+      <div class="note-section">
+        <div class="note-section-label">議題</div>
+        <textarea class="note-section-input" id="n-agenda" placeholder="本次會議討論事項…" rows="2"></textarea>
+      </div>
+      <div class="note-section">
+        <div class="note-section-label">討論內容</div>
+        <textarea class="note-section-input" id="n-discussion" placeholder="各方意見、討論過程…" rows="4"></textarea>
+      </div>
+      <div class="note-section">
+        <div class="note-section-label">決議事項</div>
+        <textarea class="note-section-input" id="n-decisions" placeholder="1. 
+2. 
+3. " rows="3"></textarea>
+      </div>
+      <div class="note-section">
+        <div class="note-section-label">待辦追蹤</div>
+        <textarea class="note-section-input" id="n-actions" placeholder="• 負責人：事項（期限）" rows="3"></textarea>
+      </div>
+    </div>
+
+    <!-- Free format -->
+    <div id="n-free-fields" style="display:none">
+      <div class="note-section">
+        <div class="note-section-label">內容</div>
+        <textarea class="note-free-input" id="n-content" placeholder="自由輸入內容…"></textarea>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -561,6 +660,9 @@ let S={
   showUrgentOnly:false,
   _autoExpandDone:false,
   sortMode:'proj',
+  notes:[],
+  editingNote:null,
+  noteFilter:null,
   tasks:[],
   pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
   editingProj:null,
@@ -657,6 +759,16 @@ async function loadFromFirebase(){
       setSyncStatus('ok','已同步 ✓');
       resolve();
     });
+    // 即時監聽 notes
+    db.ref('cyy321_todo_9x7k/notes').on('value',snap=>{
+      S.notes=[];
+      if(snap.exists()){
+        const data=snap.val();
+        if(data)S.notes=Object.values(data);
+      }
+      if(S.view==='notes')renderNotes();
+    });
+
     // 即時監聽 projects
     db.ref('cyy321_todo_9x7k/projects').on('value',snap=>{
       if(snap.exists()){
@@ -877,10 +989,17 @@ async function deleteCal(eventId){
 }
 
 // ── VIEW ──
-function setView(v){S.view=v;['list','week','cal'].forEach(x=>document.getElementById('vt-'+x).className='vtab'+(x===v?' on':''));renderView();}
+function setView(v){S.view=v;['list','week','cal','notes','search'].forEach(x=>{const el=document.getElementById('vt-'+x);if(el)el.className='vtab'+(x===v?' on':'');});renderView();}
 function navPrev(){if(S.view==='cal'){S.calMonth--;if(S.calMonth<0){S.calMonth=11;S.calYear--;}}else if(S.view==='week'){S.weekOffset--;}renderView();}
 function navNext(){if(S.view==='cal'){S.calMonth++;if(S.calMonth>11){S.calMonth=0;S.calYear++;}}else if(S.view==='week'){S.weekOffset++;}renderView();}
-function renderView(){fillCodeSel();if(S.view==='list')renderList();else if(S.view==='week')renderWeek();else renderCal();}
+function renderView(){
+  fillCodeSel();fillNoteCodeSel();
+  if(S.view==='list')renderList();
+  else if(S.view==='week')renderWeek();
+  else if(S.view==='cal')renderCal();
+  else if(S.view==='notes')renderNotes();
+  else if(S.view==='search')renderSearch();
+}
 
 // 展開任務的日期範圍
 function getTaskDates(task){
@@ -1655,6 +1774,295 @@ function copyXun(){
   const text=document.getElementById('xun-result').textContent;
   if(!text){toast('請先產生摘要','err');return;}
   navigator.clipboard.writeText(text).then(()=>toast('✅ 已複製到剪貼簿','ok')).catch(()=>toast('請手動複製','err'));
+}
+
+// ── NOTES ──
+function fillNoteCodeSel(){
+  const s=document.getElementById('n-code');
+  if(!s)return;
+  const cur=s.value;
+  s.innerHTML='<option value="">私人備忘</option>'+S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
+  if(cur)s.value=cur;
+}
+
+function toggleNoteType(){
+  const t=document.getElementById('n-type').value;
+  document.getElementById('n-meeting-fields').style.display=t==='meeting'?'block':'none';
+  document.getElementById('n-free-fields').style.display=t!=='meeting'?'block':'none';
+}
+
+function openNewNote(){
+  S.editingNote=null;
+  document.getElementById('note-modal-title').textContent='新增筆記';
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('n-date').value=today;
+  document.getElementById('n-code').value='';
+  document.getElementById('n-type').value='meeting';
+  document.getElementById('n-title').value='';
+  document.getElementById('n-attendees').value='';
+  document.getElementById('n-agenda').value='';
+  document.getElementById('n-discussion').value='';
+  document.getElementById('n-decisions').value='';
+  document.getElementById('n-actions').value='';
+  document.getElementById('n-content').value='';
+  toggleNoteType();
+  fillNoteCodeSel();
+  document.getElementById('note-modal').classList.add('show');
+}
+
+function openEditNote(id){
+  const note=S.notes.find(n=>n.id===id);
+  if(!note)return;
+  S.editingNote=id;
+  document.getElementById('note-modal-title').textContent='編輯筆記';
+  document.getElementById('n-date').value=note.date||'';
+  fillNoteCodeSel();
+  document.getElementById('n-code').value=note.code||'';
+  document.getElementById('n-type').value=note.type||'free';
+  document.getElementById('n-title').value=note.title||'';
+  if(note.type==='meeting'){
+    document.getElementById('n-attendees').value=note.attendees||'';
+    document.getElementById('n-agenda').value=note.agenda||'';
+    document.getElementById('n-discussion').value=note.discussion||'';
+    document.getElementById('n-decisions').value=note.decisions||'';
+    document.getElementById('n-actions').value=note.actions||'';
+  } else {
+    document.getElementById('n-content').value=note.content||'';
+  }
+  toggleNoteType();
+  document.getElementById('note-modal').classList.add('show');
+}
+
+async function saveNote(){
+  const title=document.getElementById('n-title').value.trim();
+  const date=document.getElementById('n-date').value;
+  const code=document.getElementById('n-code').value||null;
+  const type=document.getElementById('n-type').value;
+  if(!title){toast('請輸入標題','err');return;}
+  if(!date){toast('請選擇日期','err');return;}
+
+  const note={
+    id:S.editingNote||Date.now(),
+    title,date,code,type,
+    createdAt:S.editingNote?S.notes.find(n=>n.id===S.editingNote)?.createdAt||Date.now():Date.now(),
+    updatedAt:Date.now(),
+  };
+
+  if(type==='meeting'){
+    note.attendees=document.getElementById('n-attendees').value;
+    note.agenda=document.getElementById('n-agenda').value;
+    note.discussion=document.getElementById('n-discussion').value;
+    note.decisions=document.getElementById('n-decisions').value;
+    note.actions=document.getElementById('n-actions').value;
+    note.content=[
+      note.attendees?'【出席】'+note.attendees:'',
+      note.agenda?'【議題】'+note.agenda:'',
+      note.discussion?'【討論】'+note.discussion:'',
+      note.decisions?'【決議】'+note.decisions:'',
+      note.actions?'【待辦】'+note.actions:'',
+    ].filter(Boolean).join(' ');
+  } else {
+    note.content=document.getElementById('n-content').value;
+  }
+
+  if(S.editingNote){
+    const idx=S.notes.findIndex(n=>n.id===S.editingNote);
+    if(idx>=0)S.notes[idx]=note;
+  } else {
+    S.notes.push(note);
+  }
+
+  await saveNotes();
+  closeModal('note-modal');
+  renderView();
+  toast('✅ 筆記已儲存','ok');
+}
+
+async function saveNotes(){
+  if(!db)return;
+  try{
+    setSyncStatus('syncing','儲存中…');
+    const obj={};
+    S.notes.forEach(n=>{obj[n.id]=n;});
+    await db.ref('cyy321_todo_9x7k/notes').set(obj.length===0?null:obj);
+    setSyncStatus('ok','已同步 ✓');
+  }catch(e){console.error(e);setSyncStatus('err','同步失敗');}
+}
+
+async function deleteNote(id){
+  if(!confirm('確定要刪除這篇筆記嗎？'))return;
+  S.notes=S.notes.filter(n=>n.id!==id);
+  await saveNotes();
+  renderView();
+  toast('✅ 筆記已刪除','ok');
+}
+
+function renderNotes(){
+  document.getElementById('nav-label').textContent='';
+  const el=document.getElementById('main-view');
+  const today=new Date().toISOString().split('T')[0];
+
+  const typeLabel={meeting:'📅 會議紀錄',free:'📝 工作筆記',decision:'✅ 決議事項',info:'📌 重要資訊'};
+
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-size:13px;color:var(--text2)">共 ${S.notes.length} 篇筆記</div>
+    <button class="btn btn-ora" onclick="openNewNote()" style="padding:7px 16px">＋ 新增筆記</button>
+  </div>`;
+
+  if(!S.notes.length){
+    el.innerHTML=html+`<div class="empty"><div class="empty-ico">📝</div>還沒有筆記，點「新增筆記」開始記錄！</div>`;
+    return;
+  }
+
+  // Group by code
+  const groups={};
+  S.notes.forEach(n=>{
+    const key=n.code||'__priv__';
+    if(!groups[key])groups[key]=[];
+    groups[key].push(n);
+  });
+
+  // Work notes by project order
+  S.projects.forEach(p=>{
+    if(!groups[p.code])return;
+    const notes=groups[p.code].sort((a,b)=>b.date>a.date?1:-1);
+    const c=cHex(p.code==='0000X'?null:p.code);
+    const cb=cBg(p.code==='0000X'?null:p.code);
+    const cm=cMid(p.code==='0000X'?null:p.code);
+    const isOpen=S.expandedProjs.has('note_'+p.code);
+    html+=`<div class="proj-block" style="--c:${c};--cb:${cb};--cm:${cm};margin-bottom:10px">
+      <div class="proj-header" onclick="toggleProj('note_${p.code}')">
+        <div class="proj-color-dot"></div>
+        <span class="proj-code-badge">${p.code}</span>
+        <span class="proj-name-text">${p.name}</span>
+        <div class="proj-stats"><span class="stat-pill stat-count">${notes.length} 篇</span></div>
+        <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-note_${p.code}">▶</span>
+      </div>
+      <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-note_${p.code}">
+        ${notes.map(n=>noteCardHTML(n,typeLabel)).join('')}
+      </div>
+    </div>`;
+  });
+
+  // Private notes
+  if(groups['__priv__']){
+    const notes=groups['__priv__'].sort((a,b)=>b.date>a.date?1:-1);
+    const isOpen=S.expandedProjs.has('note___priv__');
+    html+=`<div class="proj-block" style="--c:#607D8B;--cb:#ECEFF1;--cm:#CFD8DC;margin-bottom:10px">
+      <div class="proj-header" onclick="toggleProj('note___priv__')">
+        <div class="proj-color-dot"></div>
+        <span class="proj-code-badge">私人</span>
+        <span class="proj-name-text">私人備忘</span>
+        <div class="proj-stats"><span class="stat-pill stat-count">${notes.length} 篇</span></div>
+        <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-note___priv__">▶</span>
+      </div>
+      <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-note___priv__">
+        ${notes.map(n=>noteCardHTML(n,typeLabel)).join('')}
+      </div>
+    </div>`;
+  }
+
+  el.innerHTML=html;
+}
+
+function noteCardHTML(n,typeLabel){
+  const preview=n.content?n.content.substring(0,80)+(n.content.length>80?'…':''):'（無內容）';
+  return`<div class="note-card" onclick="openEditNote(${n.id})">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+      <div style="flex:1">
+        <div class="note-title">${n.title}</div>
+        <div class="note-meta">
+          <span class="note-date">${n.date}</span>
+          <span class="note-type">${typeLabel[n.type]||n.type}</span>
+        </div>
+        <div class="note-preview">${preview}</div>
+      </div>
+      <button onclick="event.stopPropagation();deleteNote(${n.id})" style="font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;opacity:0;transition:opacity .15s" class="note-del">✕</button>
+    </div>
+  </div>`;
+}
+
+// ── SEARCH ──
+function renderSearch(){
+  document.getElementById('nav-label').textContent='';
+  const el=document.getElementById('main-view');
+  el.innerHTML=`<div>
+    <input type="text" class="search-input" id="search-input"
+      placeholder="搜尋任務、筆記內容、計畫代碼…"
+      oninput="doSearch(this.value)"
+      autofocus>
+    <div id="search-results"></div>
+  </div>`;
+  // Show recent notes on empty
+  doSearch('');
+}
+
+function doSearch(q){
+  const el=document.getElementById('search-results');
+  if(!el)return;
+  const query=q.trim().toLowerCase();
+
+  if(!query){
+    el.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:24px 0">輸入關鍵字搜尋任務和筆記</div>`;
+    return;
+  }
+
+  const results=[];
+
+  // Search tasks
+  S.tasks.forEach(t=>{
+    const haystack=[t.title,t.code,t.note,t.rawInfo].filter(Boolean).join(' ').toLowerCase();
+    if(haystack.includes(query)){
+      results.push({
+        type:'task',id:t.id,
+        title:t.title,
+        meta:`${t.type==='work'?t.code||'公事':'私人'} · ${t.date}`,
+        preview:t.note||t.rawInfo||'',
+        score:t.title.toLowerCase().includes(query)?2:1,
+      });
+    }
+  });
+
+  // Search notes
+  S.notes.forEach(n=>{
+    const haystack=[n.title,n.code,n.content,n.attendees,n.agenda,n.discussion,n.decisions,n.actions].filter(Boolean).join(' ').toLowerCase();
+    if(haystack.includes(query)){
+      const typeLabel={meeting:'📅 會議紀錄',free:'📝 工作筆記',decision:'✅ 決議事項',info:'📌 重要資訊'};
+      results.push({
+        type:'note',id:n.id,
+        title:n.title,
+        meta:`${n.code||'私人'} · ${n.date} · ${typeLabel[n.type]||''}`,
+        preview:n.content||'',
+        score:n.title.toLowerCase().includes(query)?2:1,
+      });
+    }
+  });
+
+  results.sort((a,b)=>b.score-a.score);
+
+  if(!results.length){
+    el.innerHTML=`<div style="font-size:13px;color:var(--text3);text-align:center;padding:32px 0">找不到「${q}」的相關結果</div>`;
+    return;
+  }
+
+  function highlight(text,q){
+    if(!text||!q)return text||'';
+    const safe=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    return text.replace(new RegExp('('+safe+')','gi'),'<span class="search-highlight">$1</span>');
+  }
+
+  el.innerHTML=`<div style="font-size:12px;color:var(--text3);margin-bottom:12px">找到 ${results.length} 筆結果</div>`+
+  results.map(r=>{
+    const preview=r.preview?highlight(r.preview.substring(0,100)+(r.preview.length>100?'…':''),query):'';
+    return`<div class="search-result" onclick="${r.type==='note'?`setView('notes');openEditNote(${r.id})`:`setView('list')`}">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+        <span style="font-size:10px;padding:1px 6px;border-radius:4px;background:${r.type==='note'?'var(--ora-bg)':'var(--blue-bg,#EFF6FF)'};color:${r.type==='note'?'var(--ora2)':'#1E88E5'};font-weight:500">${r.type==='note'?'筆記':'任務'}</span>
+      </div>
+      <div class="search-result-title">${highlight(r.title,query)}</div>
+      <div class="search-result-meta">${r.meta}</div>
+      ${preview?`<div class="search-result-preview">${preview}</div>`:''}
+    </div>`;
+  }).join('');
 }
 
 function closeModal(id){document.getElementById(id).classList.remove('show');}
