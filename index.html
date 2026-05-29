@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My To Do List</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="My To Do List">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23F59332'/><text y='.9em' font-size='80' x='10'>🍊</text></svg>">
+<link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;My To Do List&quot;,&quot;short_name&quot;:&quot;My ToDo&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23F59332&quot;,&quot;theme_color&quot;:&quot;%23F59332&quot;}">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -301,6 +306,8 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <div class="hdr-right">
         <div class="avatar" id="u-av">U</div>
         <button class="pill-btn" onclick="refreshData()">↻ 重新整理</button>
+        <button class="pill-btn" onclick="openXunModal()">📋 旬卡摘要</button>
+        <button class="pill-btn" onclick="openArchiveModal()">📦 封存</button>
         <button class="pill-btn" onclick="openProjModal()">⚙ 管理案子</button>
       </div>
     </div>
@@ -442,6 +449,45 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <button class="btn btn-ora" onclick="addTaskType()">新增</button>
     </div>
     <div class="modal-actions"><button class="btn btn-ora" onclick="closeModal('type-modal')">完成</button></div>
+  </div>
+</div>
+
+<!-- ARCHIVE MODAL -->
+<div class="modal-overlay" id="archive-modal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-title">📦 封存區（完成超過7天）</div>
+    <div id="archive-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-red" onclick="clearAllArchive()" style="margin-right:auto">清除全部封存</button>
+      <button class="btn btn-ora" onclick="closeModal('archive-modal')">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- XUN MODAL -->
+<div class="modal-overlay" id="xun-modal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">📋 旬卡摘要</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <select id="xun-year" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;background:var(--white);outline:none"></select>
+      <select id="xun-month" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;background:var(--white);outline:none">
+        <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+        <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+        <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+        <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+      </select>
+      <select id="xun-period" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;background:var(--white);outline:none">
+        <option value="upper">上旬（1-10日）</option>
+        <option value="mid">中旬（11-20日）</option>
+        <option value="lower">下旬（21-31日）</option>
+      </select>
+      <button class="btn btn-ora" onclick="genXunSummary()" style="padding:7px 14px">產生摘要</button>
+    </div>
+    <div id="xun-result" style="background:var(--bg);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:14px;font-size:12px;line-height:1.8;min-height:120px;font-family:'JetBrains Mono',monospace;white-space:pre-wrap;color:var(--text)"></div>
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="copyXun()">📋 複製</button>
+      <button class="btn btn-ora" onclick="closeModal('xun-modal')">關閉</button>
+    </div>
   </div>
 </div>
 
@@ -902,6 +948,14 @@ function renderList(){
     </select>
   </div>`;
 
+  // Archive notice
+  const archiveable=S.tasks.filter(t=>{
+    if(!t.done||!t.doneDate)return false;
+    const c=new Date();c.setDate(c.getDate()-7);
+    return t.doneDate<=c.toISOString().split('T')[0];
+  }).length;
+  const doneTotal=S.tasks.filter(t=>t.done).length;
+
   const wt=S.tasks.filter(t=>t.type==='work'&&ftasks(t)&&furgent(t));
   const pt=S.tasks.filter(t=>t.type==='private'&&furgent(t));
 
@@ -911,6 +965,13 @@ function renderList(){
   }
 
   let html=filterBar;
+  if(doneTotal>0){
+    html+=`<div style="font-size:11px;color:var(--text3);margin-bottom:12px">
+      已完成 ${doneTotal} 件
+      ${archiveable?`<span style="color:var(--amber)"> · ${archiveable} 件可封存</span>`:''}
+      　<button onclick="openArchiveModal()" style="color:var(--blue);background:none;border:1px solid var(--blue-border,#BFDBFE);border-radius:10px;cursor:pointer;font-size:11px;font-family:inherit;padding:1px 8px">查看封存區 📦</button>
+    </div>`;
+  }
 
   // ── 依計畫 ──
   if(S.sortMode==='proj'){
@@ -1132,7 +1193,18 @@ async function saveEdit(id){
   S.editingCard=null;await save();renderView();buildSuggestion();toast('✅ 已儲存','ok');
 }
 async function saveNote(id,val){const t=S.tasks.find(t=>t.id===id);if(t&&t.note!==val){t.note=val;await save();}}
-async function toggleDone(id){const t=S.tasks.find(t=>t.id===id);if(t){t.done=!t.done;await save();renderView();buildSuggestion();}}
+async function toggleDone(id){
+  const t=S.tasks.find(t=>t.id===id);
+  if(t){
+    t.done=!t.done;
+    if(t.done){
+      t.doneDate=new Date().toISOString().split('T')[0];
+    } else {
+      t.doneDate=null;
+    }
+    await save();renderView();buildSuggestion();
+  }
+}
 async function delTask(id){
   if(!confirm('確定要刪除這個任務嗎？'))return;
   const t=S.tasks.find(t=>t.id===id);
@@ -1415,6 +1487,182 @@ async function delProj(code){
   S.projects=S.projects.filter(p=>p.code!==code);
   saveLocal();await saveProjectsToFirebase();renderProjList();fillCodeSel();
 }
+// ── ARCHIVE ──
+function getArchivedTasks(){
+  const cutoff=new Date();
+  cutoff.setDate(cutoff.getDate()-7);
+  const cutoffStr=cutoff.toISOString().split('T')[0];
+  return S.tasks.filter(t=>t.done&&t.doneDate&&t.doneDate<=cutoffStr);
+}
+
+function openArchiveModal(){
+  renderArchiveList();
+  document.getElementById('archive-modal').classList.add('show');
+}
+
+function renderArchiveList(){
+  const archived=getArchivedTasks().sort((a,b)=>a.date>b.date?1:-1);
+  const el=document.getElementById('archive-list');
+  if(!archived.length){
+    el.innerHTML='<div class="empty" style="padding:24px 0"><div class="empty-ico">📦</div>目前沒有封存任務（完成超過7天才會出現）</div>';
+    return;
+  }
+
+  // Group by project code
+  let html='';
+  const wt=archived.filter(t=>t.type==='work');
+  const pt=archived.filter(t=>t.type==='private');
+
+  if(wt.length){
+    S.projects.forEach(p=>{
+      const pts=wt.filter(t=>t.code===p.code);
+      if(!pts.length)return;
+      const c=cHex(p.code==='0000X'?null:p.code);
+      const cb=cBg(p.code==='0000X'?null:p.code);
+      const cm=cMid(p.code==='0000X'?null:p.code);
+      html+=`<div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;background:${c};color:#fff;padding:2px 8px;border-radius:6px">${p.code}</span>
+          <span style="font-size:12px;color:var(--text2)">${p.name}</span>
+        </div>
+        ${pts.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${cb};border-radius:8px;margin-bottom:4px;border-left:2px solid ${cm}">
+          <span style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0">${t.date}</span>
+          <span style="font-size:12px;color:var(--text);flex:1;text-decoration:line-through;opacity:.7">${t.title}</span>
+          <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit;white-space:nowrap">還原</button>
+        </div>`).join('')}
+      </div>`;
+    });
+    const known=S.projects.map(p=>p.code);
+    const unk=wt.filter(t=>!known.includes(t.code));
+    if(unk.length){
+      html+=`<div style="margin-bottom:12px">
+        <div style="margin-bottom:6px"><span style="font-size:11px;background:var(--red-bg);color:var(--red);padding:2px 8px;border-radius:6px">未知代碼</span></div>
+        ${unk.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:8px;margin-bottom:4px">
+          <span style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${t.date}</span>
+          <span style="font-size:12px;flex:1;text-decoration:line-through;opacity:.7">${t.title}</span>
+          <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 6px;font-family:inherit">還原</button>
+        </div>`).join('')}
+      </div>`;
+    }
+  }
+  if(pt.length){
+    html+=`<div style="margin-bottom:12px">
+      <div style="margin-bottom:6px"><span style="font-size:11px;background:#ECEFF1;color:#607D8B;padding:2px 8px;border-radius:6px;font-family:'JetBrains Mono',monospace">私人</span></div>
+      ${pt.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#ECEFF1;border-radius:8px;margin-bottom:4px">
+        <span style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${t.date}</span>
+        <span style="font-size:12px;flex:1;text-decoration:line-through;opacity:.7">${t.title}</span>
+        <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 6px;font-family:inherit">還原</button>
+      </div>`).join('')}
+    </div>`;
+  }
+  el.innerHTML=html;
+}
+
+async function restoreTask(id){
+  const t=S.tasks.find(t=>t.id===id);
+  if(t){t.done=false;t.doneDate=null;await save();renderArchiveList();renderView();buildSuggestion();toast('✅ 已還原任務','ok');}
+}
+
+async function clearAllArchive(){
+  if(!confirm('確定要永久刪除所有封存任務嗎？'))return;
+  const archived=getArchivedTasks();
+  for(const t of archived){
+    if(t.calEventId)await deleteCal(t.calEventId);
+  }
+  S.tasks=S.tasks.filter(t=>!getArchivedTasks().find(a=>a.id===t.id));
+  await save();renderArchiveList();renderView();buildSuggestion();
+  toast('✅ 封存已清除','ok');
+}
+
+// ── XUN SUMMARY ──
+function openXunModal(){
+  const now=new Date();
+  // Fill year selector
+  const ySel=document.getElementById('xun-year');
+  ySel.innerHTML='';
+  for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
+    ySel.innerHTML+=`<option value="${y}" ${y===now.getFullYear()?'selected':''}>${y}年</option>`;
+  }
+  // Set current month and period
+  document.getElementById('xun-month').value=now.getMonth()+1;
+  const day=now.getDate();
+  document.getElementById('xun-period').value=day<=10?'upper':day<=20?'mid':'lower';
+  document.getElementById('xun-result').textContent='';
+  document.getElementById('xun-modal').classList.add('show');
+}
+
+function genXunSummary(){
+  const year=parseInt(document.getElementById('xun-year').value);
+  const month=parseInt(document.getElementById('xun-month').value);
+  const period=document.getElementById('xun-period').value;
+
+  const periodMap={upper:{label:'上旬',start:1,end:10},mid:{label:'中旬',start:11,end:20},lower:{label:'下旬',start:21,end:31}};
+  const p=periodMap[period];
+  const startDate=`${year}-${String(month).padStart(2,'0')}-${String(p.start).padStart(2,'0')}`;
+  const endDate=`${year}-${String(month).padStart(2,'0')}-${String(Math.min(p.end,new Date(year,month,0).getDate())).padStart(2,'0')}`;
+
+  // Get tasks in range (work only)
+  const inRange=S.tasks.filter(t=>{
+    if(t.type!=='work')return false;
+    const dates=getTaskDates(t);
+    return dates.some(d=>d>=startDate&&d<=endDate);
+  }).sort((a,b)=>a.date>b.date?1:-1);
+
+  if(!inRange.length){
+    document.getElementById('xun-result').textContent=`【${year}年${month}月${p.label}（${p.start}-${p.end}日）】
+
+本旬無工作項目`;
+    return;
+  }
+
+  let text=`【${year}年${month}月${p.label}（${p.start}-${Math.min(p.end,new Date(year,month,0).getDate())}日）】
+
+`;
+
+  // Group by project
+  const grouped={};
+  inRange.forEach(t=>{
+    const key=t.code||'0000X';
+    if(!grouped[key])grouped[key]=[];
+    grouped[key].push(t);
+  });
+
+  S.projects.forEach(p=>{
+    if(!grouped[p.code])return;
+    text+=`${p.code}  ${p.name}
+`;
+    grouped[p.code].forEach(t=>{
+      const dateStr=t.date+(t.endDate&&t.endDate!==t.date?` ～ ${t.endDate}`:'');
+      const timeStr=t.time?(` ${t.time}${t.timeEnd?' - '+t.timeEnd:''}`): '';
+      const doneStr=t.done?'  ✓':'';
+      text+=`  • ${dateStr}${timeStr}  ${t.title}${doneStr}
+`;
+    });
+    text+='
+';
+  });
+
+  // Unknown codes
+  const known=S.projects.map(p=>p.code);
+  const unk=inRange.filter(t=>!known.includes(t.code));
+  if(unk.length){
+    text+=`（未分類）
+`;
+    unk.forEach(t=>{
+      text+=`  • ${t.date}  ${t.title}
+`;
+    });
+  }
+
+  document.getElementById('xun-result').textContent=text.trim();
+}
+
+function copyXun(){
+  const text=document.getElementById('xun-result').textContent;
+  if(!text){toast('請先產生摘要','err');return;}
+  navigator.clipboard.writeText(text).then(()=>toast('✅ 已複製到剪貼簿','ok')).catch(()=>toast('請手動複製','err'));
+}
+
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 
 function openTypeModal(){renderTypeList();document.getElementById('type-modal').classList.add('show');}
