@@ -138,6 +138,20 @@ main{padding-bottom:48px}.pane{display:none}.pane.on{display:block}
     <div class="ovj" id="ovJ">¥---</div>
     <div class="ovt" id="ovT">≈ NT$---</div>
     <div class="ovs" id="ovS">7 天 · 日均 ¥---</div>
+    <div style="display:flex;gap:0;background:#222;margin-top:10px;border-radius:8px;overflow:hidden">
+      <div style="flex:1;padding:8px 10px;border-right:1px solid #333">
+        <div style="font-size:9px;color:#555;font-weight:700;letter-spacing:.04em">💳 刷卡</div>
+        <div id="ovCard" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#facc15;margin-top:3px">¥---</div>
+      </div>
+      <div style="flex:1;padding:8px 10px;border-right:1px solid #333">
+        <div style="font-size:9px;color:#555;font-weight:700;letter-spacing:.04em">💴 現金有收據</div>
+        <div id="ovCash" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#facc15;margin-top:3px">¥---</div>
+      </div>
+      <div style="flex:1;padding:8px 10px">
+        <div style="font-size:9px;color:#555;font-weight:700;letter-spacing:.04em">💴 現金無收據</div>
+        <div id="ovCashNoRec" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#aaa;margin-top:3px">≈¥---</div>
+      </div>
+    </div>
     <div class="ovg">
       <div class="os"><div class="osl">收據張數</div><div class="osv" id="osC">--</div></div>
       <div class="os"><div class="osl">品項數</div><div class="osv" id="osI">--</div></div>
