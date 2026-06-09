@@ -30,7 +30,7 @@ main{padding-bottom:48px}.pane{display:none}.pane.on{display:block}
 .chip[data-v="超市"].on{background:var(--grn)}.chip[data-v="交通"].on{background:var(--blue)}
 .chip[data-v="景點"].on{background:var(--tel)}.chip[data-v="機場"].on{background:var(--pur)}
 .chip[data-v="已對應"].on{background:var(--grn)}.chip[data-v="待確認"].on{background:var(--amb)}
-.chip[data-v="無收據"].on{background:var(--red)}.chip[data-v="手續費"].on{background:var(--ink3)}
+.chip[data-v="無收據"].on{background:var(--red)}.chip[data-v="手續費"].on{background:var(--ink3)}.chip[data-v="現金"].on{background:#b45309}
 /* SUMMARY */
 .ss{display:flex;background:var(--surf);border-bottom:1px solid var(--bdr)}
 .sc{flex:1;padding:8px 0;text-align:center;border-right:1px solid var(--bdr)}.sc:last-child{border-right:none}
@@ -68,7 +68,7 @@ main{padding-bottom:48px}.pane{display:none}.pane.on{display:block}
 .rl{padding:0 14px;margin-top:12px}
 .ri2{background:var(--surf);border-radius:10px;margin-bottom:8px;border:1.5px solid var(--bdr);overflow:hidden}
 .ri2.matched{border-color:var(--grn)}.ri2.unmatched{border-color:var(--amb)}
-.ri2.no-receipt{border-color:var(--red)}.ri2.fee{opacity:.6}
+.ri2.no-receipt{border-color:var(--red)}.ri2.fee{opacity:.6}.ri2.cash{border-color:#b45309}
 .rirow{display:flex}
 .ricc{flex:1;padding:10px 11px;border-right:1px solid var(--bdr);min-width:0}
 .rirec{flex:1;padding:10px 11px;min-width:0}
@@ -78,7 +78,7 @@ main{padding-bottom:48px}.pane{display:none}.pane.on{display:block}
 .ridt{font-size:10px;color:var(--ink3);margin-top:2px}
 .rist{display:flex;align-items:center;justify-content:center;padding:5px 12px;border-top:1px solid var(--bdr);font-size:11px;font-weight:700}
 .ri2.matched .rist{background:var(--grn-s);color:var(--grn)}.ri2.unmatched .rist{background:var(--amb-s);color:var(--amb)}
-.ri2.no-receipt .rist{background:#fdf0ef;color:var(--red)}.ri2.fee .rist{background:var(--bg);color:var(--ink3)}
+.ri2.no-receipt .rist{background:#fdf0ef;color:var(--red)}.ri2.fee .rist{background:var(--bg);color:var(--ink3)}.ri2.cash .rist{background:#fef9ec;color:#b45309}
 /* OVERVIEW */
 .ovh{background:var(--ink);color:#fff;padding:18px 18px 22px}
 .ovl{font-size:10px;color:#666;font-weight:700;letter-spacing:.06em;margin-bottom:4px}
@@ -329,6 +329,7 @@ const RS=[
 ];
 
 const CCDATA=[
+  // 未出帳有店名
   {id:'c1',date:'06/03',shop:'ODYSIS SUITES OSAKA',twd:79,jpy:400,type:'matched',rid:1},
   {id:'c2',date:'06/03',shop:'LAWSON',twd:535,jpy:2718,type:'matched',rid:2},
   {id:'c3',date:'06/04',shop:'CAFE ZEZE',twd:1832,jpy:9270,type:'no-receipt',rid:null,note:'已確認為當日用餐，無收據'},
@@ -336,49 +337,66 @@ const CCDATA=[
   {id:'c5',date:'06/04',shop:'Mont-bell 東大寺門前店',twd:4048,jpy:20490,type:'matched',rid:4},
   {id:'c6',date:'06/05',shop:'MUJIRUSHIRYOHIN 無印良品（小單）',twd:466,jpy:2360,type:'matched',rid:18},
   {id:'c7',date:'06/05',shop:'MUJIRUSHIRYOHIN 無印良品（免稅）',twd:2524,jpy:12807,type:'matched',rid:17},
+  // 已出帳 06/04
   {id:'c8',date:'06/04',shop:'超市/量販（7-ELEVEN奈良）',twd:256,jpy:1292,type:'matched',rid:3},
   {id:'c9',date:'06/04',shop:"超市/量販（TRY's Mart）",twd:1194,jpy:6026,type:'matched',rid:6},
+  // 已出帳 06/05
   {id:'c10',date:'06/05',shop:'超市/量販（7-ELEVEN伊勢）',twd:444,jpy:2246,type:'matched',rid:8},
   {id:'c11',date:'06/05',shop:'餐飲（STARBUCKS）',twd:109,jpy:555,type:'matched',rid:11},
-  {id:'c12',date:'06/05',shop:'超市/量販（KOHYO）',twd:133,jpy:674,type:'matched',rid:20},
-  {id:'c12b',date:'06/05',shop:'一般購物（NICK STOCK）',twd:1200,jpy:6061,type:'matched',rid:14},
-  {id:'c13',date:'06/05',shop:'餐飲（待確認）',twd:553,jpy:2793,type:'unmatched',rid:null,note:'換算¥2,793，無完全吻合收據'},
+  {id:'c12',date:'06/05',shop:'超市/量販（LAWSON京都駅）',twd:133,jpy:674,type:'matched',rid:20},
+  {id:'c12b',date:'06/05',shop:'一般購物（NICK STOCK）',twd:1200,jpy:6072,type:'matched',rid:14},
+  {id:'c13',date:'06/05',shop:'餐飲（待確認）',twd:553,jpy:2793,type:'unmatched',rid:null,note:'無對應收據'},
   {id:'c14',date:'06/05',shop:'一般購物（ポポンデッタ）',twd:1645,jpy:8322,type:'matched',rid:19},
   {id:'c15',date:'06/05',shop:'服飾/鞋/精品（UNIQLO）',twd:2800,jpy:14164,type:'matched',rid:16},
   {id:'c16',date:'06/05',shop:'一般購物（Mont-bell京都）',twd:4971,jpy:25140,type:'matched',rid:15},
   {id:'c17',date:'06/05',shop:'超市/量販（KOHYO）',twd:67,jpy:341,type:'matched',rid:13},
+  // 已出帳 06/06
   {id:'c18',date:'06/06',shop:'餐飲（雲ノ茶）',twd:497,jpy:2511,type:'matched',rid:23},
   {id:'c19',date:'06/06',shop:'超市/量販（和レ和レ和）',twd:733,jpy:3700,type:'matched',rid:24},
-  {id:'c20',date:'06/06',shop:'超市/量販（伊藤久右衛門，卡3109）',twd:4498,jpy:22750,type:'matched',rid:26},
+  {id:'c20',date:'06/06',shop:'零售店（伊藤久右衛門，卡3109）',twd:4498,jpy:22750,type:'matched',rid:26},
   {id:'c21',date:'06/06',shop:'速食店·菜市場（卡3109）',twd:2373,jpy:11985,type:'matched',rid:50},
   {id:'c22',date:'06/06',shop:'速食店·菜市場（卡3109）',twd:1859,jpy:9389,type:'matched',rid:51},
   {id:'c23',date:'06/06',shop:'百貨公司（かつくら）',twd:1475,jpy:7440,type:'matched',rid:29},
   {id:'c24',date:'06/06',shop:'超市/量販（JR伊勢丹miffy）',twd:412,jpy:2288,type:'matched',rid:30},
-  {id:'c25',date:'06/06',shop:'百貨公司（JR伊勢丹）',twd:1900,jpy:9596,type:'matched',rid:31},
+  {id:'c25',date:'06/06',shop:'百貨公司（JR伊勢丹グリンディー）',twd:1900,jpy:1900,type:'matched',rid:31},
+  // 已出帳 06/07
   {id:'c26',date:'06/07',shop:'劇場戲院（京都鉄道博物館入場）',twd:130,jpy:657,type:'matched',rid:34},
-  {id:'c27',date:'06/07',shop:'劇場戲院（京都鉄道博物館ショップ）',twd:1783,jpy:8995,type:'matched',rid:36},
+  {id:'c27',date:'06/07',shop:'劇場戲院（京都鉄道博物館紀念品）',twd:1783,jpy:8995,type:'matched',rid:36},
   {id:'c28',date:'06/07',shop:'餐飲（京都鉄道博物館餐廳）',twd:722,jpy:3500,type:'matched',rid:35},
-  {id:'c29',date:'06/07',shop:'休閒用品（待確認）',twd:694,jpy:3505,type:'unmatched',rid:null,note:'換算¥3,505 無對應收據'},
+  {id:'c29',date:'06/07',shop:'休閒用品（待確認）',twd:694,jpy:3505,type:'unmatched',rid:null,note:'無對應收據'},
   {id:'c30',date:'06/07',shop:'服飾/鞋/精品（ABC-MART）',twd:1090,jpy:5500,type:'matched',rid:39},
   {id:'c31',date:'06/07',shop:'超市消費（イトーヨーカドー，卡3109）',twd:1487,jpy:7518,type:'matched',rid:40},
   {id:'c32',date:'06/07',shop:'超市/量販（7-ELEVEN奈良）',twd:509,jpy:2570,type:'matched',rid:38},
   {id:'c33',date:'06/07',shop:'百貨公司（HANDS）',twd:1129,jpy:5698,type:'matched',rid:41},
+  // 已出帳 06/08
   {id:'c34',date:'06/08',shop:'免稅店（TASTE OF KANSAI）',twd:1304,jpy:6579,type:'matched',rid:49},
   {id:'c35',date:'06/08',shop:'百貨公司（CANADIAN MORNING）',twd:2260,jpy:10800,type:'matched',rid:47},
   {id:'c36',date:'06/08',shop:'免稅店（マツモトキヨシ）',twd:2141,jpy:11401,type:'matched',rid:48},
   {id:'c37',date:'06/08',shop:'超市/量販（LAWSON機場）',twd:885,jpy:4468,type:'matched',rid:46},
   {id:'c38',date:'06/08',shop:'百貨公司（関西旅日記）',twd:867,jpy:4374,type:'matched',rid:45},
-  {id:'f1',date:'06/03',shop:'海外手續費',twd:1,type:'fee',rid:null},
-  {id:'f2',date:'06/03',shop:'海外手續費',twd:8,type:'fee',rid:null},
-  {id:'f3',date:'06/04',shop:'海外手續費',twd:1,type:'fee',rid:null},
-  {id:'f4',date:'06/04',shop:'海外手續費',twd:27,type:'fee',rid:null},
-  {id:'f5',date:'06/04',shop:'海外手續費',twd:61,type:'fee',rid:null},
-  {id:'f6',date:'06/05',shop:'海外手續費',twd:7,type:'fee',rid:null},
-  {id:'f7',date:'06/05',shop:'海外手續費',twd:38,type:'fee',rid:null},
-  {id:'f8',date:'06/05',shop:'海外手續費',twd:67,type:'fee',rid:null},
-  {id:'f9',date:'06/06',shop:'海外手續費',twd:57,type:'fee',rid:null},
-  {id:'f10',date:'06/06',shop:'海外手續費',twd:28,type:'fee',rid:null},
-  {id:'f11',date:'06/06',shop:'海外手續費',twd:158,type:'fee',rid:null},
+  // 手續費
+  {id:'f1',date:'06/05',shop:'海外手續費',twd:67,type:'fee',rid:null},
+  {id:'f2',date:'06/06',shop:'海外手續費',twd:57,type:'fee',rid:null},
+  {id:'f3',date:'06/06',shop:'海外手續費',twd:28,type:'fee',rid:null},
+  {id:'f4',date:'06/06',shop:'海外手續費',twd:158,type:'fee',rid:null},
+  // 現金（有收據但無信用卡對應）
+  {id:'cash1',date:'06/04',shop:'FamilyMart 伊勢桜木町',jpy:1422,type:'cash',rid:7},
+  {id:'cash2',date:'06/05',shop:'赤福本店 11:54',jpy:800,type:'cash',rid:9},
+  {id:'cash3',date:'06/05',shop:'うどんやふくすけ 伊勢',jpy:2800,type:'cash',rid:10},
+  {id:'cash4',date:'06/05',shop:'赤福本店 13:40',jpy:900,type:'cash',rid:12},
+  {id:'cash5',date:'06/05',shop:'KOHYO 京都（現金）',jpy:341,type:'cash',rid:13},
+  {id:'cash6',date:'06/05',shop:'エコロパーク 停車場',jpy:800,type:'cash',rid:21},
+  {id:'cash7',date:'06/06',shop:'三井のリパーク 嵐山',jpy:500,type:'cash',rid:22},
+  {id:'cash8',date:'06/06',shop:'LAWSON 亀岡馬堀',jpy:292,type:'cash',rid:25},
+  {id:'cash9',date:'06/06',shop:'平等院 入場費',jpy:1400,type:'cash',rid:27},
+  {id:'cash10',date:'06/06',shop:'ブーブーパーク 平等院',jpy:800,type:'cash',rid:28},
+  {id:'cash11',date:'06/06',shop:'JR伊勢丹 グリンディー（現金？）',jpy:1900,type:'cash',rid:31},
+  {id:'cash12',date:'06/07',shop:'ブーブーパーク 東洞院六角',jpy:900,type:'cash',rid:32},
+  {id:'cash13',date:'06/07',shop:'ブーブーパーク 平等院過夜',jpy:800,type:'cash',rid:33},
+  {id:'cash14',date:'06/07',shop:'京都鉄道博物館 紀念品12:56',jpy:660,type:'cash',rid:37},
+  {id:'cash15',date:'06/07',shop:'apollostation 加油',jpy:4494,type:'cash',rid:42},
+  {id:'cash16',date:'06/07',shop:'タイムズ あべのキューズモール',jpy:1400,type:'cash',rid:43},
+  {id:'cash17',date:'06/07',shop:'LAWSON 通天閣南',jpy:806,type:'cash',rid:44},
 ];
 
 let aC='全部', sQ='', rF='全部';
@@ -395,7 +413,7 @@ function initChips(){
   ['餐飲','購物','超市','交通','景點','機場'].unshift('全部');
   document.getElementById('catChips').innerHTML=['全部','餐飲','購物','超市','交通','景點','機場'].map(c=>
     `<div class="chip ${c==='全部'?'on':''}" data-v="${c}" onclick="setC('${c}')">${CI[c]||''} ${c}</div>`).join('');
-  document.getElementById('recChips').innerHTML=['全部','已對應','待確認','無收據','手續費'].map(r=>
+  document.getElementById('recChips').innerHTML=['全部','已對應','待確認','現金','無收據','手續費'].map(r=>
     `<div class="chip ${r==='全部'?'on':''}" data-v="${r}" onclick="setRF('${r}')">${r}</div>`).join('');
 }
 function setC(c){aC=c;document.querySelectorAll('#catChips .chip').forEach(el=>el.classList.toggle('on',el.dataset.v===c));renderR();}
@@ -449,14 +467,15 @@ function bRC(r){
 function tog(id){const el=document.getElementById('it-'+id),cv=document.getElementById('cv-'+id);el.classList.toggle('show');cv.classList.toggle('open',el.classList.contains('show'));}
 
 function renderRec(){
-  const fl=CCDATA.filter(c=>rF==='全部'||(rF==='已對應'&&c.type==='matched')||(rF==='待確認'&&c.type==='unmatched')||(rF==='無收據'&&c.type==='no-receipt')||(rF==='手續費'&&c.type==='fee'));
-  const m=CCDATA.filter(c=>c.type==='matched').length,u=CCDATA.filter(c=>c.type==='unmatched').length,n=CCDATA.filter(c=>c.type==='no-receipt').length,fe=CCDATA.filter(c=>c.type==='fee').length;
+  const fl=CCDATA.filter(c=>rF==='全部'||(rF==='已對應'&&c.type==='matched')||(rF==='待確認'&&c.type==='unmatched')||(rF==='無收據'&&c.type==='no-receipt')||(rF==='手續費'&&c.type==='fee')||(rF==='現金'&&c.type==='cash'));
+  const m=CCDATA.filter(c=>c.type==='matched').length,u=CCDATA.filter(c=>c.type==='unmatched').length,n=CCDATA.filter(c=>c.type==='no-receipt').length,fe=CCDATA.filter(c=>c.type==='fee').length,ca=CCDATA.filter(c=>c.type==='cash').length;
   document.getElementById('rss').innerHTML=`
     <div class="rsc"><div class="rsl">已對應</div><div class="rsv g">${m}</div></div>
     <div class="rsc"><div class="rsl">待確認</div><div class="rsv a">${u}</div></div>
+    <div class="rsc"><div class="rsl">現金</div><div class="rsv" style="color:#b45309">${ca}</div></div>
     <div class="rsc"><div class="rsl">無收據</div><div class="rsv r">${n}</div></div>
     <div class="rsc"><div class="rsl">手續費</div><div class="rsv gr">${fe}</div></div>`;
-  const SL={matched:'✓ 已對應',unmatched:'⚠️ 待確認',fee:'— 手續費','no-receipt':'✕ 無收據'};
+  const SL={matched:'✓ 已對應',unmatched:'⚠️ 待確認',fee:'— 手續費','no-receipt':'✕ 無收據',cash:'💴 現金付款'};
   const list=document.getElementById('rl');
   if(!fl.length){list.innerHTML='<div class="empty"><div class="ei">📋</div><p>沒有符合的記錄</p></div>';return;}
   list.innerHTML=fl.map(c=>{
@@ -464,7 +483,7 @@ function renderRec(){
     return`<div class="ri2 ${c.type}">
       <div class="rirow">
         <div class="ricc"><div class="rilbl">信用卡明細</div><div class="rish">${c.shop}</div>
-          <div class="riam">NT$${c.twd?c.twd.toLocaleString():'—'}${c.jpy?' / '+fj(c.jpy):''}</div>
+          <div class="riam">${c.twd?'NT$'+c.twd.toLocaleString():''}${c.jpy?(c.twd?' / ':'')+fj(c.jpy):''}</div>
           <div class="ridt">${c.date}</div></div>
         <div class="rirec"><div class="rilbl">對應收據</div>
           ${rec?`<div class="rish">${rec.shop}</div><div class="riam">${fj(rec.total)} / NT$${jt(rec.total).toLocaleString()}</div><div class="ridt">${rec.date} ${rec.time||''}</div>`
@@ -483,6 +502,14 @@ function renderOV(){
   document.getElementById('ovJ').textContent=fj(total);
   document.getElementById('ovT').textContent=ft(total);
   document.getElementById('ovS').textContent=`7 天 · 日均 ${fj(Math.round(total/7))} / NT$${jt(Math.round(total/7)).toLocaleString()}`;
+  // Card vs cash
+  const cardRids=new Set(CCDATA.filter(c=>c.type==='matched'&&c.rid).map(c=>c.rid));
+  const cashRids=new Set(CCDATA.filter(c=>c.type==='cash'&&c.rid).map(c=>c.rid));
+  const cardTotal=RS.filter(r=>cardRids.has(r.id)).reduce((s,r)=>s+r.total,0);
+  const cashTotal=RS.filter(r=>cashRids.has(r.id)).reduce((s,r)=>s+r.total,0);
+  document.getElementById('ovCard').textContent=fj(cardTotal)+' / NT$'+jt(cardTotal).toLocaleString();
+  document.getElementById('ovCash').textContent=fj(cashTotal)+' / NT$'+jt(cashTotal).toLocaleString();
+  document.getElementById('ovCashNoRec').textContent='≈ '+fj(45000-cashTotal);
   document.getElementById('osC').textContent=RS.length+'張';
   document.getElementById('osI').textContent=ic+'項';
   document.getElementById('osT').textContent='NT$'+(jt(total)+fixedTwd).toLocaleString();
