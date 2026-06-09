@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>日本行 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f5f0;--surf:#fff;--ink:#1a1a1a;--ink2:#555;--ink3:#999;--bdr:#e8e8e4;--red:#c0392b;--blue:#1a56a0;--grn:#1a7a3c;--grn-s:#edfaf3;--amb:#b45309;--amb-s:#fef9ec;--pur:#6d28d9;--tel:#0f766e;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;max-width:540px;margin:0 auto;font-size:14px}
+.hd{background:var(--ink);color:#fff;padding:16px 18px 0;position:sticky;top:0;z-index:100}
+.hd-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.hd-title{font-size:17px;font-weight:900}.hd-title em{color:#facc15;font-style:normal}
+.hd-total{font-family:'JetBrains Mono',monospace;font-size:11px;color:#facc15;text-align:right;line-height:1.6;white-space:pre-line}
+.tabs{display:flex;border-top:1px solid #2a2a2a}
+.tab{flex:1;padding:10px 0;text-align:center;font-size:10px;font-weight:700;color:#666;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab.on{color:#facc15;border-bottom-color:#facc15}
+main{padding-bottom:48px}.pane{display:none}.pane.on{display:block}
+/* FILTERS */
+.flt{padding:10px 14px;background:var(--surf);border-bottom:1px solid var(--bdr);position:sticky;top:82px;z-index:90}
+.sb{display:flex;align-items:center;gap:6px;background:var(--bg);border:1.5px solid var(--bdr);border-radius:8px;padding:7px 10px;margin-bottom:8px}
+.sb input{flex:1;border:none;background:transparent;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--ink);outline:none}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--bdr);background:var(--surf);color:var(--ink2);white-space:nowrap;transition:all .12s}
+.chip.on{border-color:transparent;color:#fff}
+.chip[data-v="全部"].on,.chip[data-v="all"].on{background:var(--ink)}
+.chip[data-v="餐飲"].on{background:var(--red)}.chip[data-v="購物"].on{background:var(--amb)}
+.chip[data-v="超市"].on{background:var(--grn)}.chip[data-v="交通"].on{background:var(--blue)}
+.chip[data-v="景點"].on{background:var(--tel)}.chip[data-v="機場"].on{background:var(--pur)}
+.chip[data-v="已對應"].on{background:var(--grn)}.chip[data-v="待確認"].on{background:var(--amb)}
+.chip[data-v="無收據"].on{background:var(--red)}.chip[data-v="手續費"].on{background:var(--ink3)}
+/* SUMMARY */
+.ss{display:flex;background:var(--surf);border-bottom:1px solid var(--bdr)}
+.sc{flex:1;padding:8px 0;text-align:center;border-right:1px solid var(--bdr)}.sc:last-child{border-right:none}
+.sl{font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.04em}
+.sv{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:2px}.sv.r{color:var(--red)}
+/* DATE */
+.dg{margin:12px 14px 0}
+.dl{font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.05em;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.dl::after{content:'';flex:1;height:1px;background:var(--bdr)}.dt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)}
+/* RECEIPT CARD */
+.rc{background:var(--surf);border-radius:10px;margin-bottom:7px;border:1.5px solid var(--bdr);overflow:hidden}
+.rch{display:flex;align-items:center;gap:9px;padding:10px 12px;cursor:pointer}
+.rcd{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rci{flex:1;min-width:0}.rcs{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rct{font-size:10px;color:var(--ink3);margin-top:2px}
+.rca{text-align:right;flex-shrink:0}
+.rcj{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+.rctw{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);margin-top:1px}
+.rcv{color:var(--ink3);font-size:10px;transition:transform .2s;flex-shrink:0;margin-left:3px}.rcv.open{transform:rotate(180deg)}
+.rit{display:none;border-top:1px solid var(--bdr);background:var(--bg)}.rit.show{display:block}
+.ir{display:flex;align-items:center;gap:6px;padding:7px 12px;border-bottom:1px solid var(--bdr)}.ir:last-child{border-bottom:none}
+.irn{flex:1;font-size:12px;color:var(--ink2);line-height:1.4}
+.irq{font-size:10px;color:var(--ink3);min-width:22px;text-align:center;flex-shrink:0}
+.irp{text-align:right;flex-shrink:0}
+.irj{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
+.irt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)}
+.ir.sub{background:var(--surf)}.ir.sub .irn{font-weight:700;color:var(--ink)}.ir.sub .irj{color:var(--red);font-size:13px}
+/* RECONCILE */
+.rflt{padding:10px 14px;background:var(--surf);border-bottom:1px solid var(--bdr);position:sticky;top:82px;z-index:90}
+.rss{display:flex;background:var(--surf);border-bottom:1px solid var(--bdr)}
+.rsc{flex:1;padding:8px 0;text-align:center;border-right:1px solid var(--bdr)}.rsc:last-child{border-right:none}
+.rsl{font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.04em}
+.rsv{font-size:16px;font-weight:900;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.rsv.g{color:var(--grn)}.rsv.a{color:var(--amb)}.rsv.r{color:var(--red)}.rsv.gr{color:var(--ink3)}
+.rl{padding:0 14px;margin-top:12px}
+.ri2{background:var(--surf);border-radius:10px;margin-bottom:8px;border:1.5px solid var(--bdr);overflow:hidden}
+.ri2.matched{border-color:var(--grn)}.ri2.unmatched{border-color:var(--amb)}
+.ri2.no-receipt{border-color:var(--red)}.ri2.fee{opacity:.6}
+.rirow{display:flex}
+.ricc{flex:1;padding:10px 11px;border-right:1px solid var(--bdr);min-width:0}
+.rirec{flex:1;padding:10px 11px;min-width:0}
+.rilbl{font-size:9px;font-weight:700;color:var(--ink3);letter-spacing:.04em;margin-bottom:3px}
+.rish{font-size:12px;font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.riam{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:3px}
+.ridt{font-size:10px;color:var(--ink3);margin-top:2px}
+.rist{display:flex;align-items:center;justify-content:center;padding:5px 12px;border-top:1px solid var(--bdr);font-size:11px;font-weight:700}
+.ri2.matched .rist{background:var(--grn-s);color:var(--grn)}.ri2.unmatched .rist{background:var(--amb-s);color:var(--amb)}
+.ri2.no-receipt .rist{background:#fdf0ef;color:var(--red)}.ri2.fee .rist{background:var(--bg);color:var(--ink3)}
+/* OVERVIEW */
+.ovh{background:var(--ink);color:#fff;padding:18px 18px 22px}
+.ovl{font-size:10px;color:#666;font-weight:700;letter-spacing:.06em;margin-bottom:4px}
+.ovj{font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:700;color:#facc15;line-height:1}
+.ovt{font-size:12px;color:#aaa;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.ovs{font-size:11px;color:#666;margin-top:3px;font-family:'JetBrains Mono',monospace}
+.ovg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#222;margin-top:16px;border-radius:8px 8px 0 0;overflow:hidden}
+.os{background:#1a1a1a;padding:10px 12px}
+.osl{font-size:9px;color:#555;font-weight:700;letter-spacing:.04em}
+.osv{font-size:14px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#fff;margin-top:2px}
+.catsec{padding:14px}.catttl{font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.07em;margin-bottom:10px}
+.cbi{margin-bottom:10px}.cbt{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.cbi-i{font-size:15px;width:24px;text-align:center}.cbi-n{font-size:13px;font-weight:700;flex:1}
+.cbi-a{text-align:right}.cbi-j{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+.cbi-t{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)}
+.cbi-p{font-size:10px;color:var(--ink3);min-width:26px;text-align:right}
+.bt{background:var(--bdr);border-radius:3px;height:5px;overflow:hidden}
+.bf{height:100%;border-radius:3px}
+.fisec{padding:0 14px 14px}
+.fi{background:var(--surf);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;border:1.5px solid var(--bdr)}
+.fi-i{font-size:18px;width:28px;text-align:center}.fi-n{flex:1}
+.fi-nm{font-size:13px;font-weight:700}.fi-sb{font-size:10px;color:var(--ink3);margin-top:2px}
+.fi-a{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+.empty{text-align:center;padding:40px 20px;color:var(--ink3)}.empty .ei{font-size:32px;margin-bottom:8px}
+.t-餐飲{color:#c0392b}.t-購物{color:#b45309}.t-超市{color:#1a7a3c}.t-交通{color:#1a56a0}.t-景點{color:#0f766e}.t-機場{color:#6d28d9}
+</style>
+</head>
+<body>
+<div class="hd">
+  <div class="hd-top">
+    <div class="hd-title">🇯🇵 日本行 <em>'26</em></div>
+    <div class="hd-total" id="hdT">¥---&#10;NT$---</div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" onclick="sw('receipts')">🧾 收據明細</div>
+    <div class="tab" onclick="sw('reconcile')">💳 對帳</div>
+    <div class="tab" onclick="sw('overview')">📊 總覽</div>
+  </div>
+</div>
+<main>
+<div class="pane on" id="pane-receipts">
+  <div class="flt">
+    <div class="sb"><span style="color:var(--ink3)">🔍</span><input type="text" id="si" placeholder="搜尋店家或商品…" oninput="renderR()"></div>
+    <div class="chips" id="catChips"></div>
+  </div>
+  <div class="ss" id="ss"></div>
+  <div id="rc" style="padding-bottom:8px"></div>
+</div>
+<div class="pane" id="pane-reconcile">
+  <div class="rflt"><div class="chips" id="recChips"></div></div>
+  <div class="rss" id="rss"></div>
+  <div class="rl" id="rl"></div>
+</div>
+<div class="pane" id="pane-overview">
+  <div class="ovh">
+    <div class="ovl">當地消費總計</div>
+    <div class="ovj" id="ovJ">¥---</div>
+    <div class="ovt" id="ovT">≈ NT$---</div>
+    <div class="ovs" id="ovS">7 天 · 日均 ¥---</div>
+    <div class="ovg">
+      <div class="os"><div class="osl">收據張數</div><div class="osv" id="osC">--</div></div>
+      <div class="os"><div class="osl">品項數</div><div class="osv" id="osI">--</div></div>
+      <div class="os"><div class="osl">含固定支出</div><div class="osv" id="osT">--</div></div>
+    </div>
+  </div>
+  <div class="catsec"><div class="catttl">當地消費分類</div><div id="catBars"></div></div>
+  <div class="catttl" style="padding:0 14px 10px;font-size:10px;font-weight:700;color:var(--ink3);letter-spacing:.07em">固定支出</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:0 14px 10px">
+    <span style="font-size:11px;color:var(--ink3)">固定支出合計</span>
+    <span id="fixedTotal" style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--ink)">NT$---</span>
+  </div>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:0 14px 14px;border-bottom:1px solid var(--bdr);margin-bottom:14px">
+    <span style="font-size:13px;font-weight:700;color:var(--ink)">🧮 旅遊總支出</span>
+    <span id="grandTotal" style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:900;color:var(--red)">NT$---</span>
+  </div>
+  <div class="fisec">
+    <div class="fi"><div class="fi-i">✈️</div><div class="fi-n"><div class="fi-nm">機票（來回）</div><div class="fi-sb">2026/02/12 購入</div></div><div class="fi-a">NT$26,036</div></div>
+    <div class="fi"><div class="fi-i">🏨</div><div class="fi-n"><div class="fi-nm">住宿 Booking × 3</div><div class="fi-sb">¥57,180</div></div><div class="fi-a">NT$11,309</div></div>
+    <div class="fi"><div class="fi-i">🏨</div><div class="fi-n"><div class="fi-nm">住宿 Agoda × 1</div><div class="fi-sb">無日圓資訊</div></div><div class="fi-a">NT$6,546</div></div>
+    <div class="fi"><div class="fi-i">🚗</div><div class="fi-n"><div class="fi-nm">租車（基本費）</div><div class="fi-sb">不含現場保險與過路費</div></div><div class="fi-a">NT$12,111</div></div>
+  </div>
+</div>
+</main>
+<script>
+const RATE=0.2;
+const CCOL={'餐飲':'#c0392b','購物':'#b45309','超市':'#1a7a3c','交通':'#1a56a0','景點':'#0f766e','機場':'#6d28d9'};
+const CI={'餐飲':'🍜','購物':'🛍','超市':'🛒','交通':'🚗','景點':'⛩','機場':'✈️'};
+const DL={'06/03':'Day1 大阪','06/04':'Day2 奈良・伊勢','06/05':'Day3 伊勢・京都','06/06':'Day4 嵐山・宇治','06/07':'Day5 京都・大阪','06/08':'Day6 大阪→台灣'};
+const fj=n=>'¥'+n.toLocaleString();
+const ft=n=>'≈NT$'+Math.round(n*RATE).toLocaleString();
+const jt=n=>Math.round(n*RATE);
+
+const RS=[
+  {id:1,date:'06/03',time:'',shop:'ODYSIS SUITES大阪（附加費）',cat:'餐飲',total:400,items:[{name:'住宿附加服務',qty:1,price:400}]},
+  {id:2,date:'06/03',time:'',shop:'LAWSON 京都駅八条口（06/03）',cat:'餐飲',total:2718,items:[{name:'飲料零食（住宿首夜）',qty:1,price:2718}]},
+  {id:3,date:'06/04',time:'10:32',shop:'7-ELEVEN 奈良縣廳店',cat:'餐飲',total:1292,items:[
+    {name:'三得利天然水 550ml',qty:2,price:236},{name:'不二家水蜜桃汁 200ml',qty:1,price:106},
+    {name:'7P麝香葡萄混合果汁100%',qty:1,price:120},{name:'伊藤園濃綠茶 650ml',qty:1,price:173},
+    {name:'值引',qty:1,price:-20},{name:'巧克力鮮奶油麵包捲',qty:1,price:148},
+    {name:'調味海苔辛子明太子飯糰',qty:1,price:215},{name:'炭火烤銀鮭飯糰',qty:1,price:215},{name:'購物袋',qty:1,price:4}]},
+  {id:4,date:'06/04',time:'12:26',shop:'Mont-bell 東大寺門前店',cat:'購物',total:20490,items:[
+    {name:'登山背包容器 20L',qty:1,price:6900},{name:'WIC.T K S 熊貓車廂T恤',qty:1,price:2400},
+    {name:'WIC.T K S 玩熊貓T恤',qty:1,price:2400},{name:'PS棉質T恤 M S',qty:1,price:2800},
+    {name:'PS棉質長袖T M S',qty:1,price:3190},{name:'PS棉質T恤 M S（別色）',qty:1,price:2800}]},
+  {id:5,date:'06/04',time:'12:53',shop:'天平庵 東大寺店',cat:'餐飲',total:220,items:[{name:'大和三山（和菓子）',qty:1,price:220}]},
+  {id:6,date:'06/04',time:'18:01',shop:"TRY's Mart 八間道店",cat:'超市',total:6026,items:[
+    {name:'國產極和牛肩肉',qty:1,price:897},{name:'熟成德米格拉斯醬',qty:2,price:798},
+    {name:'黃金咖哩辛口',qty:2,price:518},{name:'大內山牛乳',qty:2,price:370},{name:'白飯',qty:1,price:263},
+    {name:'折扣30%',qty:1,price:-79},{name:'牛虎豬排丼',qty:1,price:450},{name:'澤西牛乳布丁',qty:1,price:179},
+    {name:'MOW抹茶冰淇淋',qty:1,price:119},{name:'京都府產九條蔥',qty:1,price:110},
+    {name:'蛤蜊（大）',qty:1,price:139},{name:'本鮪魚中腹生魚片',qty:1,price:599},
+    {name:'宮城縣產鹽漬銀鮭',qty:1,price:399},{name:'國產極和牛肩肉（別切）',qty:1,price:414},
+    {name:'真鯛生魚片',qty:1,price:399},{name:'購物袋',qty:1,price:5}]},
+  {id:7,date:'06/04',time:'18:43',shop:'FamilyMart 伊勢桜木町店',cat:'餐飲',total:1422,items:[
+    {name:'本わさび特選丸大豆醬油',qty:1,price:145},{name:'水蜜桃蘇打',qty:1,price:160},
+    {name:'滿足巧克力棒',qty:1,price:140},{name:'酥皮奶油泡芙',qty:1,price:270},
+    {name:'綾鷹茶 650ml',qty:1,price:238},{name:'海苔鹽薯片',qty:1,price:186},{name:'購物袋',qty:1,price:5}]},
+  {id:8,date:'06/05',time:'08:59',shop:'7-ELEVEN 伊勢市勢田町店',cat:'餐飲',total:2246,items:[
+    {name:'三得利天然水 1L',qty:2,price:336},{name:'日清兵衛狐狸烏龍麵',qty:1,price:309},
+    {name:'白醬油拉麵',qty:1,price:339},{name:'一風堂博多豚骨拉麵',qty:1,price:328},
+    {name:'明治好喝牛奶 450ml',qty:1,price:181},{name:'伊藤園茶 650ml',qty:1,price:173},
+    {name:'值引',qty:1,price:-20},{name:'辛子明太子飯糰',qty:1,price:215},
+    {name:'紅鮭飯糰',qty:1,price:215},{name:'購物袋',qty:1,price:4}]},
+  {id:9,date:'06/05',time:'11:54',shop:'赤福本店（11:54）',cat:'餐飲',total:800,items:[{name:'赤福餅 @¥400',qty:2,price:800}]},
+  {id:10,date:'06/05',time:'12:13',shop:'うどんやふくすけ 伊勢',cat:'餐飲',total:2800,items:[
+    {name:'松阪牛肉伊勢烏龍麵',qty:1,price:1300},{name:'昆布伊勢烏龍麵',qty:1,price:850},{name:'單品天婦羅',qty:1,price:650}]},
+  {id:11,date:'06/05',time:'13:32',shop:'STARBUCKS 伊勢内宮前店',cat:'餐飲',total:555,items:[{name:'冰星冰樂拿鐵（多加牛奶・少冰）',qty:1,price:555}]},
+  {id:12,date:'06/05',time:'13:40',shop:'赤福本店（13:40）',cat:'餐飲',total:900,items:[{name:'赤福餅 8個入',qty:1,price:900}]},
+  {id:13,date:'06/05',time:'18:00',shop:'KOHYO 京都店',cat:'超市',total:341,items:[
+    {name:'天然水',qty:1,price:168},{name:'明治好喝牛奶 200ml',qty:1,price:148}]},
+  {id:14,date:'06/05',time:'17:49',shop:'NICK STOCK イオンモールKYOTO',cat:'餐飲',total:6072,items:[
+    {name:'熟成牛排薯條套餐',qty:1,price:2178},{name:'可樂',qty:2,price:770},
+    {name:'培根起司漢堡 W',qty:1,price:2739},{name:'大碗白飯',qty:1,price:385}]},
+  {id:15,date:'06/05',time:'18:25',shop:'Mont-bell 京都駅前店',cat:'購物',total:25140,items:[
+    {name:'岩石涼鞋',qty:1,price:4840},{name:'背帶 蒙大拿色#1',qty:1,price:1400},
+    {name:'無孔扁型D扣環',qty:2,price:800},{name:'抓絨點點帽 K S',qty:1,price:3300},
+    {name:'PS棉質T恤 M S',qty:1,price:2800},{name:'PS棉質T恤 M S（別色）',qty:1,price:2800},
+    {name:'PS棉質T恤 炭灰色',qty:1,price:3100},{name:'PS棉質長袖T 山路色',qty:1,price:3300},
+    {name:'PS棉質T恤 M S（第三色）',qty:1,price:2800}]},
+  {id:16,date:'06/05',time:'18:56',shop:'UNIQLO イオンモールKYOTO',cat:'購物',total:14164,items:[
+    {name:'環保購物袋',qty:1,price:290},{name:'W短褲（多色）',qty:4,price:2360},
+    {name:'BT高領T恤',qty:1,price:990},{name:'BTイオン聯名UT',qty:1,price:990},
+    {name:'W尼龍寬鬆短褲',qty:1,price:2990},{name:'W迷你裙',qty:3,price:4500},
+    {name:'WUV修身高領毛衣',qty:1,price:1290},{name:'BT AIRism彈力內搭褲',qty:1,price:790},
+    {name:'BTRFAIRism內搭褲',qty:1,price:790},{name:'免稅折扣',qty:1,price:-1416}]},
+  {id:17,date:'06/05',time:'19:33',shop:'無印良品 KYOTO（免稅大單）',cat:'購物',total:12807,items:[
+    {name:'趾間無縫淺口襪',qty:1,price:300},{name:'短袖居家服套裝',qty:1,price:3628},
+    {name:'柔順前開四角褲',qty:2,price:1438},{name:'嫘縈混紡柔軟短襪',qty:4,price:1310},
+    {name:'柔順前開四角褲（別色）',qty:1,price:719},{name:'涼感A字裙',qty:1,price:2719},
+    {name:'不鏽鋼奶油抹刀',qty:1,price:355},{name:'不鏽鋼咖啡匙',qty:2,price:346},
+    {name:'浴室清潔濕紙巾',qty:1,price:272},{name:'溫和卸妝凝膠（一般）',qty:1,price:628},
+    {name:'溫和卸妝凝膠（大容量）',qty:1,price:773},{name:'溫和卸妝凝膠（隨身）',qty:1,price:319},
+    {name:'靴下3雙折扣',qty:1,price:-165},{name:'免稅折扣',qty:1,price:-1272}]},
+  {id:18,date:'06/05',time:'19:33',shop:'無印良品 KYOTO（小單）',cat:'購物',total:2360,items:[
+    {name:'柔順前開四角褲',qty:2,price:1580},{name:'嫘縈混紡柔軟短襪',qty:2,price:780}]},
+  {id:19,date:'06/05',time:'19:43',shop:'ポポンデッタ イオンモールKYOTO',cat:'購物',total:8322,items:[
+    {name:'moku列車027 阪急9N 玩具',qty:1,price:2398},{name:'moku列車024 キハ70N 玩具',qty:1,price:2398},
+    {name:'新幹線湯匙 ドクターイエロー',qty:1,price:660},{name:'新幹線湯匙 E6系',qty:1,price:660},
+    {name:'新幹線湯匙 H5系',qty:1,price:660},{name:'日本通運 Wing卡車 TOMICA',qty:1,price:990},
+    {name:'斯巴魯三菱汽車 TOMICA',qty:1,price:534},{name:'購物袋（紅中）',qty:1,price:22}]},
+  {id:20,date:'06/05',time:'20:00',shop:'LAWSON 京都駅八条口（06/05）',cat:'餐飲',total:674,items:[
+    {name:'田邊農園香蕉 1根',qty:1,price:127},{name:'東樂雞蛋布丁',qty:1,price:157},
+    {name:'明治好喝牛奶 450ml',qty:2,price:390}]},
+  {id:21,date:'06/05',time:'16:07',shop:'エコロパーク 京都水族館東停車場',cat:'交通',total:800,items:[
+    {name:'停車費（06/05 16:07－06/06 08:26）',qty:1,price:800}]},
+  {id:22,date:'06/06',time:'09:19',shop:'三井のリパーク 嵯峨伊勢ノ上町',cat:'交通',total:500,items:[
+    {name:'停車費（09:19－13:30）',qty:1,price:500}]},
+  {id:23,date:'06/06',time:'10:07',shop:'雲ノ茶 嵐山店',cat:'餐飲',total:2511,items:[
+    {name:'大福套餐（抹茶紅豆奶油大福＋抹茶拿鐵 ICE）',qty:1,price:1028},
+    {name:'雲之抹茶慕斯套餐（宇治抹茶紅豆慕斯＋咖啡拿鐵 ICE）',qty:1,price:1255}]},
+  {id:24,date:'06/06',time:'11:36',shop:'和レ和レ和 アラシヤマ',cat:'餐飲',total:3700,items:[
+    {name:'豆腐肉丸',qty:1,price:1800},{name:'炸雞',qty:1,price:1800},{name:'味噌湯續杯',qty:1,price:100}]},
+  {id:25,date:'06/06',time:'12:59',shop:'LAWSON 亀岡馬堀駅前店',cat:'餐飲',total:292,items:[
+    {name:'三得利綠茶伊右衛門檸檬 600ml',qty:1,price:149},{name:'明治好喝牛奶 200ml',qty:1,price:143}]},
+  {id:26,date:'06/06',time:'15:09',shop:'伊藤久右衛門 平等院店',cat:'購物',total:22750,items:[
+    {name:'抹茶宇治綠 罐裝',qty:1,price:1500},{name:'抹茶清壽之森 罐裝',qty:1,price:2000},
+    {name:'抹茶碾上 罐裝',qty:1,price:4000},{name:'抹茶壽久 罐裝',qty:1,price:6000},
+    {name:'抹茶卡布奇諾 18本入',qty:1,price:1850},{name:'綠茶散步道 5個入',qty:1,price:1190},
+    {name:'茶筅 80本（2個入）',qty:2,price:5400},{name:'茶杓',qty:1,price:810}]},
+  {id:27,date:'06/06',time:'15:19',shop:'平等院 入場費',cat:'景點',total:1400,items:[{name:'一般成人票 @¥700',qty:2,price:1400}]},
+  {id:28,date:'06/06',time:'16:17',shop:'ブーブーパーク 平等院（停車）',cat:'交通',total:800,items:[{name:'停車費（14:31－16:17）',qty:1,price:800}]},
+  {id:29,date:'06/06',time:'18:37',shop:'かつくら 京都ポルタ店',cat:'餐飲',total:7440,items:[
+    {name:'大海老金華豬排 120g',qty:1,price:3620},{name:'大海老三元豬菲力 80g',qty:1,price:2860},
+    {name:'馬鈴薯可樂餅',qty:1,price:380},{name:'大碗茶碗蒸',qty:1,price:580}]},
+  {id:30,date:'06/06',time:'18:54',shop:'JR伊勢丹 miffy おもちゃ賣場',cat:'購物',total:2288,items:[
+    {name:'玩具',qty:1,price:1000},{name:'玩具 @¥540',qty:2,price:1080}]},
+  {id:31,date:'06/06',time:'',shop:'JR伊勢丹 グリンディー飾品',cat:'購物',total:1900,items:[{name:'グリンディー飾品',qty:1,price:1900}]},
+  {id:32,date:'06/07',time:'08:53',shop:'ブーブーパーク 東洞院六角（停車）',cat:'交通',total:900,items:[{name:'停車費（08:53－09:35）',qty:1,price:900}]},
+  {id:33,date:'06/07',time:'09:35',shop:'ブーブーパーク 平等院（過夜停車）',cat:'交通',total:800,items:[{name:'停車費（06/06入庫－06/07出庫）',qty:1,price:800}]},
+  {id:34,date:'06/07',time:'10:28',shop:'京都鉄道博物館 入場券',cat:'景點',total:3000,items:[{name:'一般成人票 @¥1,500',qty:2,price:3000}]},
+  {id:35,date:'06/07',time:'11:18',shop:'京都鉄道博物館 餐廳',cat:'餐飲',total:3500,items:[
+    {name:'牛肉烏龍麵',qty:1,price:1300},{name:'肉醬麵',qty:1,price:1100},{name:'中華蕎麥麵',qty:1,price:1100}]},
+  {id:36,date:'06/07',time:'12:49',shop:'京都鉄道博物館 紀念品店（12:49）',cat:'購物',total:8995,items:[
+    {name:'新幹線湯匙 923ドクターイエロー',qty:1,price:660},{name:'新幹線湯匙 E6系',qty:1,price:660},
+    {name:'新幹線湯匙 E5系',qty:1,price:660},{name:'新幹線叉子 E7系',qty:1,price:660},
+    {name:'鐵道口紙膠帶 迷你列車',qty:1,price:400},{name:'口紙膠帶 ドクターイエロー',qty:1,price:400},
+    {name:'口紙膠帶 E6系',qty:1,price:407},{name:'水陸兩用玩具列車 N700系',qty:1,price:1870},
+    {name:'水陸兩用玩具列車 E6系こまち',qty:1,price:1870},
+    {name:'普樂路浴缸玩具組合B',qty:1,price:748},{name:'普樂路磁鐵',qty:1,price:660}]},
+  {id:37,date:'06/07',time:'12:56',shop:'京都鉄道博物館 紀念品店（12:56）',cat:'購物',total:660,items:[{name:'普樂路磁鐵 NEW',qty:1,price:660}]},
+  {id:38,date:'06/07',time:'',shop:'7-ELEVEN 奈良',cat:'餐飲',total:2570,items:[
+    {name:'好喝牛奶 200ml',qty:1,price:133},{name:'布丁 55mm',qty:1,price:70},{name:'水果拼盤',qty:1,price:133}]},
+  {id:39,date:'06/07',time:'15:09',shop:'ABC-MART（免稅）',cat:'購物',total:5500,items:[{name:'ADIDAS運動鞋（免稅）',qty:1,price:5500}]},
+  {id:40,date:'06/07',time:'15:35',shop:'イトーヨーカドー あべの店',cat:'超市',total:7518,items:[
+    {name:'格4.0牛乳 500ml',qty:1,price:322},{name:'乳製品',qty:1,price:236},
+    {name:'牛奶 500ml',qty:1,price:214},{name:'和牛燒肉',qty:1,price:486},
+    {name:'飯糰',qty:1,price:214},{name:'金平牛蒡',qty:1,price:486},
+    {name:'炸物10件',qty:1,price:754},{name:'其他雜貨',qty:1,price:556}]},
+  {id:41,date:'06/07',time:'16:14',shop:'HANDS あべのハルカス店',cat:'購物',total:5698,items:[
+    {name:'Jouyu圓形貼紙 米色（33入）',qty:1,price:198},{name:'Jouyu圓形貼紙 米色（40入）',qty:1,price:198},
+    {name:'Jouyu圓形貼紙 米色（22入）',qty:1,price:198},{name:'Excel圓形貼紙 米色',qty:1,price:1760},
+    {name:'Excel粉底液滴',qty:1,price:792}]},
+  {id:42,date:'06/07',time:'17:11',shop:'apollostation 大阪下寺町（加油）',cat:'交通',total:4494,items:[{name:'一般汽油 P10 @¥168/L（26.75L）',qty:1,price:4494}]},
+  {id:43,date:'06/07',time:'14:30',shop:'タイムズ あべのキューズモール停車場',cat:'交通',total:1400,items:[{name:'停車費（14:30－16:40）',qty:1,price:1400}]},
+  {id:44,date:'06/07',time:'18:47',shop:'LAWSON 通天閣南店',cat:'餐飲',total:806,items:[
+    {name:'湖池屋海苔鹽薯片',qty:1,price:322},{name:'Welch葡萄汁 470ml',qty:1,price:149},
+    {name:'可口可樂 伊藤園 650ml',qty:2,price:330},{name:'購物袋',qty:1,price:5}]},
+  {id:45,date:'06/08',time:'10:16',shop:'関西旅日記 関西機場',cat:'機場',total:4374,items:[
+    {name:'MUK J 本多拉5小鯉（伴手禮）',qty:1,price:1100},{name:'GCR J 多啦A夢捲餅乾（伴手禮）',qty:1,price:1550},
+    {name:'NGD J VIA黑船抹茶蛋糕（伴手禮）',qty:1,price:1400}]},
+  {id:46,date:'06/08',time:'10:20',shop:'LAWSON 関西國際機場店',cat:'機場',total:4468,items:[
+    {name:'森永野菜薄片餅',qty:1,price:184},{name:'卡樂比關西風味薯片',qty:1,price:181},
+    {name:'卡樂比披薩薯片',qty:1,price:218},{name:'卡樂比山葵口味薯片',qty:1,price:205},
+    {name:'湖池屋辣味薯片棒',qty:1,price:237},{name:'卡樂比雙重美乃滋薯片',qty:1,price:181},
+    {name:'可口可樂 伊藤園 650ml',qty:4,price:660},{name:'明治澤西牛奶布丁',qty:3,price:597},
+    {name:'購物袋L',qty:1,price:5},{name:'森半抹茶麻糬米果4枚',qty:1,price:376},
+    {name:'森半抹茶餅乾夾心',qty:1,price:297},{name:'巧克力可麗餅',qty:1,price:265},
+    {name:'巧克力可麗餅（另款）',qty:1,price:221},{name:'炙烤熟成紅鮭手卷',qty:1,price:235},
+    {name:'熟成辛子明太子手卷',qty:1,price:235},{name:'銅鑼燒（紅豆＋鮮奶油）',qty:2,price:428},
+    {name:'白鯛魚燒',qty:1,price:178}]},
+  {id:47,date:'06/08',time:'11:29',shop:'CANADIAN MORNING&TOKO 関西機場',cat:'機場',total:10800,items:[
+    {name:'MMT Seon拉鍊錢包（免稅）',qty:1,price:6500},{name:'水壺 16oz WIDE MOUTH（免稅）',qty:1,price:4300}]},
+  {id:48,date:'06/08',time:'11:37',shop:'マツモトキヨシ 関空出国エリア',cat:'機場',total:11401,items:[
+    {name:'百保能感冒藥A4',qty:1,price:2750},{name:'mk 貼布',qty:1,price:1600},
+    {name:'手指用OK繃',qty:2,price:996},{name:'潔淨牙膏 美白（2支）',qty:2,price:2640},
+    {name:'潔淨牙膏 去口臭',qty:1,price:1320},{name:'潔淨牙膏 抗敏',qty:1,price:1320},
+    {name:'電動牙刷刷頭',qty:1,price:460},{name:'MK溫和洗面乳',qty:1,price:310},{name:'行李袋',qty:1,price:5}]},
+  {id:49,date:'06/08',time:'11:44',shop:'TASTE OF KANSAI 関西機場',cat:'機場',total:6579,items:[
+    {name:'牛奶巧克力大包裝（免稅）',qty:1,price:2800},{name:'お濃茶蘭朵夏（抹茶餅乾，免稅）',qty:1,price:2112},
+    {name:'茶之菓薄燒（12片，免稅）',qty:1,price:1667}]},
+  {id:50,date:'06/06',time:'',shop:'抹茶專賣店 嵐山（無收據）',cat:'購物',total:12000,items:[
+    {name:'後昔 抹茶罐',qty:2,price:5000},{name:'初昔 抹茶罐',qty:2,price:3800},
+    {name:'千代壽 抹茶罐',qty:2,price:3200}]},
+  {id:51,date:'06/06',time:'',shop:'抹茶專賣店 嵐山（無收據）',cat:'購物',total:9389,items:[
+    {name:'最上初昔 抹茶罐',qty:2,price:6200},{name:'抹茶餅乾',qty:8,price:3189}]},
+  {id:52,date:'06/07',time:'',shop:'租車現場保險・過路費',cat:'交通',total:2851,items:[
+    {name:'現場保險・高速公路過路費',qty:1,price:2851}]}
+];
+
+const CCDATA=[
+  {id:'c1',date:'06/03',shop:'ODYSIS SUITES OSAKA',twd:79,jpy:400,type:'matched',rid:1},
+  {id:'c2',date:'06/03',shop:'LAWSON',twd:535,jpy:2718,type:'matched',rid:2},
+  {id:'c3',date:'06/04',shop:'CAFE ZEZE',twd:1832,jpy:9270,type:'no-receipt',rid:null,note:'已確認為當日用餐，無收據'},
+  {id:'c4',date:'06/04',shop:'TENPYOAN 天平庵',twd:44,jpy:220,type:'matched',rid:5},
+  {id:'c5',date:'06/04',shop:'Mont-bell 東大寺門前店',twd:4048,jpy:20490,type:'matched',rid:4},
+  {id:'c6',date:'06/05',shop:'MUJIRUSHIRYOHIN 無印良品（小單）',twd:466,jpy:2360,type:'matched',rid:18},
+  {id:'c7',date:'06/05',shop:'MUJIRUSHIRYOHIN 無印良品（免稅）',twd:2524,jpy:12807,type:'matched',rid:17},
+  {id:'c8',date:'06/04',shop:'超市/量販（7-ELEVEN奈良）',twd:256,jpy:1292,type:'matched',rid:3},
+  {id:'c9',date:'06/04',shop:"超市/量販（TRY's Mart）",twd:1194,jpy:6026,type:'matched',rid:6},
+  {id:'c10',date:'06/05',shop:'超市/量販（7-ELEVEN伊勢）',twd:444,jpy:2246,type:'matched',rid:8},
+  {id:'c11',date:'06/05',shop:'餐飲（STARBUCKS）',twd:109,jpy:555,type:'matched',rid:11},
+  {id:'c12',date:'06/05',shop:'超市/量販（KOHYO）',twd:133,jpy:674,type:'matched',rid:20},
+  {id:'c12b',date:'06/05',shop:'一般購物（NICK STOCK）',twd:1200,jpy:6061,type:'matched',rid:14},
+  {id:'c13',date:'06/05',shop:'餐飲（待確認）',twd:553,jpy:2793,type:'unmatched',rid:null,note:'換算¥2,793，無完全吻合收據'},
+  {id:'c14',date:'06/05',shop:'一般購物（ポポンデッタ）',twd:1645,jpy:8322,type:'matched',rid:19},
+  {id:'c15',date:'06/05',shop:'服飾/鞋/精品（UNIQLO）',twd:2800,jpy:14164,type:'matched',rid:16},
+  {id:'c16',date:'06/05',shop:'一般購物（Mont-bell京都）',twd:4971,jpy:25140,type:'matched',rid:15},
+  {id:'c17',date:'06/05',shop:'超市/量販（KOHYO）',twd:67,jpy:341,type:'matched',rid:13},
+  {id:'c18',date:'06/06',shop:'餐飲（雲ノ茶）',twd:497,jpy:2511,type:'matched',rid:23},
+  {id:'c19',date:'06/06',shop:'超市/量販（和レ和レ和）',twd:733,jpy:3700,type:'matched',rid:24},
+  {id:'c20',date:'06/06',shop:'超市/量販（伊藤久右衛門，卡3109）',twd:4498,jpy:22750,type:'matched',rid:26},
+  {id:'c21',date:'06/06',shop:'速食店·菜市場（卡3109）',twd:2373,jpy:11985,type:'matched',rid:50},
+  {id:'c22',date:'06/06',shop:'速食店·菜市場（卡3109）',twd:1859,jpy:9389,type:'matched',rid:51},
+  {id:'c23',date:'06/06',shop:'百貨公司（かつくら）',twd:1475,jpy:7440,type:'matched',rid:29},
+  {id:'c24',date:'06/06',shop:'超市/量販（JR伊勢丹miffy）',twd:412,jpy:2288,type:'matched',rid:30},
+  {id:'c25',date:'06/06',shop:'百貨公司（JR伊勢丹）',twd:1900,jpy:9596,type:'matched',rid:31},
+  {id:'c26',date:'06/07',shop:'劇場戲院（京都鉄道博物館入場）',twd:130,jpy:657,type:'matched',rid:34},
+  {id:'c27',date:'06/07',shop:'劇場戲院（京都鉄道博物館ショップ）',twd:1783,jpy:8995,type:'matched',rid:36},
+  {id:'c28',date:'06/07',shop:'餐飲（京都鉄道博物館餐廳）',twd:722,jpy:3500,type:'matched',rid:35},
+  {id:'c29',date:'06/07',shop:'休閒用品（待確認）',twd:694,jpy:3505,type:'unmatched',rid:null,note:'換算¥3,505 無對應收據'},
+  {id:'c30',date:'06/07',shop:'服飾/鞋/精品（ABC-MART）',twd:1090,jpy:5500,type:'matched',rid:39},
+  {id:'c31',date:'06/07',shop:'超市消費（イトーヨーカドー，卡3109）',twd:1487,jpy:7518,type:'matched',rid:40},
+  {id:'c32',date:'06/07',shop:'超市/量販（7-ELEVEN奈良）',twd:509,jpy:2570,type:'matched',rid:38},
+  {id:'c33',date:'06/07',shop:'百貨公司（HANDS）',twd:1129,jpy:5698,type:'matched',rid:41},
+  {id:'c34',date:'06/08',shop:'免稅店（TASTE OF KANSAI）',twd:1304,jpy:6579,type:'matched',rid:49},
+  {id:'c35',date:'06/08',shop:'百貨公司（CANADIAN MORNING）',twd:2260,jpy:10800,type:'matched',rid:47},
+  {id:'c36',date:'06/08',shop:'免稅店（マツモトキヨシ）',twd:2141,jpy:11401,type:'matched',rid:48},
+  {id:'c37',date:'06/08',shop:'超市/量販（LAWSON機場）',twd:885,jpy:4468,type:'matched',rid:46},
+  {id:'c38',date:'06/08',shop:'百貨公司（関西旅日記）',twd:867,jpy:4374,type:'matched',rid:45},
+  {id:'f1',date:'06/03',shop:'海外手續費',twd:1,type:'fee',rid:null},
+  {id:'f2',date:'06/03',shop:'海外手續費',twd:8,type:'fee',rid:null},
+  {id:'f3',date:'06/04',shop:'海外手續費',twd:1,type:'fee',rid:null},
+  {id:'f4',date:'06/04',shop:'海外手續費',twd:27,type:'fee',rid:null},
+  {id:'f5',date:'06/04',shop:'海外手續費',twd:61,type:'fee',rid:null},
+  {id:'f6',date:'06/05',shop:'海外手續費',twd:7,type:'fee',rid:null},
+  {id:'f7',date:'06/05',shop:'海外手續費',twd:38,type:'fee',rid:null},
+  {id:'f8',date:'06/05',shop:'海外手續費',twd:67,type:'fee',rid:null},
+  {id:'f9',date:'06/06',shop:'海外手續費',twd:57,type:'fee',rid:null},
+  {id:'f10',date:'06/06',shop:'海外手續費',twd:28,type:'fee',rid:null},
+  {id:'f11',date:'06/06',shop:'海外手續費',twd:158,type:'fee',rid:null},
+];
+
+let aC='全部', sQ='', rF='全部';
+
+function sw(t){
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['receipts','reconcile','overview'][i]===t));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pane-'+t).classList.add('on');
+  if(t==='overview')renderOV();
+  if(t==='reconcile')renderRec();
+}
+
+function initChips(){
+  ['餐飲','購物','超市','交通','景點','機場'].unshift('全部');
+  document.getElementById('catChips').innerHTML=['全部','餐飲','購物','超市','交通','景點','機場'].map(c=>
+    `<div class="chip ${c==='全部'?'on':''}" data-v="${c}" onclick="setC('${c}')">${CI[c]||''} ${c}</div>`).join('');
+  document.getElementById('recChips').innerHTML=['全部','已對應','待確認','無收據','手續費'].map(r=>
+    `<div class="chip ${r==='全部'?'on':''}" data-v="${r}" onclick="setRF('${r}')">${r}</div>`).join('');
+}
+function setC(c){aC=c;document.querySelectorAll('#catChips .chip').forEach(el=>el.classList.toggle('on',el.dataset.v===c));renderR();}
+function setRF(f){rF=f;document.querySelectorAll('#recChips .chip').forEach(el=>el.classList.toggle('on',el.dataset.v===f));renderRec();}
+function hl(t){if(!sQ)return t;return t.replace(new RegExp(sQ.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi'),m=>`<mark style="background:#facc15;border-radius:2px">${m}</mark>`);}
+
+function renderR(){
+  sQ=document.getElementById('si').value.trim().toLowerCase();
+  const f=RS.filter(r=>(aC==='全部'||r.cat===aC)&&(!sQ||r.shop.toLowerCase().includes(sQ)||r.items.some(i=>i.name.toLowerCase().includes(sQ))));
+  const tj=f.reduce((s,r)=>s+r.total,0);
+  const ti=f.reduce((s,r)=>s+r.items.filter(i=>i.price>0).length,0);
+  document.getElementById('ss').innerHTML=`
+    <div class="sc"><div class="sl">收據</div><div class="sv">${f.length}</div></div>
+    <div class="sc"><div class="sl">品項</div><div class="sv">${ti}</div></div>
+    <div class="sc"><div class="sl">日圓</div><div class="sv r">${fj(tj)}</div></div>
+    <div class="sc"><div class="sl">台幣</div><div class="sv">NT$${jt(tj).toLocaleString()}</div></div>`;
+  const grp={};f.forEach(r=>{(grp[r.date]||(grp[r.date]=[])).push(r);});
+  const c=document.getElementById('rc');
+  if(!f.length){c.innerHTML='<div class="empty"><div class="ei">🔍</div><p>找不到符合的收據</p></div>';return;}
+  c.innerHTML=Object.entries(grp).map(([d,items])=>{
+    const dt=items.reduce((s,r)=>s+r.total,0);
+    return`<div class="dg"><div class="dl">${d} ${DL[d]||''}<span class="dt">${fj(dt)} / NT$${jt(dt).toLocaleString()}</span></div>${items.map(r=>bRC(r)).join('')}</div>`;
+  }).join('');
+}
+
+function bRC(r){
+  const col=CCOL[r.cat]||'#999';
+  const ih=r.items.map(i=>`<div class="ir">
+    <div class="irn">${hl(i.name)}</div>
+    <div class="irq">${i.qty>1?'×'+i.qty:''}</div>
+    <div class="irp">
+      <div class="irj" style="color:${i.price<0?'var(--grn)':'var(--ink)'}">${i.price<0?'−':''}${fj(Math.abs(i.price))}</div>
+      ${i.price>0?`<div class="irt">${ft(Math.abs(i.price))}</div>`:''}
+    </div>
+  </div>`).join('');
+  return`<div class="rc">
+    <div class="rch" onclick="tog(${r.id})">
+      <div class="rcd" style="background:${col}"></div>
+      <div class="rci"><div class="rcs">${hl(r.shop)}</div><div class="rct">${r.time?r.date+' '+r.time:r.date} · ${r.cat}</div></div>
+      <div class="rca"><div class="rcj t-${r.cat}">${fj(r.total)}</div><div class="rctw">${ft(r.total)}</div></div>
+      <div class="rcv" id="cv-${r.id}">▼</div>
+    </div>
+    <div class="rit" id="it-${r.id}">
+      ${ih}
+      <div class="ir sub"><div class="irn">合計</div><div class="irq"></div>
+        <div class="irp"><div class="irj">${fj(r.total)}</div><div class="irt">${ft(r.total)}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+function tog(id){const el=document.getElementById('it-'+id),cv=document.getElementById('cv-'+id);el.classList.toggle('show');cv.classList.toggle('open',el.classList.contains('show'));}
+
+function renderRec(){
+  const fl=CCDATA.filter(c=>rF==='全部'||(rF==='已對應'&&c.type==='matched')||(rF==='待確認'&&c.type==='unmatched')||(rF==='無收據'&&c.type==='no-receipt')||(rF==='手續費'&&c.type==='fee'));
+  const m=CCDATA.filter(c=>c.type==='matched').length,u=CCDATA.filter(c=>c.type==='unmatched').length,n=CCDATA.filter(c=>c.type==='no-receipt').length,fe=CCDATA.filter(c=>c.type==='fee').length;
+  document.getElementById('rss').innerHTML=`
+    <div class="rsc"><div class="rsl">已對應</div><div class="rsv g">${m}</div></div>
+    <div class="rsc"><div class="rsl">待確認</div><div class="rsv a">${u}</div></div>
+    <div class="rsc"><div class="rsl">無收據</div><div class="rsv r">${n}</div></div>
+    <div class="rsc"><div class="rsl">手續費</div><div class="rsv gr">${fe}</div></div>`;
+  const SL={matched:'✓ 已對應',unmatched:'⚠️ 待確認',fee:'— 手續費','no-receipt':'✕ 無收據'};
+  const list=document.getElementById('rl');
+  if(!fl.length){list.innerHTML='<div class="empty"><div class="ei">📋</div><p>沒有符合的記錄</p></div>';return;}
+  list.innerHTML=fl.map(c=>{
+    const rec=c.rid?RS.find(r=>r.id===c.rid):null;
+    return`<div class="ri2 ${c.type}">
+      <div class="rirow">
+        <div class="ricc"><div class="rilbl">信用卡明細</div><div class="rish">${c.shop}</div>
+          <div class="riam">NT$${c.twd?c.twd.toLocaleString():'—'}${c.jpy?' / '+fj(c.jpy):''}</div>
+          <div class="ridt">${c.date}</div></div>
+        <div class="rirec"><div class="rilbl">對應收據</div>
+          ${rec?`<div class="rish">${rec.shop}</div><div class="riam">${fj(rec.total)} / NT$${jt(rec.total).toLocaleString()}</div><div class="ridt">${rec.date} ${rec.time||''}</div>`
+          :`<div class="rish" style="color:var(--ink3);font-size:11px;white-space:normal">${c.type==='fee'?'（海外手續費，不計入消費）':c.note||'找不到對應收據'}</div>`}
+        </div>
+      </div>
+      <div class="rist">${SL[c.type]||''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderOV(){
+  const total=RS.reduce((s,r)=>s+r.total,0);
+  const ic=RS.reduce((s,r)=>s+r.items.filter(i=>i.price>0).length,0);
+  const fixedTwd=26036+11309+6546+12111;
+  document.getElementById('ovJ').textContent=fj(total);
+  document.getElementById('ovT').textContent=ft(total);
+  document.getElementById('ovS').textContent=`7 天 · 日均 ${fj(Math.round(total/7))} / NT$${jt(Math.round(total/7)).toLocaleString()}`;
+  document.getElementById('osC').textContent=RS.length+'張';
+  document.getElementById('osI').textContent=ic+'項';
+  document.getElementById('osT').textContent='NT$'+(jt(total)+fixedTwd).toLocaleString();
+  document.getElementById('fixedTotal').textContent='NT$'+fixedTwd.toLocaleString();
+  document.getElementById('grandTotal').textContent='NT$'+(jt(total)+fixedTwd).toLocaleString();
+  document.getElementById('hdT').textContent=fj(total)+'\nNT$'+jt(total).toLocaleString();
+  const ct={};RS.forEach(r=>{ct[r.cat]=(ct[r.cat]||0)+r.total;});
+  const sorted=Object.entries(ct).sort((a,b)=>b[1]-a[1]);
+  const grand=sorted.reduce((s,[,v])=>s+v,0)||1;
+  document.getElementById('catBars').innerHTML=sorted.map(([cat,val])=>`
+    <div class="cbi">
+      <div class="cbt"><div class="cbi-i">${CI[cat]||'📦'}</div><div class="cbi-n">${cat}</div>
+        <div class="cbi-a"><div class="cbi-j t-${cat}">${fj(val)}</div><div class="cbi-t">${ft(val)}</div></div>
+        <div class="cbi-p">${Math.round(val/grand*100)}%</div></div>
+      <div class="bt"><div class="bf" style="width:${val/grand*100}%;background:${CCOL[cat]}"></div></div>
+    </div>`).join('');
+}
+
+initChips();renderR();renderOV();
+</script>
+</body>
+</html>
