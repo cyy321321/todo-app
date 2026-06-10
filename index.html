@@ -278,6 +278,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .note-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s;border-left:3px solid var(--ora)}
 .note-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
 .note-card:hover .note-del{opacity:1!important}
+.proj-header:hover .proj-archive-btn{opacity:1!important}
 .note-card.priv-note{border-left-color:#607D8B}
 .note-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px}
 .note-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
@@ -1075,7 +1076,7 @@ function renderList(){
   const doneTotal=S.tasks.filter(t=>t.done).length;
 
   const wt=S.tasks.filter(t=>t.type==='work'&&ftasks(t)&&furgent(t));
-  const pt=S.tasks.filter(t=>t.type==='private'&&furgent(t));
+  const pt=S.tasks.filter(t=>t.type==='private'&&furgent(t)&&!t.archived);
 
   if(!S.tasks.length){
     el.innerHTML=filterBar+`<div class="empty"><div class="empty-ico">🍊</div>還沒有任務，點上方「新增任務」開始吧！</div>`;
@@ -1121,6 +1122,7 @@ function renderList(){
               <span class="stat-pill stat-count">${p.pendingTasks.length} 件</span>
               ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
             </div>
+            <button onclick="event.stopPropagation();archiveProject('${p.code}')" title="封存此案子所有任務" style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:8px;padding:2px 8px;cursor:pointer;font-family:inherit" class="proj-archive-btn">📦</button>
             <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-${p.code}">▶</span>
           </div>
           <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-${p.code}">
@@ -1250,6 +1252,7 @@ function taskCardHTML(t,today,color){
     </div>
     <div class="task-acts">
       <button class="t-btn" onclick="startEdit(${t.id})" title="編輯">✏️</button>
+      <button class="t-btn" onclick="archiveTask(${t.id})" title="封存（不做了但留記錄）">📦</button>
       <button class="t-btn del" onclick="delTask(${t.id})" title="刪除">✕</button>
     </div>
   </div>
@@ -1311,6 +1314,30 @@ async function saveEdit(id){
   S.editingCard=null;await save();renderView();buildSuggestion();toast('✅ 已儲存','ok');
 }
 async function saveNote(id,val){const t=S.tasks.find(t=>t.id===id);if(t&&t.note!==val){t.note=val;await save();}}
+async function archiveTask(id){
+  const t=S.tasks.find(t=>t.id===id);
+  if(!t)return;
+  t.archived=true;
+  t.archivedDate=new Date().toISOString().split('T')[0];
+  if(!t.doneDate)t.doneDate=t.archivedDate;
+  await save();renderView();buildSuggestion();
+  toast('📦 已封存','ok');
+}
+
+async function archiveProject(code){
+  const tasks=S.tasks.filter(t=>t.code===code&&!t.archived);
+  if(!tasks.length){toast('此案子沒有待封存的任務','info');return;}
+  if(!confirm(`確定要封存「${code}」的所有 ${tasks.length} 筆任務嗎？`))return;
+  const today=new Date().toISOString().split('T')[0];
+  tasks.forEach(t=>{
+    t.archived=true;
+    t.archivedDate=today;
+    if(!t.doneDate)t.doneDate=today;
+  });
+  await save();renderView();buildSuggestion();
+  toast(`📦 已封存 ${tasks.length} 筆任務`,'ok');
+}
+
 async function toggleDone(id){
   const t=S.tasks.find(t=>t.id===id);
   if(t){
@@ -1610,7 +1637,10 @@ function getArchivedTasks(){
   const cutoff=new Date();
   cutoff.setDate(cutoff.getDate()-7);
   const cutoffStr=cutoff.toISOString().split('T')[0];
-  return S.tasks.filter(t=>t.done&&t.doneDate&&t.doneDate<=cutoffStr);
+  return S.tasks.filter(t=>
+    t.archived || // 手動封存
+    (t.done&&t.doneDate&&t.doneDate<=cutoffStr) // 完成超過7天
+  );
 }
 
 function openArchiveModal(){
@@ -1645,7 +1675,7 @@ function renderArchiveList(){
         </div>
         ${pts.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${cb};border-radius:8px;margin-bottom:4px;border-left:2px solid ${cm}">
           <span style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0">${t.date}</span>
-          <span style="font-size:12px;color:var(--text);flex:1;text-decoration:line-through;opacity:.7">${t.title}</span>
+          <span style="font-size:12px;color:var(--text);flex:1;${t.done?'text-decoration:line-through;':''}opacity:.7">${t.title}${t.archived&&!t.done?' <span style=\"font-size:10px;background:var(--amber-bg);color:var(--amber);padding:1px 5px;border-radius:4px\">封存</span>':''}</span>
           <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit;white-space:nowrap">還原</button>
         </div>`).join('')}
       </div>`;
@@ -1678,7 +1708,14 @@ function renderArchiveList(){
 
 async function restoreTask(id){
   const t=S.tasks.find(t=>t.id===id);
-  if(t){t.done=false;t.doneDate=null;await save();renderArchiveList();renderView();buildSuggestion();toast('✅ 已還原任務','ok');}
+  if(t){
+    t.done=false;
+    t.doneDate=null;
+    t.archived=false;
+    t.archivedDate=null;
+    await save();renderArchiveList();renderView();buildSuggestion();
+    toast('✅ 已還原任務','ok');
+  }
 }
 
 async function clearAllArchive(){
