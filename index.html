@@ -553,12 +553,27 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 
 <!-- ARCHIVE MODAL -->
 <div class="modal-overlay" id="archive-modal">
-  <div class="modal" style="max-width:560px">
-    <div class="modal-title">📦 封存區（完成超過7天）</div>
-    <div id="archive-list"></div>
-    <div class="modal-actions">
-      <button class="btn btn-red" onclick="clearAllArchive()" style="margin-right:auto">清除全部封存</button>
-      <button class="btn btn-ora" onclick="closeModal('archive-modal')">關閉</button>
+  <div class="modal" style="max-width:600px;max-height:92vh">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div class="modal-title" style="margin:0">📦 封存區</div>
+      <button class="btn btn-ora" onclick="closeModal('archive-modal')" style="padding:6px 14px;font-size:12px">關閉</button>
+    </div>
+    <!-- Sort controls -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;gap:4px">
+        <button id="arc-grp-proj" onclick="setArchiveGroup('proj')" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--ora);color:#fff">依計畫</button>
+        <button id="arc-grp-date" onclick="setArchiveGroup('date')" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--white);color:var(--text2)">依日期</button>
+      </div>
+      <div style="display:flex;gap:4px" id="arc-date-unit-wrap" style="display:none">
+        <button id="arc-unit-month" onclick="setArchiveDateUnit('month')" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--white);color:var(--text2)">依月</button>
+        <button id="arc-unit-year" onclick="setArchiveDateUnit('year')" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--white);color:var(--text2)">依年</button>
+      </div>
+      <button id="arc-sort-dir" onclick="toggleArchiveSort()" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--white);color:var(--text2);margin-left:auto">近→遠 ↓</button>
+    </div>
+    <div id="archive-list" style="max-height:calc(92vh - 200px);overflow-y:auto"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+      <button class="btn btn-red" onclick="clearAllArchive()" style="font-size:12px;padding:6px 14px">🗑 清除全部封存</button>
+      <span style="font-size:11px;color:var(--text3)" id="arc-count"></span>
     </div>
   </div>
 </div>
@@ -1075,7 +1090,7 @@ function renderList(){
   }).length;
   const doneTotal=S.tasks.filter(t=>t.done).length;
 
-  const wt=S.tasks.filter(t=>t.type==='work'&&ftasks(t)&&furgent(t));
+  const wt=S.tasks.filter(t=>t.type==='work'&&ftasks(t)&&furgent(t)&&!t.archived);
   const pt=S.tasks.filter(t=>t.type==='private'&&furgent(t)&&!t.archived);
 
   if(!S.tasks.length){
@@ -1643,66 +1658,130 @@ function getArchivedTasks(){
   );
 }
 
-function openArchiveModal(){
+// Archive state
+let arcGroup='proj', arcSortDesc=true, arcDateUnit='month';
+
+function setArchiveGroup(g){
+  arcGroup=g;
+  document.getElementById('arc-grp-proj').style.background=g==='proj'?'var(--ora)':'var(--white)';
+  document.getElementById('arc-grp-proj').style.color=g==='proj'?'#fff':'var(--text2)';
+  document.getElementById('arc-grp-date').style.background=g==='date'?'var(--ora)':'var(--white)';
+  document.getElementById('arc-grp-date').style.color=g==='date'?'#fff':'var(--text2)';
+  const unitWrap=document.getElementById('arc-date-unit-wrap');
+  if(unitWrap)unitWrap.style.display=g==='date'?'flex':'none';
   renderArchiveList();
+}
+
+function setArchiveDateUnit(u){
+  arcDateUnit=u;
+  document.getElementById('arc-unit-month').style.background=u==='month'?'var(--ora)':'var(--white)';
+  document.getElementById('arc-unit-month').style.color=u==='month'?'#fff':'var(--text2)';
+  document.getElementById('arc-unit-year').style.background=u==='year'?'var(--ora)':'var(--white)';
+  document.getElementById('arc-unit-year').style.color=u==='year'?'#fff':'var(--text2)';
+  renderArchiveList();
+}
+
+function toggleArchiveSort(){
+  arcSortDesc=!arcSortDesc;
+  const btn=document.getElementById('arc-sort-dir');
+  if(btn)btn.textContent=arcSortDesc?'近→遠 ↓':'遠→近 ↑';
+  renderArchiveList();
+}
+
+function openArchiveModal(){
+  arcGroup='proj';arcSortDesc=true;arcDateUnit='month';
   document.getElementById('archive-modal').classList.add('show');
+  renderArchiveList();
+}
+
+function taskRowHTML(t){
+  const c=t.type==='private'?'#607D8B':cHex(t.code);
+  const cb=t.type==='private'?'#ECEFF1':cBg(t.code);
+  const cm=t.type==='private'?'#CFD8DC':cMid(t.code);
+  const badge=t.archived&&!t.done?`<span style="font-size:10px;background:var(--amber-bg);color:var(--amber);padding:1px 5px;border-radius:4px;margin-left:4px">封存</span>`:'';
+  return`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${cb};border-radius:8px;margin-bottom:4px;border-left:2px solid ${cm}">
+    <span style="font-size:11px;color:${c};font-family:'JetBrains Mono',monospace;flex-shrink:0">${t.date}</span>
+    <span style="font-size:12px;color:var(--text);flex:1;${t.done?'text-decoration:line-through;':''}opacity:.8">${t.title}${badge}</span>
+    ${t.code&&arcGroup!=='proj'?`<span style="font-size:10px;background:${c};color:#fff;padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;flex-shrink:0">${t.code}</span>`:''}
+    <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:var(--white);border:1px solid var(--border2);border-radius:6px;cursor:pointer;padding:3px 8px;font-family:inherit;white-space:nowrap;flex-shrink:0">↩ 還原</button>
+  </div>`;
 }
 
 function renderArchiveList(){
-  const archived=getArchivedTasks().sort((a,b)=>a.date>b.date?1:-1);
+  const archived=getArchivedTasks();
   const el=document.getElementById('archive-list');
+  const countEl=document.getElementById('arc-count');
+  if(countEl)countEl.textContent=`共 ${archived.length} 筆封存`;
+
   if(!archived.length){
-    el.innerHTML='<div class="empty" style="padding:24px 0"><div class="empty-ico">📦</div>目前沒有封存任務（完成超過7天才會出現）</div>';
+    el.innerHTML='<div class="empty" style="padding:24px 0"><div class="empty-ico">📦</div>目前沒有封存任務</div>';
     return;
   }
 
-  // Group by project code
-  let html='';
-  const wt=archived.filter(t=>t.type==='work');
-  const pt=archived.filter(t=>t.type==='private');
+  // Sort
+  const sorted=[...archived].sort((a,b)=>{
+    const diff=a.date>b.date?1:a.date<b.date?-1:0;
+    return arcSortDesc?-diff:diff;
+  });
 
-  if(wt.length){
+  let html='';
+
+  if(arcGroup==='proj'){
+    // Group by project code, private at bottom
+    const wt=sorted.filter(t=>t.type==='work');
+    const pt=sorted.filter(t=>t.type==='private');
+    const groups={};
+    wt.forEach(t=>{const k=t.code||'0000X';if(!groups[k])groups[k]=[];groups[k].push(t);});
+
     S.projects.forEach(p=>{
-      const pts=wt.filter(t=>t.code===p.code);
-      if(!pts.length)return;
+      if(!groups[p.code])return;
       const c=cHex(p.code==='0000X'?null:p.code);
-      const cb=cBg(p.code==='0000X'?null:p.code);
-      const cm=cMid(p.code==='0000X'?null:p.code);
-      html+=`<div style="margin-bottom:12px">
+      html+=`<div style="margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <span style="font-family:'JetBrains Mono',monospace;font-size:11px;background:${c};color:#fff;padding:2px 8px;border-radius:6px">${p.code}</span>
-          <span style="font-size:12px;color:var(--text2)">${p.name}</span>
+          <span style="font-size:12px;color:var(--text2);font-weight:500">${p.name}</span>
+          <span style="font-size:11px;color:var(--text3)">${groups[p.code].length} 筆</span>
         </div>
-        ${pts.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${cb};border-radius:8px;margin-bottom:4px;border-left:2px solid ${cm}">
-          <span style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0">${t.date}</span>
-          <span style="font-size:12px;color:var(--text);flex:1;${t.done?'text-decoration:line-through;':''}opacity:.7">${t.title}${t.archived&&!t.done?' <span style=\"font-size:10px;background:var(--amber-bg);color:var(--amber);padding:1px 5px;border-radius:4px\">封存</span>':''}</span>
-          <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;font-family:inherit;white-space:nowrap">還原</button>
-        </div>`).join('')}
+        ${groups[p.code].map(t=>taskRowHTML(t)).join('')}
       </div>`;
     });
     const known=S.projects.map(p=>p.code);
     const unk=wt.filter(t=>!known.includes(t.code));
     if(unk.length){
-      html+=`<div style="margin-bottom:12px">
+      html+=`<div style="margin-bottom:14px">
         <div style="margin-bottom:6px"><span style="font-size:11px;background:var(--red-bg);color:var(--red);padding:2px 8px;border-radius:6px">未知代碼</span></div>
-        ${unk.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg);border-radius:8px;margin-bottom:4px">
-          <span style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${t.date}</span>
-          <span style="font-size:12px;flex:1;text-decoration:line-through;opacity:.7">${t.title}</span>
-          <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 6px;font-family:inherit">還原</button>
-        </div>`).join('')}
+        ${unk.map(t=>taskRowHTML(t)).join('')}
       </div>`;
     }
+    if(pt.length){
+      html+=`<div style="margin-bottom:14px">
+        <div style="margin-bottom:6px"><span style="font-size:11px;background:#ECEFF1;color:#607D8B;padding:2px 8px;border-radius:6px;font-family:'JetBrains Mono',monospace">私人</span></div>
+        ${pt.map(t=>taskRowHTML(t)).join('')}
+      </div>`;
+    }
+
+  } else {
+    // Group by date (year or month)
+    const groups={};
+    sorted.forEach(t=>{
+      const key=arcDateUnit==='year'?t.date.substring(0,4):t.date.substring(0,7);
+      if(!groups[key])groups[key]=[];
+      groups[key].push(t);
+    });
+    const keys=Object.keys(groups).sort((a,b)=>arcSortDesc?b>a?1:-1:a>b?1:-1);
+    keys.forEach(key=>{
+      const label=arcDateUnit==='year'?`${key} 年`:`${key.replace('-','年')}月`;
+      html+=`<div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:8px">
+          📅 ${label}
+          <span style="font-size:11px;color:var(--text3);font-weight:400">${groups[key].length} 筆</span>
+          <span style="flex:1;height:1px;background:var(--border);display:block"></span>
+        </div>
+        ${groups[key].map(t=>taskRowHTML(t)).join('')}
+      </div>`;
+    });
   }
-  if(pt.length){
-    html+=`<div style="margin-bottom:12px">
-      <div style="margin-bottom:6px"><span style="font-size:11px;background:#ECEFF1;color:#607D8B;padding:2px 8px;border-radius:6px;font-family:'JetBrains Mono',monospace">私人</span></div>
-      ${pt.map(t=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#ECEFF1;border-radius:8px;margin-bottom:4px">
-        <span style="font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">${t.date}</span>
-        <span style="font-size:12px;flex:1;text-decoration:line-through;opacity:.7">${t.title}</span>
-        <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;padding:2px 6px;font-family:inherit">還原</button>
-      </div>`).join('')}
-    </div>`;
-  }
+
   el.innerHTML=html;
 }
 
