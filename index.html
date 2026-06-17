@@ -302,6 +302,34 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .search-highlight{background:#FFF3CD;color:var(--text);border-radius:2px;padding:0 2px}
 .search-result-preview{font-size:12px;color:var(--text2);line-height:1.5}
 
+/* RESEARCH */
+:root{--teal:#0D9488;--teal-bg:#F0FDFA;--teal-mid:#99F6E4;--teal2:#0F766E;--purple:#7C3AED;--purple-bg:#F5F3FF;--purple-mid:#DDD6FE;}
+.res-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--teal);transition:all .15s;cursor:pointer}
+.res-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.res-card.dormant{border-left-color:var(--amber)}
+.res-card.done-res{border-left-color:var(--green);opacity:.6}
+.res-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px}
+.res-field{font-size:11px;color:var(--teal2);font-weight:500;margin-bottom:8px}
+.res-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.res-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.rs-idea{background:var(--purple-bg);color:var(--purple)}
+.rs-active{background:var(--teal-bg);color:var(--teal2)}
+.rs-dormant{background:var(--amber-bg);color:var(--amber)}
+.rs-done{background:var(--green-bg);color:var(--green)}
+.res-deadline{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.res-dormant-warn{font-size:10px;color:var(--amber);font-weight:600}
+.res-next{font-size:12px;color:var(--text2);background:var(--teal-bg);border-radius:6px;padding:6px 10px;margin-bottom:8px;border-left:2px solid var(--teal-mid)}
+.spark-list{margin-top:8px;border-top:1px solid var(--border);padding-top:8px}
+.spark-item{display:flex;gap:8px;align-items:flex-start;padding:4px 0;border-bottom:1px solid var(--bg)}
+.spark-date{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0;margin-top:2px}
+.spark-txt{font-size:12px;color:var(--text);line-height:1.5;flex:1}
+.paper-list{margin-top:6px}
+.paper-item{font-size:11px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--bg);display:flex;gap:6px}
+.paper-item::before{content:'📄';font-size:11px;flex-shrink:0}
+.res-detail{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.res-detail.open{display:block}
+.res-act-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+
 @media(max-width:600px){
   .hdr-email{display:none}
   .man-row{flex-direction:column}
@@ -426,6 +454,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
         <button class="vtab" id="vt-week" onclick="setView('week')">📆 週曆</button>
         <button class="vtab" id="vt-cal" onclick="setView('cal')">📅 月曆</button>
         <button class="vtab" id="vt-notes" onclick="setView('notes')">📝 筆記</button>
+        <button class="vtab" id="vt-research" onclick="setView('research')">🔬 研究</button>
         <button class="vtab" id="vt-search" onclick="setView('search')">🔍 搜尋</button>
       </div>
       <div class="view-nav">
@@ -605,6 +634,52 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
   </div>
 </div>
 
+<!-- RESEARCH MODAL -->
+<div class="modal-overlay" id="res-modal">
+  <div class="modal" style="max-width:640px;max-height:94vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div class="modal-title" style="margin:0" id="res-modal-title">新增研究項目</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-soft" onclick="closeModal('res-modal')" style="font-size:12px;padding:6px 12px">取消</button>
+        <button class="btn btn-ora" onclick="saveResearch()" style="font-size:12px;padding:6px 12px">儲存</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="fld"><label>研究主題</label><input type="text" id="r-title" placeholder="例：鋼橋鋼腹版振動噪音解法研究"></div>
+      <div class="fld"><label>狀態</label>
+        <select id="r-status">
+          <option value="idea">💡 構思中</option>
+          <option value="active">🔬 進行中</option>
+          <option value="dormant">💤 擱置中</option>
+          <option value="done">✅ 完成</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div class="fld"><label>研究領域 / 關聯</label><input type="text" id="r-field" placeholder="例：噪音振動、軌道幾何"></div>
+      <div class="fld"><label>目標期限（選填）</label><input type="date" id="r-deadline"></div>
+    </div>
+
+    <div class="fld" style="margin-bottom:12px">
+      <label>下一步行動</label>
+      <input type="text" id="r-nextstep" placeholder="例：找 3 篇關於正交各向異性板振動的 paper">
+    </div>
+
+    <div class="fld" style="margin-bottom:14px">
+      <label>💡 新增靈感記錄</label>
+      <textarea id="r-spark" placeholder="把現在腦子裡的想法先記下來…" style="height:70px;font-family:'Noto Sans TC',sans-serif;font-size:13px"></textarea>
+    </div>
+
+    <div class="fld" style="margin-bottom:14px">
+      <label>📄 文獻清單（每行一篇）</label>
+      <textarea id="r-papers" placeholder="例：Chen & Li (2021) - Vibration of orthotropic plate&#10;Remington (1987) - Wheel/rail noise" style="height:90px;font-size:12px"></textarea>
+    </div>
+
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -677,7 +752,8 @@ let S={
   _autoExpandDone:false,
   sortMode:'proj',
   notes:[],
-  editingNote:null,
+  research:[],
+  editingResearch:null,
   noteFilter:null,
   tasks:[],
   pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
@@ -783,6 +859,16 @@ async function loadFromFirebase(){
         if(data)S.notes=Object.values(data);
       }
       if(S.view==='notes')renderNotes();
+    });
+
+    // 即時監聽 research
+    db.ref('cyy321_todo_9x7k/research').on('value',snap=>{
+      S.research=[];
+      if(snap.exists()){
+        const data=snap.val();
+        if(data)S.research=Object.values(data);
+      }
+      if(S.view==='research')renderResearch();
     });
 
     // 即時監聽 projects
@@ -1005,7 +1091,7 @@ async function deleteCal(eventId){
 }
 
 // ── VIEW ──
-function setView(v){S.view=v;['list','week','cal','notes','search'].forEach(x=>{const el=document.getElementById('vt-'+x);if(el)el.className='vtab'+(x===v?' on':'');});renderView();}
+function setView(v){S.view=v;['list','week','cal','notes','research','search'].forEach(x=>{const el=document.getElementById('vt-'+x);if(el)el.className='vtab'+(x===v?' on':'');});renderView();}
 function navPrev(){if(S.view==='cal'){S.calMonth--;if(S.calMonth<0){S.calMonth=11;S.calYear--;}}else if(S.view==='week'){S.weekOffset--;}renderView();}
 function navNext(){if(S.view==='cal'){S.calMonth++;if(S.calMonth>11){S.calMonth=0;S.calYear++;}}else if(S.view==='week'){S.weekOffset++;}renderView();}
 function renderView(){
@@ -1014,6 +1100,7 @@ function renderView(){
   else if(S.view==='week')renderWeek();
   else if(S.view==='cal')renderCal();
   else if(S.view==='notes')renderNotes();
+  else if(S.view==='research')renderResearch();
   else if(S.view==='search')renderSearch();
 }
 
@@ -1579,21 +1666,45 @@ function buildSuggestion(){
   const tags=document.getElementById('sug-tags');
   const today=fmtDate(new Date());
   const pending=S.tasks.filter(t=>!t.done).sort((a,b)=>a.date>b.date?1:-1);
-  if(!pending.length){el.textContent='目前沒有待辦任務，好好休息 ☕';tags.innerHTML='';return;}
-  const overdue=pending.filter(t=>t.date<today);
-  const todayT=pending.filter(t=>t.date===today);
-  const thisWeek=pending.filter(t=>{const diff=(new Date(t.date)-new Date())/86400000;return diff>=0&&diff<=7;});
-  const urgent=pending.filter(t=>t.priority==='high');
+
   let parts=[];
-  if(overdue.length)parts.push(`<b style="color:var(--red)">逾期 ${overdue.length} 件</b>，請優先處理：${overdue.map(t=>t.title).slice(0,2).join('、')}`);
-  if(todayT.length)parts.push(`今天有 <b>${todayT.length} 件</b>任務：${todayT.map(t=>t.title).slice(0,2).join('、')}`);
-  else if(urgent.length&&!overdue.length)parts.push(`緊急事項：<b>${urgent[0].title}</b>（${urgent[0].date}）`);
-  if(!parts.length)parts.push(`下一個截止：<b>${pending[0].title}</b>（${pending[0].date}）`);
-  el.innerHTML=parts.join('<br>');
   let tagHtml='';
-  if(overdue.length)tagHtml+=`<span class="stag stag-u">逾期 ${overdue.length} 件</span>`;
-  if(todayT.length)tagHtml+=`<span class="stag stag-s">今天 ${todayT.length} 件</span>`;
-  if(thisWeek.length)tagHtml+=`<span class="stag stag-o">本週 ${thisWeek.length} 件</span>`;
+
+  if(!pending.length&&!S.research.length){el.textContent='目前沒有待辦任務，好好休息 ☕';tags.innerHTML='';return;}
+
+  if(pending.length){
+    const overdue=pending.filter(t=>t.date<today);
+    const todayT=pending.filter(t=>t.date===today);
+    const thisWeek=pending.filter(t=>{const diff=(new Date(t.date)-new Date())/86400000;return diff>=0&&diff<=7;});
+    const urgent=pending.filter(t=>t.priority==='high');
+    if(overdue.length)parts.push(`<b style="color:var(--red)">逾期 ${overdue.length} 件</b>，請優先處理：${overdue.map(t=>t.title).slice(0,2).join('、')}`);
+    if(todayT.length)parts.push(`今天有 <b>${todayT.length} 件</b>任務：${todayT.map(t=>t.title).slice(0,2).join('、')}`);
+    else if(urgent.length&&!overdue.length)parts.push(`緊急事項：<b>${urgent[0].title}</b>（${urgent[0].date}）`);
+    if(!parts.length&&pending.length)parts.push(`下一個截止：<b>${pending[0].title}</b>（${pending[0].date}）`);
+    if(overdue.length)tagHtml+=`<span class="stag stag-u">逾期 ${overdue.length} 件</span>`;
+    if(todayT.length)tagHtml+=`<span class="stag stag-s">今天 ${todayT.length} 件</span>`;
+    if(thisWeek.length)tagHtml+=`<span class="stag stag-o">本週 ${thisWeek.length} 件</span>`;
+  }
+
+  // Research dormancy nudge
+  const activeRes=S.research.filter(r=>r.status!=='done');
+  if(activeRes.length){
+    const dormant=activeRes.filter(r=>{
+      const last=r.lastTouchedAt||new Date(r.createdAt).toISOString().split('T')[0];
+      const diff=(new Date(today)-new Date(last))/86400000;
+      return diff>30;
+    });
+    if(dormant.length){
+      parts.push(`🔬 <b style="color:var(--teal2)">${dormant.length} 個研究</b>擱置超過 30 天：${dormant.map(r=>r.title).slice(0,2).join('、')}`);
+      tagHtml+=`<span class="stag" style="background:var(--teal-bg);color:var(--teal2);border:1px solid var(--teal-mid)">研究擱置 ${dormant.length}</span>`;
+    } else if(!pending.length){
+      // No tasks but have research: nudge
+      const r=activeRes.sort((a,b)=>(a.lastTouchedAt||'')>(b.lastTouchedAt||'')?1:-1)[0];
+      if(r)parts.push(`🔬 今天可以花點時間推進：<b>${r.title}</b>`);
+    }
+  }
+
+  el.innerHTML=parts.join('<br>')||'今天沒有緊急事項，保持進度 ☕';
   tags.innerHTML=tagHtml;
 }
 
@@ -2181,7 +2292,211 @@ function doSearch(q){
   }).join('');
 }
 
-function closeModal(id){document.getElementById(id).classList.remove('show');}
+// ── RESEARCH ──
+async function saveResearchToFirebase(){
+  if(!db)return;
+  try{
+    setSyncStatus('syncing','儲存中…');
+    const obj={};
+    S.research.forEach(r=>{obj[r.id]=r;});
+    await db.ref('cyy321_todo_9x7k/research').set(Object.keys(obj).length===0?null:obj);
+    setSyncStatus('ok','已同步 ✓');
+  }catch(e){console.error(e);setSyncStatus('err','同步失敗');}
+}
+
+function openNewResearch(){
+  S.editingResearch=null;
+  document.getElementById('res-modal-title').textContent='新增研究項目';
+  document.getElementById('r-title').value='';
+  document.getElementById('r-field').value='';
+  document.getElementById('r-status').value='idea';
+  document.getElementById('r-deadline').value='';
+  document.getElementById('r-nextstep').value='';
+  document.getElementById('r-spark').value='';
+  document.getElementById('r-papers').value='';
+  document.getElementById('res-modal').classList.add('show');
+}
+
+function openEditResearch(id){
+  const r=S.research.find(r=>r.id===id);
+  if(!r)return;
+  S.editingResearch=id;
+  document.getElementById('res-modal-title').textContent='編輯研究項目';
+  document.getElementById('r-title').value=r.title||'';
+  document.getElementById('r-field').value=r.field||'';
+  document.getElementById('r-status').value=r.status||'idea';
+  document.getElementById('r-deadline').value=r.deadline||'';
+  document.getElementById('r-nextstep').value=r.nextStep||'';
+  document.getElementById('r-spark').value='';
+  document.getElementById('r-papers').value=(r.papers||[]).join('\n');
+  document.getElementById('res-modal').classList.add('show');
+}
+
+async function saveResearch(){
+  const title=document.getElementById('r-title').value.trim();
+  if(!title){toast('請輸入研究主題','err');return;}
+  const sparkTxt=document.getElementById('r-spark').value.trim();
+  const papersRaw=document.getElementById('r-papers').value.trim();
+  const papers=papersRaw?papersRaw.split('\n').map(s=>s.trim()).filter(Boolean):[];
+  const now=Date.now();
+  const today=fmtDate(new Date());
+
+  if(S.editingResearch){
+    const r=S.research.find(r=>r.id===S.editingResearch);
+    if(!r)return;
+    r.title=title;
+    r.field=document.getElementById('r-field').value.trim();
+    r.status=document.getElementById('r-status').value;
+    r.deadline=document.getElementById('r-deadline').value||null;
+    r.nextStep=document.getElementById('r-nextstep').value.trim();
+    r.papers=papers;
+    r.updatedAt=now;
+    r.lastTouchedAt=today;
+    if(sparkTxt){
+      if(!r.sparks)r.sparks=[];
+      r.sparks.unshift({date:today,text:sparkTxt,ts:now});
+    }
+  } else {
+    const r={
+      id:now,
+      title,
+      field:document.getElementById('r-field').value.trim(),
+      status:document.getElementById('r-status').value,
+      deadline:document.getElementById('r-deadline').value||null,
+      nextStep:document.getElementById('r-nextstep').value.trim(),
+      papers,
+      sparks:sparkTxt?[{date:today,text:sparkTxt,ts:now}]:[],
+      createdAt:now,
+      updatedAt:now,
+      lastTouchedAt:today,
+    };
+    S.research.push(r);
+  }
+
+  await saveResearchToFirebase();
+  closeModal('res-modal');
+  renderResearch();
+  toast('✅ 研究項目已儲存','ok');
+}
+
+async function addSparkQuick(id){
+  const txt=prompt('記下這個靈感：');
+  if(!txt||!txt.trim())return;
+  const r=S.research.find(r=>r.id===id);
+  if(!r)return;
+  const today=fmtDate(new Date());
+  if(!r.sparks)r.sparks=[];
+  r.sparks.unshift({date:today,text:txt.trim(),ts:Date.now()});
+  r.lastTouchedAt=today;
+  r.updatedAt=Date.now();
+  await saveResearchToFirebase();
+  renderResearch();
+  toast('💡 靈感已記錄','ok');
+}
+
+async function deleteResearch(id){
+  if(!confirm('確定要刪除此研究項目嗎？'))return;
+  S.research=S.research.filter(r=>r.id!==id);
+  await saveResearchToFirebase();
+  renderResearch();
+  toast('✅ 已刪除','ok');
+}
+
+function toggleResCard(id){
+  const el=document.getElementById('res-detail-'+id);
+  if(!el)return;
+  el.classList.toggle('open');
+}
+
+function renderResearch(){
+  document.getElementById('nav-label').textContent='';
+  const el=document.getElementById('main-view');
+  const today=fmtDate(new Date());
+
+  const statusLabel={idea:'💡 構思中',active:'🔬 進行中',dormant:'💤 擱置中',done:'✅ 完成'};
+  const statusClass={idea:'rs-idea',active:'rs-active',dormant:'rs-dormant',done:'rs-done'};
+
+  // Check dormancy: lastTouchedAt > 30 days ago
+  function isDormantWarn(r){
+    if(r.status==='done')return false;
+    const lastDate=r.lastTouchedAt||r.createdAt;
+    if(!lastDate)return false;
+    const diff=(new Date(today)-new Date(typeof lastDate==='number'?new Date(lastDate).toISOString().split('T')[0]:lastDate))/86400000;
+    return diff>30;
+  }
+
+  const active=S.research.filter(r=>r.status!=='done').sort((a,b)=>{
+    const order={active:0,idea:1,dormant:2};
+    return(order[a.status]??3)-(order[b.status]??3);
+  });
+  const done=S.research.filter(r=>r.status==='done');
+
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+    <div style="font-size:13px;color:var(--text2)">共 ${S.research.length} 個研究項目</div>
+    <button class="btn btn-ora" onclick="openNewResearch()" style="padding:7px 16px">＋ 新增研究</button>
+  </div>`;
+
+  if(!S.research.length){
+    el.innerHTML=html+`<div class="empty"><div class="empty-ico">🔬</div>還沒有研究項目<br><span style="font-size:11px;color:var(--text3)">把有興趣的題目、靈感記在這裡，避免遺忘</span></div>`;
+    return;
+  }
+
+  function resCardHTML(r){
+    const warn=isDormantWarn(r);
+    const daysSince=r.lastTouchedAt?(Math.floor((new Date(today)-new Date(r.lastTouchedAt))/86400000)):null;
+    const sparks=r.sparks||[];
+    const papers=r.papers||[];
+    return`<div class="res-card ${r.status==='done'?'done-res':warn?'dormant':''}" onclick="toggleResCard(${r.id})">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div style="flex:1">
+          <div class="res-title">${r.title}</div>
+          ${r.field?`<div class="res-field">📌 ${r.field}</div>`:''}
+          <div class="res-meta">
+            <span class="res-status ${statusClass[r.status]||'rs-idea'}">${statusLabel[r.status]||r.status}</span>
+            ${r.deadline?`<span class="res-deadline">📅 ${r.deadline}</span>`:''}
+            ${warn?`<span class="res-dormant-warn">⚠ 已 ${daysSince} 天未動</span>`:''}
+            ${sparks.length?`<span style="font-size:10px;color:var(--text3)">💡 ${sparks.length} 筆靈感</span>`:''}
+            ${papers.length?`<span style="font-size:10px;color:var(--text3)">📄 ${papers.length} 篇文獻</span>`:''}
+          </div>
+          ${r.nextStep?`<div class="res-next">→ ${r.nextStep}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+          <button onclick="event.stopPropagation();addSparkQuick(${r.id})" class="t-btn" title="記下靈感">💡</button>
+          <button onclick="event.stopPropagation();openEditResearch(${r.id})" class="t-btn">✏️</button>
+          <button onclick="event.stopPropagation();deleteResearch(${r.id})" class="t-btn del">✕</button>
+        </div>
+      </div>
+
+      <div class="res-detail" id="res-detail-${r.id}">
+        ${sparks.length?`<div class="spark-list">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:6px;letter-spacing:.04em">SPARKS / 靈感記錄</div>
+          ${sparks.map(s=>`<div class="spark-item"><span class="spark-date">${s.date}</span><span class="spark-txt">${s.text}</span></div>`).join('')}
+        </div>`:'<div style="font-size:12px;color:var(--text3);padding:8px 0">還沒有靈感記錄，點 💡 按鈕快速記錄</div>'}
+        ${papers.length?`<div class="paper-list">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);margin:10px 0 5px;letter-spacing:.04em">PAPERS / 文獻清單</div>
+          ${papers.map(p=>`<div class="paper-item">${p}</div>`).join('')}
+        </div>`:''}
+        <div class="res-act-row">
+          <button class="btn btn-soft" onclick="event.stopPropagation();openEditResearch(${r.id})" style="font-size:11px;padding:5px 12px">✏️ 編輯</button>
+          <button class="btn" onclick="event.stopPropagation();addSparkQuick(${r.id})" style="font-size:11px;padding:5px 12px;background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-mid)">💡 記下靈感</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if(active.length){
+    html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🔬 進行中 / 構思中</div>`;
+    html+=active.map(resCardHTML).join('');
+  }
+  if(done.length){
+    html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin:16px 0 10px">✅ 已完成</div>`;
+    html+=done.map(resCardHTML).join('');
+  }
+
+  el.innerHTML=html;
+}
+
+
 
 function openTypeModal(){renderTypeList();document.getElementById('type-modal').classList.add('show');}
 function renderTypeList(){
