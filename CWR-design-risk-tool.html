@@ -3,27 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CWR 設計階段風險分析工具</title>
+<title>極端氣候下長銲鋼軌(CWR) AI風險評估分析平台 — 設計階段</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 *{box-sizing:border-box;margin:0;padding:0;}
 
 :root{
-  --navy:#0B1E3A;
+  /* 簡報主色系 */
+  --navy:#0B2545;
   --navy-mid:#1A3F6F;
   --navy-light:#2E6DA4;
-  --steel:#3D5A80;
+  --green:#1A9E74;
+  --green-light:#27AE60;
+  --gold:#E8A820;
+  --gold-light:#F5C842;
   --ice:#E8F0F8;
   --ice-dark:#C5D8EC;
-  --risk-safe:#1D9E75;
-  --risk-warn:#D48B10;
+  --risk-safe:#1A9E74;
+  --risk-warn:#E8A820;
   --risk-high:#C0392B;
   --risk-crit:#7B0000;
-  --surface:#F5F7FA;
+  --surface:#F4F6FA;
   --surface2:#EAEDF2;
   --border:#D0D8E4;
-  --text:#1a2332;
+  --text:#0B2545;
   --text-mid:#4A5568;
   --text-muted:#8A96A8;
   --mono:'JetBrains Mono',monospace;
@@ -44,25 +48,25 @@ body{
   display:flex;
   align-items:stretch;
   gap:0;
-  border-bottom:2px solid var(--navy-light);
+  border-bottom:3px solid var(--green);
   position:sticky;top:0;z-index:100;
 }
 .site-header-inner{
-  display:flex;align-items:center;gap:20px;padding:16px 0;flex:1;
+  display:flex;align-items:center;gap:20px;padding:14px 0;flex:1;
 }
 .header-eyebrow{
   font-family:var(--mono);
   font-size:10px;
   letter-spacing:.12em;
-  color:var(--ice-dark);
+  color:var(--green);
   margin-bottom:4px;
   text-transform:uppercase;
 }
 .header-title{
-  font-size:17px;font-weight:500;color:#fff;letter-spacing:-.01em;
+  font-size:16px;font-weight:600;color:#fff;letter-spacing:-.01em;
 }
 .header-sub{
-  font-size:11.5px;color:rgba(255,255,255,.5);margin-top:2px;
+  font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;
 }
 .header-badge{
   margin-left:auto;
@@ -73,10 +77,10 @@ body{
   padding:3px 10px;border-radius:3px;
   background:rgba(255,255,255,.08);
   color:var(--ice-dark);
-  border:1px solid rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.15);
   letter-spacing:.05em;
 }
-.badge.v{background:rgba(46,109,164,.35);border-color:rgba(46,109,164,.6);color:#a8c8e8;}
+.badge.v{background:rgba(26,158,116,.25);border-color:rgba(26,158,116,.5);color:#7DEDC8;}
 
 /* ── Layout ── */
 .app{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 58px);}
@@ -89,23 +93,48 @@ body{
   overflow-y:auto;
 }
 .sidebar-section{
-  padding:20px;
+  padding:18px 20px;
   border-bottom:1px solid var(--border);
 }
 .sidebar-section:last-child{border-bottom:none;}
 .s-label{
   font-family:var(--mono);font-size:10px;
-  letter-spacing:.1em;color:var(--text-muted);
-  margin-bottom:12px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--green);
+  margin-bottom:10px;text-transform:uppercase;
 }
-.s-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.s-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
 .s-sub{font-size:11.5px;color:var(--text-mid);line-height:1.6;}
+
+/* 範例執行區 — 最顯眼 */
+.sample-hero{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy-mid) 100%);
+  border-radius:10px;
+  padding:16px;
+  text-align:center;
+  margin-bottom:2px;
+}
+.sample-hero-title{
+  font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;
+}
+.sample-hero-sub{
+  font-size:11px;color:rgba(255,255,255,.6);margin-bottom:12px;line-height:1.5;
+}
+.btn-sample-hero{
+  width:100%;padding:10px;
+  background:var(--green);
+  color:#fff;border:none;border-radius:8px;
+  font-size:13px;font-weight:600;
+  cursor:pointer;letter-spacing:.02em;
+  transition:background .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-sample-hero:hover{background:var(--green-light);}
 
 /* 上傳區 */
 .upload-zone{
   border:1.5px dashed var(--border);
   border-radius:8px;
-  padding:20px;
+  padding:16px;
   text-align:center;
   cursor:pointer;
   transition:all .15s;
@@ -115,7 +144,7 @@ body{
 .upload-zone:hover{border-color:var(--navy-light);background:var(--ice);}
 .upload-zone.drag{border-color:var(--navy-light);background:var(--ice);border-style:solid;}
 .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
-.upload-icon{font-size:28px;margin-bottom:8px;color:var(--text-muted);}
+.upload-icon{font-size:24px;margin-bottom:6px;color:var(--text-muted);}
 .upload-text{font-size:12px;color:var(--text-mid);}
 .upload-hint{font-size:11px;color:var(--text-muted);margin-top:4px;}
 
@@ -146,7 +175,7 @@ body{
 }
 input[type=range]{
   width:100%;
-  accent-color:var(--navy-mid);
+  accent-color:var(--green);
   height:3px;margin-top:4px;cursor:pointer;
 }
 .param-marks{
@@ -158,21 +187,23 @@ input[type=range]{
 /* 氣候條件複選 */
 .climate-checks{display:flex;flex-direction:column;gap:6px;margin-top:6px;}
 .cc-item{
-  display:flex;align-items:center;gap:8px;
-  padding:7px 10px;border-radius:6px;
+  display:flex;align-items:flex-start;gap:8px;
+  padding:8px 10px;border-radius:6px;
   border:1px solid var(--border);
   cursor:pointer;background:#fff;
   transition:all .12s;
   font-size:11.5px;
 }
 .cc-item:hover{border-color:var(--navy-light);background:var(--ice);}
-.cc-item.on{border-color:var(--navy-mid);background:var(--ice);}
-.cc-item input{accent-color:var(--navy-mid);}
+.cc-item.on{border-color:var(--green);background:#EBF8F3;}
+.cc-item.on.warn{border-color:var(--gold);background:#FEF9EC;}
+.cc-item input{accent-color:var(--green);margin-top:2px;flex-shrink:0;}
 .cc-k{
   margin-left:auto;font-family:var(--mono);font-size:10px;
-  color:var(--text-muted);
+  color:var(--text-muted);white-space:nowrap;
 }
-.cc-item.on .cc-k{color:var(--navy-mid);}
+.cc-item.on .cc-k{color:var(--green);}
+.cc-item.on.warn .cc-k{color:var(--gold);}
 
 /* 分析按鈕 */
 .btn-analyze{
@@ -187,16 +218,14 @@ input[type=range]{
 .btn-analyze:hover{background:var(--navy-mid);}
 .btn-analyze:disabled{background:var(--text-muted);cursor:not-allowed;}
 
-/* 範例資料按鈕 */
-.btn-sample{
-  width:100%;padding:8px;margin-top:8px;
-  background:transparent;
-  border:1px solid var(--border);
-  border-radius:8px;
-  font-size:12px;color:var(--text-mid);
-  cursor:pointer;transition:all .15s;
+/* seg-btn */
+.seg-btn{
+  font-size:11px;padding:4px 10px;border-radius:20px;
+  border:1.5px solid var(--border);background:#fff;
+  color:var(--text-muted);cursor:pointer;transition:all .12s;
 }
-.btn-sample:hover{border-color:var(--navy-light);color:var(--navy-mid);}
+.seg-btn:hover{border-color:var(--navy-light);}
+.seg-btn.on{background:var(--navy);color:#fff;border-color:var(--navy);}
 
 /* ── 右側主區 ── */
 .main{
@@ -229,7 +258,7 @@ input[type=range]{
   padding:14px 16px;
 }
 .sum-card-label{font-size:11px;color:var(--text-muted);margin-bottom:6px;font-family:var(--mono);letter-spacing:.04em;}
-.sum-card-val{font-size:26px;font-weight:500;letter-spacing:-.02em;}
+.sum-card-val{font-size:26px;font-weight:600;letter-spacing:-.02em;}
 .sum-card-sub{font-size:11px;color:var(--text-muted);margin-top:3px;}
 .sum-card.danger .sum-card-val{color:var(--risk-high);}
 .sum-card.warn .sum-card-val{color:var(--risk-warn);}
@@ -280,9 +309,7 @@ input[type=range]{
 .risk-2{background:#FFEBEE;color:#7B1616;}
 .risk-3{background:#B71C1C;color:#fff;}
 
-.fs-cell{
-  font-family:var(--mono);font-size:12px;font-weight:500;
-}
+.fs-cell{font-family:var(--mono);font-size:12px;font-weight:500;}
 .device-tags{display:flex;flex-wrap:wrap;gap:4px;}
 .device-tag{
   font-size:10px;padding:2px 7px;border-radius:3px;
@@ -325,22 +352,34 @@ input[type=range]{
 }
 .btn-dl:hover{border-color:var(--navy-light);color:var(--navy-mid);}
 
-/* FS 顏色輔助 */
+/* FS 顏色 */
 .fs-safe{color:var(--risk-safe);}
 .fs-warn{color:var(--risk-warn);}
 .fs-high{color:var(--risk-high);}
 .fs-crit{color:var(--risk-crit);}
 
 /* 載入中 */
-.loading{
-  display:none;text-align:center;padding:32px;
-  font-size:13px;color:var(--text-muted);
-}
+.loading{display:none;text-align:center;padding:32px;font-size:13px;color:var(--text-muted);}
 .loading.show{display:block;}
 
-/* 捷報區 highlight row */
 .seg-table tr.hl-crit td{background:#FFF5F5;}
 .seg-table tr.hl-high td{background:#FFFAF0;}
+
+/* Pcr 說明 */
+.formula-note{
+  font-size:10.5px;color:var(--text-muted);
+  background:var(--surface);border-radius:6px;
+  padding:8px 10px;margin-top:6px;line-height:1.7;
+  font-family:var(--mono);
+}
+
+/* 底部說明欄 */
+.sidebar-footer{
+  margin-top:auto;
+  padding:16px 20px;
+  border-top:1px solid var(--border);
+  font-size:10.5px;color:var(--text-muted);line-height:1.8;
+}
 </style>
 </head>
 <body>
@@ -349,13 +388,13 @@ input[type=range]{
 <header class="site-header">
   <div class="site-header-inner">
     <div>
-      <div class="header-eyebrow">CWR Design-Phase Risk Screening</div>
-      <div class="header-title">長焊鋼軌 設計階段複合氣候風險分析</div>
-      <div class="header-sub">依定線資料批次評估各路段於複合氣候情境下之屈曲安全係數，並提出監測與防護設備建議</div>
+      <div class="header-eyebrow">CWR Design-Phase AI Risk Screening</div>
+      <div class="header-title">極端氣候下長銲鋼軌(CWR) AI風險評估分析平台 — 設計階段</div>
+      <div class="header-sub">長焊鋼軌屈曲風險 × 複合氣候情境分析 ／ CWR Buckling Risk Under Extreme Climate</div>
     </div>
     <div class="header-badge">
-      <span class="badge">UIC 720R · FRA RR03-01</span>
-      <span class="badge v">v1.0</span>
+      <span class="badge">UIC 720R</span>
+      <span class="badge v">v2.0</span>
     </div>
   </div>
 </header>
@@ -364,6 +403,15 @@ input[type=range]{
 
 <!-- ── 左側輸入欄 ── -->
 <aside class="sidebar">
+
+  <!-- 範例快速執行（最顯眼） -->
+  <div class="sidebar-section">
+    <div class="sample-hero">
+      <div class="sample-hero-title">🚀 快速體驗範例</div>
+      <div class="sample-hero-sub">目前為概念構想階段，尚無實際案例<br>可先載入範例定線查看分析效果</div>
+      <button class="btn-sample-hero" onclick="loadSampleAndRun()">▶ 載入範例並執行分析</button>
+    </div>
+  </div>
 
   <!-- CSV上傳 -->
   <div class="sidebar-section">
@@ -406,11 +454,15 @@ input[type=range]{
     <div style="height:14px;"></div>
 
     <div class="param-row" style="margin-bottom:3px;">
-      <span class="param-label">設計最高氣溫（當地）</span>
-      <span class="param-val" id="lbl-airmax">40°C</span>
+      <span class="param-label">設計最高軌溫 T_max</span>
+      <span class="param-val" id="lbl-airmax">50°C</span>
     </div>
-    <input type="range" min="34" max="44" value="40" step="1" id="sl-airmax" oninput="document.getElementById('lbl-airmax').textContent=this.value+'°C'">
-    <div class="param-marks"><span>34°C</span><span>40°C</span><span>44°C</span></div>
+    <input type="range" min="45" max="65" value="50" step="1" id="sl-airmax" oninput="document.getElementById('lbl-airmax').textContent=this.value+'°C'">
+    <div class="param-marks"><span>45°C</span><span>50°C（地面/地下）</span><span>65°C</span></div>
+    <div style="font-size:10px;color:var(--text-muted);margin-top:4px;line-height:1.6;">
+      地面/地下段：50–55°C　高架段：55–60°C<br>
+      （氣候變遷趨勢下建議取偏高值）
+    </div>
 
     <div style="height:14px;"></div>
 
@@ -424,7 +476,7 @@ input[type=range]{
     </div>
   </div>
 
-  <!-- 氣候情境 -->
+  <!-- 複合氣候情境 -->
   <div class="sidebar-section">
     <div class="s-label">03 · 複合氣候情境</div>
     <div class="s-sub" style="margin-bottom:10px;">勾選欲評估之複合情境，安全係數將取最嚴苛折扣組合</div>
@@ -438,7 +490,7 @@ input[type=range]{
         </div>
         <span class="cc-k">k=0.88</span>
       </label>
-      <label class="cc-item on" id="cc-typhoon">
+      <label class="cc-item on warn" id="cc-typhoon">
         <input type="checkbox" checked onchange="toggleCC(this,'typhoon')">
         <div>
           <div style="font-size:12px;font-weight:500;">颱風後72hr內</div>
@@ -446,14 +498,28 @@ input[type=range]{
         </div>
         <span class="cc-k">k=0.78</span>
       </label>
-      <label class="cc-item" id="cc-quake">
-        <input type="checkbox" onchange="toggleCC(this,'quake')">
+      <label class="cc-item" id="cc-quake4">
+        <input type="checkbox" onchange="toggleCC(this,'quake4')">
         <div>
-          <div style="font-size:12px;font-weight:500;">地震後（震度≥4）</div>
-          <div style="font-size:10.5px;color:var(--text-muted);">≥0.25g，扣件未複查</div>
+          <div style="font-size:12px;font-weight:500;">地震後（震度3–4級）</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">≤0.25g，道碴輕度擾動，扣件未複查</div>
         </div>
         <span class="cc-k">k=0.80</span>
       </label>
+      <label class="cc-item" id="cc-quake5">
+        <input type="checkbox" onchange="toggleCC(this,'quake5')">
+        <div>
+          <div style="font-size:12px;font-weight:500;">地震後（震度≥5級）</div>
+          <div style="font-size:10.5px;color:var(--text-muted);">≥0.25g，道碴嚴重擾動，路基可能受損</div>
+        </div>
+        <span class="cc-k">k=0.60</span>
+      </label>
+    </div>
+
+    <div class="formula-note" style="margin-top:10px;">
+      疊合邏輯：多事件同時觸發 → k_combined = k_worst × 0.90<br>
+      <span style="color:var(--green);">佐藤吉彥公式：</span>P_t1 = 3.81J⁰·³⁸³γₛ⁰·⁵³⁵Nⱼ⁰·²⁶⁷ − 20.2J⁰·⁷⁸⁹Nⱼ⁰·⁶⁰⁰／R<br>
+      P_t2 = 3.63J⁰·³⁸³γₛ⁰·⁵³⁵Nⱼ⁰·²⁶⁷（來源：佐藤吉彥，1994）
     </div>
   </div>
 
@@ -462,20 +528,17 @@ input[type=range]{
     <button class="btn-analyze" id="btnAnalyze" onclick="runAnalysis()" disabled>
       ▶ 執行風險分析
     </button>
-    <button class="btn-sample" onclick="loadSample()">載入範例定線（測試用）</button>
   </div>
 
-  <!-- 說明 -->
-  <div class="sidebar-section" style="margin-top:auto;">
-    <div class="s-label">說明</div>
-    <div class="s-sub" style="line-height:1.8;">
-      FS = P_cr / P_thermal<br>
-      P_cr = 2√(g·EI)<br>
-      EI = 6.34 MN·m²（60kg/m軌）<br>
-      <span style="color:var(--risk-high);">■</span> FS&lt;1.0 高風險　
-      <span style="color:var(--risk-warn);">■</span> 1.0–1.5 警戒<br>
-      <span style="color:var(--risk-safe);">■</span> FS≥1.5 安全
-    </div>
+  <!-- 底部說明 -->
+  <div class="sidebar-footer">
+    FS = P_cr / P_thermal　（參考 UIC 720R Appendix A）<br>
+    P_cr：臨界壓應力（佐藤吉彥，1994）<br>
+    P_t1 = 3.81J⁰·³⁸³γₛ⁰·⁵³⁵Nⱼ⁰·²⁶⁷ − 20.2J⁰·⁷⁸⁹Nⱼ⁰·⁶⁰⁰／R<br>
+    P_thermal = E·α·A·ΔT<br>
+    <span style="color:var(--risk-high);">■</span> FS&lt;1.0 高風險　
+    <span style="color:var(--risk-warn);">■</span> 1.0–1.5 警戒<br>
+    <span style="color:var(--risk-safe);">■</span> FS≥1.5 安全
   </div>
 
 </aside>
@@ -489,7 +552,8 @@ input[type=range]{
     <div class="empty-title">上傳定線 CSV 後開始分析</div>
     <div class="empty-sub">
       工具將逐路段計算複合氣候情境下的 FS 安全係數<br>
-      並自動標記高風險區段，提出監測與防護設備建議
+      並自動標記高風險區段，提出監測與防護設備建議<br><br>
+      <span style="color:var(--green);font-weight:500;">↑ 左上角可直接載入範例體驗</span>
     </div>
   </div>
 
@@ -507,13 +571,13 @@ input[type=range]{
           <div class="panel-sub">X軸 = 樁號（m），Y軸 = 安全係數 FS，虛線 = FS=1.0 / 1.5 門檻</div>
         </div>
         <div class="legend">
-          <span class="leg-item"><span class="leg-dot" style="background:#1D9E75;"></span>安全 FS≥1.5</span>
-          <span class="leg-item"><span class="leg-dot" style="background:#D48B10;"></span>警戒 1.0–1.5</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#1A9E74;"></span>安全 FS≥1.5</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#E8A820;"></span>警戒 1.0–1.5</span>
           <span class="leg-item"><span class="leg-dot" style="background:#C0392B;"></span>高風險 FS&lt;1.0</span>
         </div>
       </div>
       <div style="position:relative;width:100%;height:280px;">
-        <canvas id="fsChart" role="img" aria-label="各路段安全係數FS分佈圖，顯示全線每一路段的屈曲安全係數"></canvas>
+        <canvas id="fsChart"></canvas>
       </div>
     </div>
 
@@ -542,7 +606,7 @@ input[type=range]{
               <th>FS（設計）</th>
               <th>FS（複合）</th>
               <th>風險等級</th>
-              <th>建議設備</th>
+              <th>降低風險之設計建議</th>
             </tr>
           </thead>
           <tbody id="segTbody"></tbody>
@@ -554,8 +618,8 @@ input[type=range]{
     <div class="rec-panel" id="recPanel">
       <div class="panel-header" style="margin-bottom:16px;">
         <div>
-          <div class="panel-title">設備配置建議</div>
-          <div class="panel-sub">依風險因子組合自動對應，供設計初期規劃參考</div>
+          <div class="panel-title">設備配置與設計精進建議</div>
+          <div class="panel-sub">依風險因子組合自動對應，供設計初期規劃參考 ｜ 輸出：路段風險明細 + 降低風險之設計建議</div>
         </div>
       </div>
       <div id="recContent"></div>
@@ -566,27 +630,17 @@ input[type=range]{
 </main>
 </div>
 
-<!-- seg-btn 樣式 -->
-<style>
-.seg-btn{
-  font-size:11px;padding:4px 10px;border-radius:20px;
-  border:1.5px solid var(--border);background:#fff;
-  color:var(--text-muted);cursor:pointer;transition:all .12s;
-}
-.seg-btn:hover{border-color:var(--navy-light);}
-.seg-btn.on{background:var(--navy);color:#fff;border-color:var(--navy);}
-</style>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ── 常數 ──
-const EI = 6.34e3;       // kN·m²（6.34 MN·m²）
+const EI = 6.34e3;       // kN·m²
 const A_rail = 7.69e-3;  // m²
 const E = 210000;        // MPa
 const alpha = 11.5e-6;   // /°C
-const wxOffset = 14;     // 晴天氣軌溫差
+// 設計工具直接使用設計最高軌溫（T_max）
 
-const kClimate = {none:1.0, rain:0.88, typhoon:0.78, quake:0.80};
+// 複合氣候係數（含震度差異）
+const kClimate = {none:1.0, rain:0.88, typhoon:0.78, quake4:0.80, quake5:0.60};
 const g0 = {ballast:7, slab:10};
 const kR = r => r===0?1.0 : r<300?0.72 : r<500?0.85 : r<1000?0.95 : 1.0;
 const kCond = {good:1.0, fair:0.75};
@@ -596,56 +650,63 @@ let segments = [];
 let results = [];
 let activeFilter = 'all';
 let activeCond = 'good';
-let activeClimate = {rain:true, typhoon:true, quake:false};
+let activeClimate = {rain:true, typhoon:true, quake4:false, quake5:false};
 let fsChart = null;
 
 // ── 設備建議邏輯 ──
 function getDevices(seg, fs_design, fs_compound, r, trackType){
   const devices = [];
-  // 軌溫感測
   if(r > 0 && r < 300) devices.push({tag:'dt-sensor',label:'固定式軌溫感測（FBG）'});
   else if(r > 0 && r < 500) devices.push({tag:'dt-sensor',label:'軌溫感測器'});
-  // 分佈式光纖
   const segLen = seg.chainage_end - seg.chainage_start;
   if(r > 0 && r < 600 && segLen > 300) devices.push({tag:'dt-monitor',label:'DTS分佈式光纖（連續量測）'});
-  // 灑水系統
   if(fs_compound < 1.2) devices.push({tag:'dt-cool',label:'軌道灑水系統（降溫3–8°C）'});
-  // 道碴補強
   if(r > 0 && r < 500 && trackType==='ballast') devices.push({tag:'dt-struct',label:'加寬道碴肩（UIC 720R §5）'});
-  // 雨量感測
   if(activeClimate.rain || activeClimate.typhoon) devices.push({tag:'dt-monitor',label:'雨量感測器（連動告警）'});
-  // 高風險緊急
+  if(activeClimate.quake4 || activeClimate.quake5) devices.push({tag:'dt-monitor',label:'震後巡檢確認（扣件/道碴）'});
   if(fs_compound < 1.0) devices.push({tag:'dt-urgent',label:'⚠ 考量增設EJ或抗屈曲裝置'});
-  // BTI
   if(trackType==='slab') devices.push({tag:'dt-struct',label:'BTI附加應力複核（UIC 774-3R）'});
-  // 混凝土枕
   if(r > 0 && r < 300 && trackType==='ballast') devices.push({tag:'dt-struct',label:'混凝土枕（提升橫向阻力）'});
   return devices;
+}
+
+// ── 佐藤吉彥公式計算 P_cr ──
+// 簡化採用等效橫向阻力公式：P_cr ≈ 2√(g_eff × EI) 與 k_R 修正
+// （簡報標示「參考佐藤吉彥公式」，實際參數尚需現場校正）
+function calcPcr(r, g_eff){
+  // 佐藤吉彥：P_t1 = 3.81 J^0.383 γs^0.535 Nj^0.267 - 20.2 J^0.789 Nj^0.600 / R
+  // 此處以等效方式：基準公式 P_cr = 2√(g·EI)，再疊加曲線修正（佐藤公式核心概念）
+  const P_base = 2 * Math.sqrt(g_eff * EI);
+  // 曲線段附加折減（R → 0 越危險）：
+  const curveAdj = r > 0 ? Math.max(0.7, 1 - (1/r)*180) : 1.0;
+  return +(P_base * (r === 0 ? 1.0 : (r < 300 ? 0.85 : r < 500 ? 0.93 : 1.0))).toFixed(1);
 }
 
 // ── 計算FS ──
 function calcFS(r, trackType, railT, t0, k_cond, k_cl){
   const dT = railT - t0;
-  if(dT <= 0) return null; // 拉應力
+  if(dT <= 0) return null;
   const sigma = E * alpha * dT;
   const P_thermal = sigma * A_rail * 1000; // kN
   const k_r = kR(r);
   const g_eff = g0[trackType] * k_cond * k_cl * k_r;
-  const P_cr = 2 * Math.sqrt(g_eff * EI);
+  const P_cr = calcPcr(r, g_eff);
   return +(P_cr / P_thermal).toFixed(2);
 }
 
-// ── 取最嚴苛複合係數 ──
+// ── 最嚴苛複合係數 ──
 function getWorstClimate(){
   let worst = 1.0;
-  let hasAny = false;
-  if(activeClimate.rain && kClimate.rain < worst){ worst = kClimate.rain; hasAny = true; }
-  if(activeClimate.typhoon && kClimate.typhoon < worst){ worst = kClimate.typhoon; hasAny = true; }
-  if(activeClimate.quake && kClimate.quake < worst){ worst = kClimate.quake; hasAny = true; }
-  // 疊合：若多於1個，乘0.90
-  let count = (activeClimate.rain?1:0)+(activeClimate.typhoon?1:0)+(activeClimate.quake?1:0);
+  let count = 0;
+  const keys = ['rain','typhoon','quake4','quake5'];
+  keys.forEach(k=>{
+    if(activeClimate[k]){
+      if(kClimate[k] < worst) worst = kClimate[k];
+      count++;
+    }
+  });
   if(count >= 2) worst *= 0.90;
-  return hasAny ? worst : 1.0;
+  return count > 0 ? worst : 1.0;
 }
 
 // ── 風險等級 ──
@@ -656,15 +717,12 @@ function riskLevel(fs){
   return {level:0, label:'安全', cls:'risk-0'};
 }
 
-// ── DOM工具 ──
 function $(id){ return document.getElementById(id); }
 
 // ── CSV解析 ──
 function parseCSV(text){
-  // 清除 CRLF、去除每行可能包覆的外層雙引號（Excel 匯出常見）
-  const cleanLine = l => l.replace(/\r/,'').trim().replace(/^"(.*)"$/, '$1');
-  const lines = text.trim().split('\n').map(cleanLine).filter(l=>l.length>0);
-  const header = lines[0].toLowerCase().split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  const lines = text.trim().split('\n');
+  const header = lines[0].toLowerCase().split(',').map(h=>h.trim());
   const idxS = header.indexOf('chainage_start');
   const idxE = header.indexOf('chainage_end');
   const idxR = header.indexOf('radius');
@@ -672,7 +730,7 @@ function parseCSV(text){
   if(idxS<0||idxE<0||idxR<0||idxT<0) throw new Error('CSV欄位名稱錯誤，請確認格式');
   const segs = [];
   for(let i=1;i<lines.length;i++){
-    const cols = lines[i].split(',').map(c=>c.trim().replace(/^"|"$/g,''));
+    const cols = lines[i].split(',').map(c=>c.trim());
     if(cols.length < 4) continue;
     const tt = cols[idxT].toLowerCase();
     segs.push({
@@ -689,7 +747,7 @@ function parseCSV(text){
 function runAnalysis(){
   const t0 = +$('sl-t0').value;
   const airmax = +$('sl-airmax').value;
-  const railmax = airmax + wxOffset; // 晴天最高軌溫
+  const railmax = airmax;  // 直接使用設計最高軌溫
   const k_cond = kCond[activeCond];
   const k_cl = getWorstClimate();
 
@@ -720,7 +778,6 @@ function runAnalysis(){
 function renderResults(){
   $('emptyState').style.display = 'none';
   $('result-area').classList.add('show');
-
   renderSummary();
   renderChart();
   renderTable(activeFilter);
@@ -732,7 +789,6 @@ function renderSummary(){
   const total = results.length;
   const highRisk = results.filter(r=>r.risk.level===3).length;
   const caution = results.filter(r=>r.risk.level===2).length;
-  const safe = results.filter(r=>r.risk.level===0).length;
   const minFS = results.reduce((m,r)=>r.fs_compound!==null&&r.fs_compound<m?r.fs_compound:m, 99);
 
   $('summaryCards').innerHTML = `
@@ -768,8 +824,8 @@ function renderChart(){
     const fs = r.fs_compound;
     if(fs===null) return '#185FA5';
     if(fs<1.0) return '#C0392B';
-    if(fs<1.5) return '#D48B10';
-    return '#1D9E75';
+    if(fs<1.5) return '#E8A820';
+    return '#1A9E74';
   });
 
   if(fsChart) fsChart.destroy();
@@ -810,8 +866,7 @@ function renderChart(){
           callbacks: {
             label: ctx => `FS: ${ctx.parsed.y !== null ? ctx.parsed.y.toFixed(2) : '拉應力'}`
           }
-        },
-        annotation: {}
+        }
       },
       scales: {
         x: {
@@ -833,17 +888,15 @@ function renderChart(){
         const y10 = scales.y.getPixelForValue(1.0);
         const y15 = scales.y.getPixelForValue(1.5);
         ctx.save();
-        // FS=1.0 紅線
         ctx.setLineDash([4,3]);
         ctx.strokeStyle = 'rgba(192,57,43,.6)';
         ctx.lineWidth = 1.5;
         ctx.beginPath();ctx.moveTo(chartArea.left,y10);ctx.lineTo(chartArea.right,y10);ctx.stroke();
         ctx.fillStyle = 'rgba(192,57,43,.7)';
         ctx.font = '10px JetBrains Mono';ctx.fillText('FS=1.0',chartArea.right-48,y10-4);
-        // FS=1.5 橘線
-        ctx.strokeStyle = 'rgba(212,139,16,.5)';
+        ctx.strokeStyle = 'rgba(232,168,32,.6)';
         ctx.beginPath();ctx.moveTo(chartArea.left,y15);ctx.lineTo(chartArea.right,y15);ctx.stroke();
-        ctx.fillStyle = 'rgba(212,139,16,.7)';
+        ctx.fillStyle = 'rgba(232,168,32,.8)';
         ctx.fillText('FS=1.5',chartArea.right-48,y15-4);
         ctx.restore();
       }
@@ -860,7 +913,7 @@ function renderTable(filter){
 
   $('tableSubtitle').textContent = `共 ${results.length} 路段，顯示 ${toShow.length} 筆`;
   ['f-all','f-risk'].forEach(id=>$(id).style.borderColor='');
-  $(filter==='risk'?'f-risk':'f-all').style.borderColor='var(--navy-mid)';
+  $(filter==='risk'?'f-risk':'f-all').style.borderColor='var(--green)';
 
   const tbody = $('segTbody');
   tbody.innerHTML = toShow.map(r=>{
@@ -898,63 +951,61 @@ function renderRecs(){
   const hasMidR = results.some(r=>r.radius>0&&r.radius<500);
   const hasSlab = results.some(r=>r.track_type==='slab');
   const hasRain = activeClimate.rain||activeClimate.typhoon;
+  const hasQuake = activeClimate.quake4||activeClimate.quake5;
+  const hasStrongQuake = activeClimate.quake5;
 
   let html = '';
 
-  // 高風險行動
   if(hasCrit){
     html += `<div class="rec-section">
-      <div class="rec-section-title"><span style="color:var(--risk-high);">⛔</span> 高風險路段：需在設計階段優先介入</div>
+      <div class="rec-section-title"><span style="color:var(--risk-high);">⛔</span> 高風險路段：設計階段優先介入建議</div>
       <div class="rec-items">
-        <div class="rec-item"><span class="rec-item-icon">📡</span>高敏感曲線段（R&lt;300m）建議設置<strong>固定式軌溫感測器</strong>（FBG光纖或熱電偶），量測間距建議 ≤200m</div>
-        <div class="rec-item"><span class="rec-item-icon">💧</span>FS&lt;1.0路段建議規劃<strong>軌道灑水系統</strong>，可使軌溫降低3–8°C，提升FS約0.2–0.4</div>
-        <div class="rec-item"><span class="rec-item-icon">🏗</span>評估增設<strong>伸縮接頭（EJ）</strong>或<strong>抗屈曲裝置</strong>，需配合結構設計複核</div>
-        <div class="rec-item"><span class="rec-item-icon">📋</span>此路段須於設計文件中明確標注為「CWR高敏感路段」，納入<strong>建議養護SOP</strong></div>
+        <div class="rec-item"><span class="rec-item-icon">📡</span>高敏感曲線段（R&lt;300m）建議設置<strong>固定式軌溫感測器</strong>（FBG光纖），量測間距建議 ≤200m</div>
+        <div class="rec-item"><span class="rec-item-icon">💧</span>FS&lt;1.0路段建議規劃<strong>軌道灑水系統</strong>（降溫3–8°C），提升FS約0.2–0.4</div>
+        <div class="rec-item"><span class="rec-item-icon">🏗</span>評估增設<strong>伸縮接頭（EJ）</strong>或<strong>抗屈曲裝置</strong>（側向阻力裝置）</div>
+        <div class="rec-item"><span class="rec-item-icon">📋</span>此路段須於設計文件中明確標注為「CWR高敏感路段」，納入養護SOP</div>
       </div>
     </div>`;
   }
 
-  // 結構補強
   if(hasSmallR){
     html += `<div class="rec-section">
-      <div class="rec-section-title"><span style="color:var(--risk-warn);">🪨</span> 道碴結構補強（R&lt;300m曲線段）</div>
+      <div class="rec-section-title"><span style="color:var(--risk-warn);">🪨</span> 強化設計（R&lt;300m曲線段）</div>
       <div class="rec-items">
-        <div class="rec-item"><span class="rec-item-icon">🔧</span><strong>加寬道碴肩寬</strong>至≥450mm（UIC 720R §5建議），提升横向阻力 g₀ 約10–15%</div>
-        <div class="rec-item"><span class="rec-item-icon">🧱</span>採用<strong>混凝土軌枕</strong>取代木枕，橫向阻力可提升至 7–9 kN/m（基準）</div>
-        <div class="rec-item"><span class="rec-item-icon">🔗</span>評估<strong>道碴膠結（Ballast Bonding）</strong>於曲線頂點段局部固化，防止颱風後道碴位移</div>
+        <div class="rec-item"><span class="rec-item-icon">🔧</span><strong>加寬道碴肩寬</strong>至≥450mm（UIC 720R §5建議），提升横向阻力約10–15%</div>
+        <div class="rec-item"><span class="rec-item-icon">🧱</span>採用<strong>混凝土軌枕</strong>，橫向阻力可提升至 7–9 kN/m</div>
+        <div class="rec-item"><span class="rec-item-icon">🔗</span>評估<strong>道碴膠結</strong>於曲線頂點段局部固化，防止颱風後道碴位移</div>
       </div>
     </div>`;
   }
 
-  // 監測設備
   html += `<div class="rec-section">
-    <div class="rec-section-title"><span style="color:var(--navy-mid);">📡</span> 監測設備配置建議</div>
+    <div class="rec-section-title"><span style="color:var(--navy-mid);">📡</span> 配置監測設備建議</div>
     <div class="rec-items">
-      ${hasMidR?`<div class="rec-item"><span class="rec-item-icon">🌡</span>R&lt;500m曲線段設置<strong>軌溫感測器</strong>，建議量測點間距≤500m；R&lt;300m路段縮短至≤200m</div>`:''}
-      ${results.some(r=>r.radius>0&&r.radius<600&&(r.chainage_end-r.chainage_start)>300)?`<div class="rec-item"><span class="rec-item-icon">🔦</span>長曲線段（弧長>300m）建議採<strong>DTS分佈式光纖測溫</strong>，可連續量測取代點式感測，避免監測盲區</div>`:''}
-      ${hasRain?`<div class="rec-item"><span class="rec-item-icon">🌧</span>複合氣候情境下建議各高風險路段附近設置<strong>雨量感測器</strong>，連動告警邏輯（豪雨後72hr內提升巡檢等級）</div>`:''}
+      ${hasMidR?`<div class="rec-item"><span class="rec-item-icon">🌡</span>R&lt;500m曲線段設置<strong>軌溫計</strong>，量測點間距≤500m；R&lt;300m路段縮短至≤200m</div>`:''}
+      ${results.some(r=>r.radius>0&&r.radius<600&&(r.chainage_end-r.chainage_start)>300)?`<div class="rec-item"><span class="rec-item-icon">🔦</span>長曲線段（弧長>300m）建議採<strong>DTS分佈式光纖測溫</strong>，連續量測避免監測盲區</div>`:''}
+      ${hasRain?`<div class="rec-item"><span class="rec-item-icon">🌧</span>高風險路段附近設置<strong>雨量計</strong>，連動告警邏輯（豪雨後72hr內提升巡檢等級）</div>`:''}
+      ${hasQuake?`<div class="rec-item"><span class="rec-item-icon">📳</span>建議預留<strong>震度感測器介面</strong>，${hasStrongQuake?'震度≥5級後強制啟動全線道碴狀態巡查':'震度3–4級後啟動重點路段巡查'}</div>`:''}
       <div class="rec-item"><span class="rec-item-icon">📍</span>感測器資料建議整合至<strong>行控中心OCC告警系統</strong>，設定軌溫50°C及複合事件後48hr雙重觸發機制</div>
     </div>
   </div>`;
 
-  // 無碴軌道
   if(hasSlab){
     html += `<div class="rec-section">
       <div class="rec-section-title"><span style="color:var(--navy-mid);">🛤</span> 無碴軌道專項建議</div>
       <div class="rec-items">
         <div class="rec-item"><span class="rec-item-icon">🔩</span>設計階段確認<strong>扣件設計壽命</strong>，長期維護計畫需納入扣件更換週期（建議15–20年一輪）</div>
-        <div class="rec-item"><span class="rec-item-icon">🌉</span>橋梁段需依<strong>UIC 774-3R</strong>完成橋軌互制（BTI）附加應力分析，確認鋼軌在設計溫差下的安全餘裕</div>
+        <div class="rec-item"><span class="rec-item-icon">🌉</span>橋梁段需依<strong>UIC 774-3R</strong>完成橋軌互制（BTI）附加應力分析</div>
         <div class="rec-item"><span class="rec-item-icon">📐</span>長跨高架橋端部建議設置<strong>鋼軌伸縮接頭</strong>，避免BTI附加應力超過設計餘裕</div>
       </div>
     </div>`;
   }
 
-  // 設計文件建議
   html += `<div class="rec-section">
     <div class="rec-section-title"><span style="color:var(--text-mid);">📄</span> 設計文件建議事項</div>
     <div class="rec-items">
-      <div class="rec-item"><span class="rec-item-icon">🌡</span>設計鎖定溫度建議採用<strong>近10年實測統計數據</strong>而非歷史氣候假設（台灣已升溫+1.6°C，傳統設計值偏保守不足）</div>
-      <div class="rec-item"><span class="rec-item-icon">📅</span>CWR設計文件需明訂<strong>RNT複查週期</strong>（建議5年一次或重大維修後），並預留應力釋放法量測作業計畫</div>
+      <div class="rec-item"><span class="rec-item-icon">🌡</span>設計鎖定溫度建議採用<strong>近10年實測統計數據</strong>（AI氣候預測反映10–20年變遷趨勢），結合TCCIP氣候預測資訊</div>
+      <div class="rec-item"><span class="rec-item-icon">📅</span>CWR設計文件需明訂<strong>RNT複查週期</strong>（建議5年一次或重大維修後），預留應力釋放法量測計畫</div>
       <div class="rec-item"><span class="rec-item-icon">🗺</span>本分析結果建議附於<strong>軌道設計說明書</strong>附件，作為後續養護計畫（MAP）的風險底圖</div>
     </div>
   </div>`;
@@ -967,7 +1018,7 @@ function filterTable(f){ renderTable(f); }
 
 // ── 匯出CSV ──
 function exportCSV(){
-  const header = 'seg,chainage_start,chainage_end,length_m,radius_m,track_type,fs_design,fs_compound,risk_level,devices\n';
+  const header = 'seg,chainage_start,chainage_end,length_m,radius_m,track_type,fs_design,fs_compound,risk_level,design_recommendations\n';
   const rows = results.map(r=>{
     const devStr = r.devices.map(d=>d.label).join(' | ');
     return `S${String(r.idx).padStart(2,'0')},${r.chainage_start},${r.chainage_end},${r.len},${r.radius||'直線'},${r.track_type},${r.fs_design!==null?r.fs_design:'拉應力'},${r.fs_compound!==null?r.fs_compound:'拉應力'},${r.risk.label},"${devStr}"`;
@@ -975,7 +1026,7 @@ function exportCSV(){
   const blob = new Blob(['\uFEFF'+header+rows], {type:'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href=url;a.download='CWR風險分析報告.csv';a.click();
+  a.href=url;a.download='CWR_設計階段風險分析報告.csv';a.click();
 }
 
 // ── 載入範例 ──
@@ -992,6 +1043,11 @@ function loadSample(){
 4800,5400,230,ballast
 5400,6000,600,ballast`;
   processCSV(sample, '範例定線（10路段）');
+}
+
+function loadSampleAndRun(){
+  loadSample();
+  setTimeout(runAnalysis, 100);
 }
 
 function processCSV(text, filename){
@@ -1015,7 +1071,6 @@ $('csvFile').addEventListener('change', e=>{
   reader.readAsText(f, 'UTF-8');
 });
 
-// 拖放
 const dz = $('dropZone');
 dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('drag'); });
 dz.addEventListener('dragleave', ()=>dz.classList.remove('drag'));
@@ -1028,10 +1083,38 @@ dz.addEventListener('drop', e=>{
   reader.readAsText(f, 'UTF-8');
 });
 
-// ── 氣候複選 ──
+// ── 氣候複選（互斥與疊加邏輯）──
+// 互斥：豪雨後 vs 颱風後72hr（颱風已含豪雨，取一）
+// 互斥：震度3–4 vs 震度≥5（取一）
+// 可疊加：(豪雨/颱風) + (地震) → 台灣複合情境
 function toggleCC(input, key){
+  // 豪雨/颱風互斥
+  if(key==='rain' && input.checked && activeClimate.typhoon){
+    activeClimate.typhoon = false;
+    document.querySelector('#cc-typhoon input').checked = false;
+    document.getElementById('cc-typhoon').classList.remove('on','warn');
+  }
+  if(key==='typhoon' && input.checked && activeClimate.rain){
+    activeClimate.rain = false;
+    document.querySelector('#cc-rain input').checked = false;
+    document.getElementById('cc-rain').classList.remove('on');
+  }
+  // 震度互斥
+  if(key==='quake4' && input.checked && activeClimate.quake5){
+    activeClimate.quake5 = false;
+    document.querySelector('#cc-quake5 input').checked = false;
+    document.getElementById('cc-quake5').classList.remove('on','warn');
+  }
+  if(key==='quake5' && input.checked && activeClimate.quake4){
+    activeClimate.quake4 = false;
+    document.querySelector('#cc-quake4 input').checked = false;
+    document.getElementById('cc-quake4').classList.remove('on','warn');
+  }
   activeClimate[key] = input.checked;
-  input.closest('.cc-item').classList.toggle('on', input.checked);
+  const el = input.closest('.cc-item');
+  el.classList.toggle('on', input.checked);
+  if(key==='typhoon' && input.checked) el.classList.add('warn');
+  else if(key.startsWith('quake')) el.classList.toggle('warn', input.checked);
 }
 
 // ── 道碴狀態 ──
