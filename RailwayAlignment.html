@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>軌道定線動態評估平台</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif}
+html,body{height:100%;overflow:hidden;background:#0d2b4e}
+
+/* ── 頂部 ── */
+#topbar{height:46px;background:#0d2b4e;display:flex;align-items:center;
+  justify-content:space-between;padding:0 16px;flex-shrink:0;
+  border-bottom:1px solid rgba(255,255,255,.08)}
+#topbar h1{font-size:14px;font-weight:600;color:#fff;letter-spacing:.2px}
+#topbar .sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+.top-right{display:flex;align-items:center;gap:8px}
+.tpill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  border-radius:16px;padding:3px 12px;font-size:11px;color:rgba(255,255,255,.7);
+  display:flex;align-items:center;gap:5px}
+.tpill strong{color:#fff;font-size:14px}
+.tbtn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);
+  border-radius:6px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,.8);
+  cursor:pointer;transition:.2s;display:flex;align-items:center;gap:4px}
+.tbtn:hover{background:rgba(255,255,255,.12)}
+.tbtn.act{background:#185FA5;border-color:#378ADD;color:#fff}
+
+/* ── 主體 ── */
+#app{display:flex;height:calc(100vh - 46px);overflow:hidden}
+
+/* ── 左側面板 ── */
+#left{width:300px;min-width:160px;max-width:460px;background:#162438;
+  display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;transition:width .3s}
+#left.hidden{width:0;min-width:0}
+
+/* 左側頂部切換 */
+.left-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.ltab{flex:1;padding:8px;font-size:11px;text-align:center;cursor:pointer;
+  color:rgba(255,255,255,.4);border-bottom:2px solid transparent;transition:.2s;font-weight:500}
+.ltab.act{color:#fff;border-bottom-color:#378ADD;background:rgba(55,138,221,.06)}
+
+/* 全域速度控制 */
+.gvctrl{padding:10px 12px;background:#0f1e2e;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.gvctrl .lbl{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:5px}
+.gvctrl .vrow{display:flex;align-items:center;gap:6px}
+.gvctrl input[type=range]{flex:1;accent-color:#378ADD}
+.gvctrl .vnum{font-size:13px;font-weight:700;color:#fff;min-width:54px;text-align:right}
+.apply-btn{margin-top:6px;width:100%;padding:4px;background:rgba(55,138,221,.2);
+  border:1px solid rgba(55,138,221,.4);border-radius:4px;color:#6bb8ff;
+  font-size:10px;cursor:pointer;transition:.2s}
+.apply-btn:hover{background:rgba(55,138,221,.35)}
+
+/* 規範設定面板 */
+#pane-rules{flex:1;overflow-y:auto;display:none}
+#pane-rules::-webkit-scrollbar{width:3px}
+#pane-rules::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1)}
+table.ct{width:100%;border-collapse:collapse}
+table.ct .ghdr{background:#0d2b4e;color:rgba(255,255,255,.4);font-size:9px;
+  font-weight:700;padding:5px 10px;letter-spacing:.5px;text-transform:uppercase}
+table.ct td{padding:4px 7px;border-bottom:1px solid rgba(255,255,255,.04);vertical-align:middle}
+table.ct tr:hover td{background:rgba(255,255,255,.02)}
+table.ct .ino{color:rgba(255,255,255,.2);font-size:9px;width:22px}
+table.ct .iname{color:rgba(255,255,255,.7);font-size:10px}
+.vi{width:56px;border:1px solid rgba(255,255,255,.12);border-radius:4px;
+  padding:2px 4px;font-size:10px;text-align:center;color:#fff;background:rgba(255,255,255,.06)}
+.vi::placeholder{color:rgba(255,255,255,.2)}
+.vi:focus{outline:none;border-color:#378ADD;background:rgba(55,138,221,.1)}
+.sicon{text-align:center;font-size:12px;width:28px}
+
+/* 曲線清單面板 */
+#pane-list{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+#pane-list::-webkit-scrollbar{width:3px}
+#pane-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1)}
+.route-block{border-bottom:1px solid rgba(255,255,255,.06)}
+.route-hdr{display:flex;align-items:center;padding:8px 12px;cursor:pointer;
+  background:#0f1e2e;transition:.2s;gap:6px}
+.route-hdr:hover{background:rgba(255,255,255,.04)}
+.route-name{font-size:11px;font-weight:600;color:#fff;flex:1}
+.curve-list{overflow:hidden}
+.curve-item{border-bottom:1px solid rgba(255,255,255,.04)}
+.curve-hdr{display:flex;align-items:center;padding:6px 12px 6px 20px;cursor:pointer;
+  transition:.2s;gap:6px}
+.curve-hdr:hover{background:rgba(255,255,255,.03)}
+.curve-name{font-size:10px;color:rgba(255,255,255,.75);flex:1}
+.curve-sub{font-size:9px;color:rgba(255,255,255,.35)}
+.curve-detail{padding:8px 12px 10px 24px;background:rgba(0,0,0,.15);display:none}
+.vslider-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.vslider-row label{font-size:9px;color:rgba(255,255,255,.4);white-space:nowrap}
+.vslider-row input[type=range]{flex:1;accent-color:#378ADD}
+.vslider-val{font-size:11px;font-weight:700;color:#fff;min-width:44px;text-align:right}
+.curve-stats{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.cstat{background:rgba(255,255,255,.04);border-radius:4px;padding:4px 6px}
+.cstat-label{font-size:8px;color:rgba(255,255,255,.35)}
+.cstat-val{font-size:11px;font-weight:600;color:#fff}
+
+/* 左側底部按鈕 */
+.left-btns{padding:8px 10px;border-top:1px solid rgba(255,255,255,.06);
+  display:flex;gap:6px;flex-shrink:0}
+.lbtn{flex:1;padding:6px;border:none;border-radius:6px;font-size:11px;
+  font-weight:600;cursor:pointer;transition:.2s}
+.lbtn-p{background:#185FA5;color:#fff}.lbtn-p:hover{background:#0d4880}
+.lbtn-s{background:rgba(255,255,255,.06);color:rgba(255,255,255,.6);
+  border:1px solid rgba(255,255,255,.1)}.lbtn-s:hover{background:rgba(255,255,255,.1)}
+
+/* ── 分隔條 ── */
+#div-v{width:4px;background:rgba(255,255,255,.04);cursor:col-resize;flex-shrink:0;transition:background .2s}
+#div-v:hover{background:#378ADD}
+#div-h{height:4px;background:#dde8f0;cursor:row-resize;flex-shrink:0;transition:background .2s}
+#div-h:hover{background:#185FA5}
+
+/* ── 右側 ── */
+#right{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f4f7fa}
+
+/* 地圖 */
+#map-wrap{flex:1;position:relative;min-height:0}
+#map{width:100%;height:100%}
+.maptool{position:absolute;top:10px;right:10px;z-index:1000;display:flex;flex-direction:column;gap:6px}
+.mcard{background:rgba(255,255,255,.97);border-radius:8px;padding:8px 11px;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);border:0.5px solid rgba(0,0,0,.08)}
+.mt{font-size:9px;font-weight:700;color:#5a7a9a;margin-bottom:5px;
+  text-transform:uppercase;letter-spacing:.5px}
+.bmbtns{display:flex;gap:3px}
+.bmbtn{flex:1;padding:3px 6px;border:1px solid #c8d8ea;border-radius:4px;
+  font-size:10px;cursor:pointer;background:#fff;color:#5a7a9a;text-align:center}
+.bmbtn.act{background:#185FA5;color:#fff;border-color:#185FA5}
+.lyritem{display:flex;align-items:center;gap:5px;font-size:11px;color:#1a2a3a;
+  margin-bottom:3px;cursor:pointer}
+.lyritem:last-child{margin-bottom:0}
+.lyritem input[type=radio]{accent-color:#185FA5}
+.ldot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0}
+.legwrap{position:absolute;bottom:28px;left:10px;z-index:1000}
+.legitem{display:flex;align-items:center;gap:5px;font-size:10px;color:#1a2a3a;margin-bottom:2px}
+
+/* 上傳提示 */
+#upload-overlay{position:absolute;inset:0;background:rgba(13,43,78,.85);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:500;gap:14px}
+#upload-overlay h2{color:#fff;font-size:16px;font-weight:600}
+#upload-overlay p{color:rgba(255,255,255,.6);font-size:12px;text-align:center}
+.upload-box{background:rgba(255,255,255,.06);border:2px dashed rgba(255,255,255,.2);
+  border-radius:12px;padding:32px 48px;text-align:center;cursor:pointer;transition:.2s}
+.upload-box:hover{border-color:#378ADD;background:rgba(55,138,221,.1)}
+.upload-box input{display:none}
+.upload-btn{background:#185FA5;color:#fff;border:none;border-radius:8px;
+  padding:10px 28px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
+
+/* ── 底部 ── */
+#bottom{height:200px;min-height:60px;max-height:500px;display:flex;
+  flex-direction:column;background:#fff;border-top:1px solid #dde8f0}
+
+/* 功能分頁 */
+.ftabs{display:flex;border-bottom:1px solid #e8eff7;background:#f8fafc;flex-shrink:0;align-items:center}
+.ftab{padding:7px 16px;font-size:11px;cursor:pointer;border-bottom:2px solid transparent;
+  color:#8a9ab0;font-weight:500;transition:.2s;white-space:nowrap}
+.ftab.act{color:#0d2b4e;border-bottom-color:#185FA5;background:#fff}
+.ftab.disabled{color:#c8d8ea;cursor:default;position:relative}
+.ftab.disabled::after{content:'開發中';position:absolute;top:2px;right:4px;
+  font-size:8px;color:#b0c0d0;letter-spacing:.3px}
+
+/* 圖表 */
+#tab-chart{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.chart-ctrl{padding:4px 12px;display:flex;gap:12px;align-items:center;font-size:10px;
+  color:#5a7a9a;flex-shrink:0;border-bottom:0.5px solid #eef1f5}
+.chart-ctrl label{display:flex;align-items:center;gap:4px;cursor:pointer}
+.ccanvas{flex:1;padding:3px 12px;position:relative;min-height:0}
+
+/* 明細表 */
+#tab-detail{flex:1;overflow:auto;display:none}
+#tab-detail::-webkit-scrollbar{width:5px;height:5px}
+#tab-detail::-webkit-scrollbar-thumb{background:#c8d8ea;border-radius:3px}
+table.dt{width:100%;border-collapse:collapse;font-size:10.5px;min-width:1400px}
+table.dt th{background:#0d2b4e;color:#fff;padding:5px 7px;text-align:center;
+  font-weight:500;position:sticky;top:0;white-space:nowrap;border-right:1px solid #1a4a7c;
+  font-size:10px;z-index:2}
+table.dt th.vd{background:#1a4a7c}
+table.dt th.ve{background:#2a5a8c}
+table.dt td{padding:4px 7px;border-bottom:1px solid #edf1f7;text-align:center;
+  white-space:nowrap;border-right:1px solid #f0f4f8}
+table.dt .crv-hdr td{background:#e8f0f8;font-weight:600;color:#0d2b4e;
+  text-align:left;padding:5px 10px;font-size:11px}
+table.dt tr:hover td{background:#f5f8ff}
+.badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600}
+.b-ok{background:#d5f5e3;color:#1e6e3a}
+.b-warn{background:#fef3cd;color:#7a5000}
+.b-fail{background:#fde8e8;color:#8b1e1e}
+.b-pref{background:#d6eaf8;color:#0d4480}
+.b-na{background:#eef0f3;color:#8a9ab0}
+</style>
+</head>
+<body>
+
+<!-- ── 頂部 ── -->
+<div id="topbar">
+  <div>
+    <h1>🛤 Rail Alignment Dynamic Assessment Platform</h1>
+    <div class="sub" id="route-sub">請上傳定線資料 Excel 開始分析</div>
+  </div>
+  <div class="top-right">
+    <div class="tpill">V_eval <strong id="veval-top">—</strong></div>
+    <button class="tbtn act" id="btn-eng" onclick="setMode('eng')">🔧 Engineering Mode</button>
+    <button class="tbtn" id="btn-pre" onclick="setMode('present')">📍 簡報</button>
+    <button class="tbtn lbtn-s" onclick="document.getElementById('file-input').click()">↑ 上傳 Excel</button>
+    <input type="file" id="file-input" accept=".xlsx" style="display:none" onchange="loadExcel(this)">
+  </div>
+</div>
+
+<div id="app">
+<!-- ── 左側 ── -->
+<div id="left">
+  <div class="left-tabs">
+    <div class="ltab act" id="ltab-list" onclick="switchLeftTab('list')">曲線清單</div>
+    <div class="ltab" id="ltab-rules" onclick="switchLeftTab('rules')">規範設定</div>
+  </div>
+
+  <!-- 全域速度快捷 -->
+  <div class="gvctrl">
+    <div class="lbl">全域套用評估速度 V_eval</div>
+    <div class="vrow">
+      <span style="font-size:9px;color:rgba(255,255,255,.25)">5</span>
+      <input type="range" id="gl-v" min="5" max="120" value="25" step="5" oninput="document.getElementById('gl-vv').textContent=this.value">
+      <span style="font-size:9px;color:rgba(255,255,255,.25)">120</span>
+      <div class="vnum"><span id="gl-vv">25</span> kph</div>
+    </div>
+    <button class="apply-btn" onclick="applyGlobalV()">套用至所有曲線</button>
+  </div>
+
+  <!-- 曲線清單 -->
+  <div id="pane-list">
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;
+      color:rgba(255,255,255,.2);font-size:12px;text-align:center;padding:20px">
+      請上傳 Excel 載入路線資料
+    </div>
+  </div>
+
+  <!-- 規範設定 -->
+  <div id="pane-rules">
+  <table class="ct">
+    <tbody>
+    <tr><td colspan="5" class="ghdr">1. 平面曲線</td></tr>
+    <tr><td class="ino">1.1</td><td class="iname">最小半徑（主線）</td>
+        <td style="color:rgba(255,255,255,.2);font-size:10px;text-align:center">—</td>
+        <td><input class="vi" id="p-rmin" placeholder="50" oninput="recalcAll()"> m</td>
+        <td class="sicon" id="s11">—</td></tr>
+    <tr><td class="ino">1.3</td><td class="iname">圓曲線最小長度</td>
+        <td style="color:rgba(255,255,255,.2);font-size:10px;text-align:center">—</td>
+        <td><input class="vi" id="p-lcirc" placeholder="14.5" oninput="recalcAll()"> m</td>
+        <td class="sicon" id="s13">—</td></tr>
+    <tr><td colspan="5" class="ghdr">2. 超高及超高不足</td></tr>
+    <tr><td class="ino">2.1</td><td class="iname">最大超高 D</td>
+        <td><input class="vi" id="p-dmax1" placeholder="120" oninput="recalcAll()"> mm</td>
+        <td><input class="vi" id="p-dmax2" placeholder="160" oninput="recalcAll()"> mm</td>
+        <td class="sicon" id="s21">—</td></tr>
+    <tr><td class="ino">2.2</td><td class="iname">超高不足 I</td>
+        <td><input class="vi" id="p-imax1" placeholder="100" oninput="recalcAll()"> mm</td>
+        <td><input class="vi" id="p-imax2" placeholder="120" oninput="recalcAll()"> mm</td>
+        <td class="sicon" id="s22">—</td></tr>
+    <tr><td class="ino">2.3</td><td class="iname">超高不足基準值</td>
+        <td><input class="vi" id="p-ibase" placeholder="60" oninput="recalcAll()"> mm</td>
+        <td style="color:rgba(255,255,255,.2);font-size:9px;text-align:center">需提報</td>
+        <td class="sicon" id="s23">—</td></tr>
+    <tr><td colspan="5" class="ghdr">2. 時變率（實際值顯示）</td></tr>
+    <tr><td class="ino">2.4</td><td class="iname">超高縱坡 D/Ls</td>
+        <td style="color:rgba(255,255,255,.2);font-size:10px;text-align:center">—</td>
+        <td><input class="vi" id="p-dls" placeholder="0.00227" oninput="recalcAll()"> (1/440)</td>
+        <td class="sicon" id="s24">—</td></tr>
+    <tr><td class="ino">2.5</td><td class="iname">超高時變率</td>
+        <td><input class="vi" id="p-cdr1" placeholder="35" oninput="recalcAll()"> mm/s</td>
+        <td><input class="vi" id="p-cdr2" placeholder="55" oninput="recalcAll()"> mm/s</td>
+        <td class="sicon" id="s25">—</td></tr>
+    <tr><td colspan="5" class="ghdr">3. 緩和曲線</td></tr>
+    <tr><td class="ino">3.1</td><td class="iname">緩和曲線最小長度</td>
+        <td style="color:rgba(255,255,255,.2);font-size:9px;text-align:center">max(Ls1,2,3)</td>
+        <td><input class="vi" id="p-lsmin" placeholder="14.5" oninput="recalcAll()"> m</td>
+        <td class="sicon" id="s31">—</td></tr>
+    <tr><td colspan="5" class="ghdr">Jerk 門檻</td></tr>
+    <tr><td class="ino">J1</td><td class="iname">優良門檻</td>
+        <td><input class="vi" id="p-j1" placeholder="0.3" oninput="recalcAll()"> m/s³</td>
+        <td style="color:rgba(255,255,255,.2);font-size:10px;text-align:center">—</td>
+        <td>—</td></tr>
+    <tr><td class="ino">J2</td><td class="iname">不舒適門檻</td>
+        <td style="color:rgba(255,255,255,.2);font-size:10px;text-align:center">—</td>
+        <td><input class="vi" id="p-j2" placeholder="0.5" oninput="recalcAll()"> m/s³</td>
+        <td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="left-btns">
+    <button class="lbtn lbtn-p" onclick="recalcAll()">↺ 重新計算</button>
+    <button class="lbtn lbtn-s" onclick="alert('匯出功能開發中')">↓ 匯出</button>
+  </div>
+</div>
+
+<div id="div-v"></div>
+
+<!-- ── 右側 ── -->
+<div id="right">
+  <div id="map-wrap">
+    <div id="map"></div>
+
+    <!-- 上傳引導 -->
+    <div id="upload-overlay">
+      <h2>🛤 軌道定線動態評估平台</h2>
+      <p>支援多路線分析｜EN 13803 合規檢核｜動態舒適度評估</p>
+      <div class="upload-box" onclick="document.getElementById('file-input').click()">
+        <div style="font-size:32px;margin-bottom:8px">📂</div>
+        <div style="color:rgba(255,255,255,.8);font-size:13px;font-weight:600">上傳定線資料 Excel</div>
+        <div style="color:rgba(255,255,255,.4);font-size:11px;margin-top:4px">
+          支援多路線分頁格式（v3 範本）
+        </div>
+        <button class="upload-btn">選擇檔案</button>
+      </div>
+      <p style="font-size:10px">或使用右上角「↑ 上傳 Excel」按鈕</p>
+    </div>
+
+    <div class="maptool">
+      <div class="mcard">
+        <div class="mt">底圖</div>
+        <div class="bmbtns">
+          <div class="bmbtn act" id="bm-osm" onclick="setBase('osm')">地圖</div>
+          <div class="bmbtn" id="bm-sat" onclick="setBase('sat')">衛星</div>
+        </div>
+        <div style="margin-top:6px">
+          <div style="font-size:9px;color:#5a7a9a;margin-bottom:2px">透明度</div>
+          <input type="range" style="width:100%;accent-color:#185FA5" min="0.1" max="1" value="1" step="0.05" oninput="setOp(this.value)">
+        </div>
+      </div>
+      <div class="mcard">
+        <div class="mt">圖層（單選）</div>
+        <label class="lyritem"><input type="radio" name="lyr" value="comply" checked onchange="redrawMap()">
+          <span class="ldot" style="background:#185FA5"></span>合規狀態</label>
+        <label class="lyritem"><input type="radio" name="lyr" value="cant" onchange="redrawMap()">
+          <span class="ldot" style="background:#8e44ad"></span>不平衡加速度</label>
+        <label class="lyritem"><input type="radio" name="lyr" value="jerk" onchange="redrawMap()">
+          <span class="ldot" style="background:#e67e22"></span>Jerk</label>
+      </div>
+    </div>
+
+    <div class="legwrap">
+      <div class="mcard" style="padding:5px 9px">
+        <div class="mt">圖例</div>
+        <div class="legitem"><span style="display:inline-block;width:22px;height:4px;background:#e74c3c;border-radius:2px"></span>FAIL</div>
+        <div class="legitem"><span style="display:inline-block;width:22px;height:4px;background:#f39c12;border-radius:2px"></span>WARN</div>
+        <div class="legitem"><span style="display:inline-block;width:22px;height:4px;background:#27ae60;border-radius:2px"></span>OK</div>
+        <div class="legitem"><span style="display:inline-block;width:22px;height:4px;background:#95a5a6;border-radius:2px"></span>直線</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="div-h"></div>
+
+  <div id="bottom">
+    <div class="ftabs">
+      <div class="ftab act" onclick="swFTab('chart',this)">Alignment Summary</div>
+      <div class="ftab" onclick="swFTab('detail',this)">明細表</div>
+      <div class="ftab" onclick="swFTab('jerk',this)">Dynamic Comfort (Jerk)</div>
+      <div class="ftab disabled" title="開發中">Structural Kern (1/3 Off.)</div>
+      <div class="ftab disabled" title="開發中">Maintenance Cost (LCC)</div>
+    </div>
+    <div id="tab-chart">
+      <div class="chart-ctrl">
+        <span>顯示：</span>
+        <label><input type="radio" name="ch" value="i" checked onchange="updateChart()"> 超高不足 @V_design</label>
+        <label><input type="radio" name="ch" value="iv" onchange="updateChart()"> 超高偏差 @V_eval</label>
+        <label><input type="radio" name="ch" value="cr" onchange="updateChart()"> 超高縱坡 D/Ls</label>
+        <label><input type="radio" name="ch" value="tr" onchange="updateChart()"> 時變率 mm/s</label>
+      </div>
+      <div class="ccanvas"><canvas id="mainChart" role="img" aria-label="定線分析圖表">定線分析圖表</canvas></div>
+    </div>
+    <div id="tab-detail">
+      <table class="dt">
+        <thead>
+          <tr>
+            <th rowspan="2">路線</th><th rowspan="2">曲線</th>
+            <th rowspan="2">段落</th><th rowspan="2">里程</th>
+            <th rowspan="2">R(m)</th><th rowspan="2">長度(m)</th>
+            <th rowspan="2">D設計(mm)</th>
+            <th colspan="6" class="vd">── 合規檢核 @V_design ──</th>
+            <th colspan="3" class="ve">── 降速評估 @V_eval ──</th>
+            <th rowspan="2">Jerk(m/s³)</th><th rowspan="2">Jerk狀態</th>
+            <th rowspan="2">V_design</th><th rowspan="2">V_eval</th>
+            <th rowspan="2">V_max推算</th><th rowspan="2">V_min推算</th>
+            <th rowspan="2">結果</th><th rowspan="2">備註</th>
+          </tr>
+          <tr>
+            <th class="vd">D_eq(mm)</th><th class="vd">I(mm)</th>
+            <th class="vd">a(m/s²)</th><th class="vd">I狀態</th>
+            <th class="vd">D/Ls實際</th><th class="vd">時變率實際(mm/s)</th>
+            <th class="ve">D_eq(mm)</th><th class="ve">偏差(mm)</th>
+            <th class="ve">a_eval(m/s²)</th>
+          </tr>
+        </thead>
+        <tbody id="dt-body"></tbody>
+      </table>
+    </div>
+    <div id="tab-jerk" style="display:none;flex:1;flex-direction:column">
+      <div class="chart-ctrl" style="font-size:11px;color:#0d2b4e;font-weight:500">
+        Jerk 峰值分析（緩和曲線段，@V_design）
+      </div>
+      <div class="ccanvas"><canvas id="jerkChart" role="img" aria-label="Jerk分析圖表">Jerk分析圖表</canvas></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const Gw=1435, grav=9.81;
+
+// ── 全域狀態 ──
+let routes=[];       // [{name, curves:[{id,R,D,Vd,Ls,circ_len,dir,segs,keyPts}]}]
+let curveVeval={};   // {curveKey: veval}
+let CR={};           // {curveKey: calcResult}
+let mainChart=null, jerkChartObj=null;
+let mapLayers=[], map=null, osmL, satL, curBase='osm';
+
+// ── 參數讀取 ──
+function pv(id){ const el=document.getElementById(id); const v=parseFloat(el.value); return isNaN(v)?parseFloat(el.placeholder)||0:v; }
+function getP(){
+  return{
+    rMin:pv('p-rmin'), lCirc:pv('p-lcirc'),
+    dMax1:pv('p-dmax1'), dMax2:pv('p-dmax2'),
+    iMax1:pv('p-imax1'), iMax2:pv('p-imax2'), iBase:pv('p-ibase'),
+    dlsLim:pv('p-dls'),   // 1/440 = 0.002272
+    cdr1:pv('p-cdr1'), cdr2:pv('p-cdr2'),
+    lsMin:pv('p-lsmin'),
+    j1:pv('p-j1'), j2:pv('p-j2'),
+  };
+}
+
+// ── Excel 讀取 ──
+function loadExcel(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:'array'});
+    const skip=['Global_Settings','使用說明'];
+    routes=[];
+    wb.SheetNames.forEach(name=>{
+      if(skip.includes(name))return;
+      const ws=wb.Sheets[name];
+      const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      // 找欄位標題行（含 ABB 或 NO 的行）
+      let hdrRow=-1;
+      for(let i=0;i<raw.length;i++){
+        const r=raw[i].map(c=>String(c).trim().toUpperCase());
+        if(r.includes('ABB')||r.includes('NO')){hdrRow=i;break;}
+      }
+      if(hdrRow<0)return;
+      const headers=raw[hdrRow].map(c=>String(c).trim());
+      const idx=k=>headers.findIndex(h=>h.toUpperCase()===k.toUpperCase());
+      const iABB=idx('ABB'), iCH=idx('Chainage'), iE=idx('Easting_m'),
+            iN=idx('Northing_m'), iL=idx('Length_m'), iR=idx('Radius_m'),
+            iDir=idx('Direction'), iD=idx('Cant_mm'), iV=idx('V_max_kph'),
+            iCrv=idx('Curve_No');
+
+      const parseCh=v=>{
+        const s=String(v).trim().replace(/\s/g,'');
+        if(s.includes('+')){ const [km,m]=s.split('+'); return parseFloat(km)*1000+parseFloat(m); }
+        return parseFloat(s)||0;
+      };
+
+      const pts=[];
+      for(let i=hdrRow+1;i<raw.length;i++){
+        const row=raw[i];
+        const abb=String(row[iABB]||'').trim().toUpperCase();
+        if(!abb)continue;
+        pts.push({
+          abb, ch:parseCh(row[iCH]),
+          e:parseFloat(row[iE])||0, n:parseFloat(row[iN])||0,
+          len:parseFloat(row[iL])||0,
+          r:parseFloat(row[iR])||0,
+          dir:String(row[iDir]||'').trim().toUpperCase(),
+          d:parseFloat(row[iD])||0,
+          v:parseFloat(row[iV])||0,
+          crv:String(row[iCrv]||'').trim(),
+        });
+      }
+
+      // 建立曲線組
+      const curves=buildCurves(pts, name);
+      routes.push({name, curves, pts});
+    });
+
+    document.getElementById('upload-overlay').style.display='none';
+    document.getElementById('route-sub').textContent=routes.map(r=>r.name).join(' ｜ ');
+    initMap();
+    buildCurveList();
+    recalcAll();
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── 彎向判斷：三點座標外積（完全不依賴正負號或Direction欄位）──
+// cross = (SC-TS) × (CS-SC)
+// cross > 0 → 左彎(逆時針), cross < 0 → 右彎(順時針)
+function detectDir(TS, SC, CS){
+  const v1x=SC.e-TS.e, v1y=SC.n-TS.n;
+  const v2x=CS.e-SC.e, v2y=CS.n-SC.n;
+  const cross=v1x*v2y - v1y*v2x;
+  return cross>0?'L':'R';
+}
+
+// ── 從點位清單建立曲線（支援 TS/SC/CS/ST 和 TC/CT）──
+function buildCurves(pts, routeName){
+  const curves=[];
+  let i=0;
+  while(i<pts.length){
+    const p=pts[i];
+
+    // ── 標準緩和曲線結構：TS → SC → CS → ST ──
+    if(p.abb==='TS'){
+      // 找下一組 SC/CS/ST（不跨越其他 TS）
+      let SC=null,CS=null,ST=null;
+      for(let j=i+1;j<pts.length;j++){
+        if(pts[j].abb==='TS')break; // 遇到下一個 TS 就停
+        if(!SC&&pts[j].abb==='SC')SC=pts[j];
+        if(!CS&&pts[j].abb==='CS')CS=pts[j];
+        if(!ST&&pts[j].abb==='ST'){ST=pts[j];break;}
+      }
+      if(SC&&CS&&ST){
+        const R=Math.abs(SC.r||CS.r)||1;
+        const D=SC.d||CS.d||0;
+        const Vd=SC.v||CS.v||0;
+        const Ls_in=Math.max(0,SC.ch-p.ch);
+        const Ls_out=Math.max(0,ST.ch-CS.ch);
+        const Ls=Math.max(Ls_in,Ls_out,0.001);
+        const circ_len=Math.max(0,CS.ch-SC.ch);
+        const crv=SC.crv||CS.crv||`${routeName}-C${curves.length+1}`;
+
+        // 外積判斷彎向
+        const dir=detectDir(p,SC,CS);
+
+        const keyPts={
+          TS:twd97ToWgs84(p.e,p.n),
+          SC:twd97ToWgs84(SC.e,SC.n),
+          CS:twd97ToWgs84(CS.e,CS.n),
+          ST:twd97ToWgs84(ST.e,ST.n)
+        };
+        const segs=[
+          {type:'SPIRAL', label:'TS→SC',ch0:p.ch, ch1:SC.ch,len:Ls_in, desc:'緩和曲線（入彎）'},
+          {type:'CIRCULAR',label:'SC→CS',ch0:SC.ch,ch1:CS.ch,len:circ_len,desc:'圓曲線'},
+          {type:'SPIRAL', label:'CS→ST',ch0:CS.ch,ch1:ST.ch,len:Ls_out,desc:'緩和曲線（出彎）'},
+        ];
+        curves.push({id:crv,full:crv,R,D,Vd,Ls,Ls_in,Ls_out,circ_len,dir,
+                     hasSpiral:true,segs,keyPts,tcct:false});
+        i=pts.indexOf(ST)+1;
+        continue;
+      }
+    }
+
+    // ── 無緩和曲線結構：TC → CT ──
+    if(p.abb==='TC'){
+      let CT=null;
+      for(let j=i+1;j<pts.length;j++){
+        if(pts[j].abb==='TC')break;
+        if(pts[j].abb==='CT'){CT=pts[j];break;}
+      }
+      if(CT){
+        const R=Math.abs(p.r||CT.r)||1;
+        const D=p.d||CT.d||0;
+        const Vd=p.v||CT.v||0;
+        const circ_len=Math.max(0,CT.ch-p.ch);
+        const crv=p.crv||CT.crv||`${routeName}-C${curves.length+1}`;
+
+        // 外積判斷彎向：用 TC 前一個點、TC、CT 三點
+        const prevPt=i>0?pts[i-1]:p;
+        const dir=detectDir(prevPt,p,CT);
+
+        const keyPts={
+          TC:twd97ToWgs84(p.e,p.n),
+          CT:twd97ToWgs84(CT.e,CT.n),
+        };
+        // 免設緩和曲線依據規範（R>3000m）
+        const spiralExempt=R>3000;
+        const segs=[
+          {type:'CIRCULAR',label:'TC→CT',ch0:p.ch,ch1:CT.ch,len:circ_len,
+           desc:spiralExempt?`圓曲線（R=${R}m>3000m，依規範免設緩和曲線）`:`圓曲線（無緩和曲線）`},
+        ];
+        curves.push({id:crv,full:crv,R,D,Vd,Ls:0,Ls_in:0,Ls_out:0,circ_len,dir,
+                     hasSpiral:false,spiralExempt,segs,keyPts,tcct:true});
+        i=pts.indexOf(CT)+1;
+        continue;
+      }
+    }
+
+    i++;
+  }
+  return curves;
+}
+
+// ── TWD97 TM2 → WGS84 ──
+function twd97ToWgs84(E,N){
+  const a=6378137.0,f=1/298.257222101,b=a*(1-f),e2=1-(b/a)**2;
+  const k0=0.9999,lon0=Math.PI*121/180,E0=250000;
+  const x=E-E0,y=N,M=y/k0;
+  const mu=M/(a*(1-e2/4-3*e2**2/64-5*e2**3/256));
+  const e1=(1-Math.sqrt(1-e2))/(1+Math.sqrt(1-e2));
+  const phi1=mu+(3*e1/2-27*e1**3/32)*Math.sin(2*mu)+(21*e1**2/16)*Math.sin(4*mu)+(151*e1**3/96)*Math.sin(6*mu);
+  const N1=a/Math.sqrt(1-e2*Math.sin(phi1)**2);
+  const T1=Math.tan(phi1)**2,C1=e2/(1-e2)*Math.cos(phi1)**2;
+  const R1=a*(1-e2)/(1-e2*Math.sin(phi1)**2)**1.5;
+  const D=x/(N1*k0);
+  const lat=phi1-(N1*Math.tan(phi1)/R1)*(D**2/2-(5+3*T1+10*C1-4*C1**2-9*e2/(1-e2))*D**4/24);
+  const lon=lon0+(D-(1+2*T1+C1)*D**3/6)/Math.cos(phi1);
+  return[lat*180/Math.PI, lon*180/Math.PI];
+}
+
+// ── 計算（A1: V_design合規, V_eval降速評估）──
+function calcCurve(c, veval, p){
+  const Deq_d=(Gw*c.Vd*c.Vd)/(127*c.R);
+  const I_d=Deq_d-c.D;
+  const a_d=I_d*grav/Gw;
+  const Deq_e=(Gw*veval*veval)/(127*c.R);
+  const I_e=Deq_e-c.D;
+  const a_e=I_e*grav/Gw;
+
+  // 超高縱坡 D/Ls（實際值）
+  const dls_actual=c.Ls>0?c.D/c.Ls:0;
+  const dls_limit=p.dlsLim||1/440;
+
+  // 超高時變率（實際值）mm/s
+  const cantRate_actual=c.Ls>0?(c.D*c.Vd)/(3.6*c.Ls):0;
+  const cantDefRate_actual=c.Ls>0?(Math.abs(I_d)*c.Vd)/(3.6*c.Ls):0;
+
+  const DlimR=Math.max(0,(c.R-50)/1.5);
+  const Dlim=Math.min(DlimR,p.dMax2);
+  const DlimP=Math.min(DlimR,p.dMax1);
+  const Vmax=Math.sqrt(Math.max(0,(c.D+p.iMax2)*127*c.R/Gw));
+  const VminSq=(c.D-p.iMax2)*127*c.R/Gw;
+  const Vmin=VminSq>0?Math.sqrt(VminSq):0;
+
+  const Ls1=0.44*c.D;
+  const Ls2=c.Vd*c.D/(3.6*(p.cdr2||55));
+  const Ls3=c.Vd*Math.abs(I_d)/(3.6*(p.cdr2||55));
+  const LsReq=Math.max(Ls1,Ls2,Ls3,p.lsMin||14.5);
+  const jerk=c.Ls>0?Math.abs(c.Vd/3.6*I_d/c.Ls)/1000:0;
+
+  let Dst='ok',Dn='';
+  if(c.D>Dlim){Dst='fail';Dn=`D超Table6限值${Dlim.toFixed(0)}mm`;}
+  else if(c.D>DlimP){Dst='warn';Dn=`D超希望選用${DlimP.toFixed(0)}mm`;}
+
+  let Ist='ok',In='';
+  if(I_d>p.iMax2){Ist='fail';In=`I=${I_d.toFixed(1)}mm>絕對需求${p.iMax2}mm`;}
+  else if(I_d>p.iMax1){Ist='warn';In=`I=${I_d.toFixed(1)}mm>希望選用${p.iMax1}mm`;}
+  else if(I_d>p.iBase){Ist='pref';In=`I=${I_d.toFixed(1)}mm>基準值${p.iBase}mm(需提報)`;}
+
+  // 超高縱坡與時變率：TC/CT 且 spiralExempt → 跳過，顯示「依規範免設」
+  let DlsSt='ok',DlsN='';
+  let CrSt='ok',CrN='';
+  let LsSt='ok',Ln='';
+
+  if(c.tcct && c.spiralExempt){
+    // R>3000m，免設緩和曲線，相關檢核跳過
+    DlsSt='na'; DlsN='依規範免設（R>3000m）';
+    CrSt='na';  CrN='依規範免設（R>3000m）';
+    LsSt='na';  Ln='依規範免設（R>3000m）';
+  }else if(c.tcct && !c.spiralExempt){
+    // R≤3000m 但無緩和曲線 → FAIL
+    LsSt='fail'; Ln=`R=${c.R}m≤3000m，應設置緩和曲線`;
+    DlsSt='fail'; DlsN='無緩和曲線，無法計算D/Ls';
+    CrSt='fail';  CrN='無緩和曲線，無法計算時變率';
+  }else{
+    // 一般 TS/SC/CS/ST
+    if(dls_actual>dls_limit){DlsSt='fail';DlsN=`D/Ls=${dls_actual.toFixed(4)}>限值${dls_limit.toFixed(4)}`;}
+    if(cantRate_actual>(p.cdr2||55)){CrSt='fail';CrN=`時變率=${cantRate_actual.toFixed(1)}mm/s>限值${p.cdr2||55}mm/s`;}
+    else if(cantRate_actual>(p.cdr1||35)){CrSt='warn';}
+    if(c.Ls<LsReq){LsSt='fail';Ln=`Ls=${c.Ls.toFixed(1)}m<需${LsReq.toFixed(1)}m`;}
+  }
+
+  let JkSt='ok';
+  if(jerk>=(p.j2||0.5))JkSt='fail';
+  else if(jerk>=(p.j1||0.3))JkSt='warn';
+
+  const rOk=c.R>=(p.rMin||50), lOk=c.circ_len>=(p.lCirc||14.5);
+  const overall=(Dst==='fail'||Ist==='fail'||LsSt==='fail'||DlsSt==='fail'||CrSt==='fail'||!rOk||!lOk)?'fail':
+                (Dst==='warn'||Ist==='warn'||Ist==='pref'||CrSt==='warn')?'warn':'ok';
+  const notes=[Dn,In,DlsN,CrN,Ln].filter(s=>s&&!s.includes('依規範免設'));
+
+  return{Deq_d,I_d,a_d,Deq_e,I_e,a_e,Dlim,DlimP,Vmin,Vmax,
+         dls_actual,cantRate_actual,cantDefRate_actual,LsReq,jerk,
+         Dst,Ist,DlsSt,CrSt,LsSt,JkSt,rOk,lOk,overall,notes,
+         spiralExempt:c.spiralExempt,tcct:c.tcct};
+}
+
+function getCurveKey(routeName, curveId){ return `${routeName}::${curveId}`; }
+
+function recalcAll(){
+  if(!routes.length)return;
+  const p=getP();
+  routes.forEach(route=>{
+    route.curves.forEach(c=>{
+      const key=getCurveKey(route.name,c.id);
+      const ve=curveVeval[key]||c.Vd;
+      CR[key]=calcCurve(c,ve,p);
+    });
+  });
+  updateComplianceSummary();
+  updateCurveListStats();
+  updateDetailTable();
+  updateChart();
+  redrawMap();
+  updateVevalTop();
+}
+
+function updateVevalTop(){
+  const vals=Object.values(curveVeval);
+  if(!vals.length){ document.getElementById('veval-top').textContent='—'; return; }
+  const allSame=vals.every(v=>v===vals[0]);
+  document.getElementById('veval-top').textContent=allSame?vals[0]+'kph':'多段';
+}
+
+// ── 全域套用速度 ──
+function applyGlobalV(){
+  const v=parseFloat(document.getElementById('gl-v').value);
+  routes.forEach(route=>{
+    route.curves.forEach(c=>{
+      const key=getCurveKey(route.name,c.id);
+      curveVeval[key]=v;
+      const el=document.getElementById('slv-'+key);
+      if(el){ el.value=v; el.nextElementSibling.textContent=v; }
+    });
+  });
+  recalcAll();
+}
+
+// ── 左側曲線清單 ──
+function buildCurveList(){
+  const pane=document.getElementById('pane-list');
+  let html='';
+  routes.forEach(route=>{
+    const routeOverall=getRouteOverall(route.name);
+    const ocol={ok:'#27ae60',warn:'#f39c12',fail:'#e74c3c'}[routeOverall]||'#95a5a6';
+    html+=`<div class="route-block">
+      <div class="route-hdr" onclick="toggleRoute('rb-${route.name}')">
+        <span style="color:#5a9fd4;font-size:10px">▼</span>
+        <span class="route-name">${route.name}</span>
+        <span style="display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;
+          font-weight:600;background:${ocol}22;color:${ocol}">${routeOverall.toUpperCase()}</span>
+      </div>
+      <div class="curve-list" id="rb-${route.name}">`;
+    route.curves.forEach(c=>{
+      const key=getCurveKey(route.name,c.id);
+      const ve=curveVeval[key]||c.Vd;
+      const r=CR[key];
+      const ocol2=r?{ok:'#27ae60',warn:'#f39c12',fail:'#e74c3c'}[r.overall]:'#95a5a6';
+      html+=`<div class="curve-item">
+        <div class="curve-hdr" onclick="toggleCurve('cd-${key}')">
+          <span style="color:rgba(255,255,255,.25);font-size:9px">▶</span>
+          <span class="curve-name">${c.id.replace(/.*-/,'')} <span class="curve-sub">R=${c.R}m D=${c.D}mm</span></span>
+          <span style="display:inline-block;padding:1px 7px;border-radius:8px;font-size:9px;
+            font-weight:600;background:${ocol2}22;color:${ocol2}" id="badge-${key}">
+            ${r?r.overall.toUpperCase():'—'}</span>
+        </div>
+        <div class="curve-detail" id="cd-${key}">
+          <div class="vslider-row">
+            <label>V_eval</label>
+            <input type="range" id="slv-${key}" min="5" max="120" value="${ve}" step="5"
+              oninput="onCurveV('${key}',this)">
+            <span class="vslider-val" id="vv-${key}">${ve}</span> kph
+          </div>
+          <div class="curve-stats" id="stats-${key}">
+            ${r?renderStats(r,c):''}
+          </div>
+        </div>
+      </div>`;
+    });
+    html+=`</div></div>`;
+  });
+  pane.innerHTML=html;
+}
+
+function renderStats(r,c){
+  const iCol=r.I_d>0?'#e74c3c':'#27ae60';
+  return`
+    <div class="cstat"><div class="cstat-label">D_eq @V_design</div><div class="cstat-val">${r.Deq_d.toFixed(1)} mm</div></div>
+    <div class="cstat"><div class="cstat-label">超高不足 I</div><div class="cstat-val" style="color:${iCol}">${r.I_d.toFixed(1)} mm</div></div>
+    <div class="cstat"><div class="cstat-label">V_max 推算</div><div class="cstat-val" style="color:#378ADD">${r.Vmax.toFixed(1)} kph</div></div>
+    <div class="cstat"><div class="cstat-label">Jerk 峰值</div><div class="cstat-val">${r.jerk.toFixed(4)} m/s³</div></div>
+    <div class="cstat"><div class="cstat-label">D/Ls 實際</div><div class="cstat-val">${r.dls_actual.toFixed(4)}</div></div>
+    <div class="cstat"><div class="cstat-label">時變率 實際</div><div class="cstat-val">${r.cantRate_actual.toFixed(1)} mm/s</div></div>
+  `;
+}
+
+function updateCurveListStats(){
+  routes.forEach(route=>{
+    route.curves.forEach(c=>{
+      const key=getCurveKey(route.name,c.id);
+      const r=CR[key];
+      if(!r)return;
+      const ocol={ok:'#27ae60',warn:'#f39c12',fail:'#e74c3c'}[r.overall]||'#95a5a6';
+      const badge=document.getElementById('badge-'+key);
+      if(badge){ badge.textContent=r.overall.toUpperCase(); badge.style.color=ocol; badge.style.background=ocol+'22'; }
+      const stats=document.getElementById('stats-'+key);
+      if(stats)stats.innerHTML=renderStats(r,c);
+    });
+  });
+}
+
+function getRouteOverall(routeName){
+  const route=routes.find(r=>r.name===routeName);
+  if(!route)return'ok';
+  let worst='ok';
+  route.curves.forEach(c=>{
+    const r=CR[getCurveKey(routeName,c.id)];
+    if(!r)return;
+    if(r.overall==='fail')worst='fail';
+    else if(r.overall==='warn'&&worst!=='fail')worst='warn';
+  });
+  return worst;
+}
+
+function onCurveV(key,el){
+  const v=parseFloat(el.value);
+  curveVeval[key]=v;
+  document.getElementById('vv-'+key).textContent=v;
+  recalcAll();
+}
+
+function toggleRoute(id){
+  const el=document.getElementById(id);
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+function toggleCurve(id){
+  const el=document.getElementById(id);
+  el.style.display=el.style.display==='block'?'none':'block';
+}
+
+// ── 左側分頁切換 ──
+function switchLeftTab(tab){
+  document.getElementById('ltab-list').classList.toggle('act',tab==='list');
+  document.getElementById('ltab-rules').classList.toggle('act',tab==='rules');
+  document.getElementById('pane-list').style.display=tab==='list'?'flex':'none';
+  document.getElementById('pane-rules').style.display=tab==='rules'?'block':'none';
+}
+
+// ── 規範摘要 ──
+function si(st){return{ok:'✅',warn:'⚠️',fail:'❌',pref:'🔵'}[st]||'—';}
+function updateComplianceSummary(){
+  if(!routes.length)return;
+  const w=(key)=>{
+    let worst='ok';
+    routes.forEach(route=>route.curves.forEach(c=>{
+      const r=CR[getCurveKey(route.name,c.id)]; if(!r)return;
+      const v=r[key];
+      if(v==='fail')worst='fail';
+      else if(v==='warn'&&worst!=='fail')worst='warn';
+      else if(v==='pref'&&worst==='ok')worst='pref';
+    }));
+    return worst;
+  };
+  const allR=routes.every(route=>route.curves.every(c=>CR[getCurveKey(route.name,c.id)]?.rOk!==false));
+  const allL=routes.every(route=>route.curves.every(c=>CR[getCurveKey(route.name,c.id)]?.lOk!==false));
+  const s=(id,val)=>{ const el=document.getElementById(id); if(el)el.innerHTML=val; };
+  s('s11',si(allR?'ok':'fail'));
+  s('s13',si(allL?'ok':'fail'));
+  s('s21',si(w('Dst')));
+  s('s22',si(w('Ist')));
+  s('s23',si(w('Ist')==='pref'?'pref':w('Ist')==='ok'?'ok':'warn'));
+  s('s24',si(w('DlsSt')));
+  s('s25',si(w('CrSt')));
+  s('s31',si(w('LsSt')));
+}
+
+// ── 明細表 ──
+function badge(st,txt){
+  const cls={ok:'b-ok',warn:'b-warn',fail:'b-fail',pref:'b-pref',na:'b-na'}[st]||'b-na';
+  return`<span class="badge ${cls}">${txt}</span>`;
+}
+function updateDetailTable(){
+  const p=getP(); const tb=document.getElementById('dt-body'); tb.innerHTML='';
+  routes.forEach(route=>{
+    route.curves.forEach(c=>{
+      const key=getCurveKey(route.name,c.id);
+      const r=CR[key]; if(!r)return;
+      const ve=curveVeval[key]||c.Vd;
+      tb.innerHTML+=`<tr class="crv-hdr"><td colspan="24">
+        ${route.name} ／ ${c.full}　R=${c.R}m D=${c.D}mm V_d=${c.Vd}kph V_eval=${ve}kph
+        ${badge(r.overall,{ok:'✅通過',warn:'⚠️注意',fail:'❌不通過'}[r.overall])}
+        ${r.notes.length?'<span style="font-size:10px;color:#8b1e1e;margin-left:8px">'+r.notes.join('；')+'</span>':''}
+      </td></tr>`;
+      c.segs.forEach(seg=>{
+        const isC=seg.type==='CIRCULAR',isS=seg.type==='SPIRAL';
+        const iCol=r.I_d>p.iMax2?'#8b1e1e':r.I_d>p.iMax1?'#7a5000':r.I_d>p.iBase?'#0d4480':'#1e6e3a';
+        const ieCol=Math.abs(r.I_e)>p.iMax2?'#8b1e1e':Math.abs(r.I_e)>p.iMax1?'#7a5000':'#1e6e3a';
+        const segBg=isC?'background:#d6eaf8;color:#0d4480':'background:#fef3cd;color:#7a5000';
+        tb.innerHTML+=`<tr>
+          <td style="color:#5a7a9a;font-size:10px">${route.name}</td>
+          <td style="text-align:left;font-weight:600;color:#0d2b4e">${c.id.replace(/.*-/,'')}</td>
+          <td style="text-align:left">
+            <span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;${segBg}">${seg.label}</span>
+          </td>
+          <td style="font-size:10px;color:#5a7a9a">${seg.ch0.toFixed(3)}～${seg.ch1.toFixed(3)}</td>
+          <td>${c.R}</td><td>${seg.len.toFixed(3)}</td><td>${c.D}</td>
+          <td>${isC?r.Deq_d.toFixed(1):'漸變'}</td>
+          <td style="font-weight:600;color:${iCol}">${isC?r.I_d.toFixed(1):'—'}</td>
+          <td style="color:${iCol}">${isC?r.a_d.toFixed(3):'—'}</td>
+          <td>${isC?badge(r.Ist,{ok:'符合',warn:'注意',fail:'不符',pref:'需提報'}[r.Ist]):badge('na','N/A')}</td>
+          <td style="font-weight:600;color:${r.DlsSt==='fail'?'#8b1e1e':'#1e6e3a'}">${isS?r.dls_actual.toFixed(4):'—'}</td>
+          <td style="font-weight:600;color:${r.CrSt==='fail'?'#8b1e1e':r.CrSt==='warn'?'#7a5000':'#1e6e3a'}">${isS?r.cantRate_actual.toFixed(1):'—'}</td>
+          <td>${isC?r.Deq_e.toFixed(1):'漸變'}</td>
+          <td style="font-weight:600;color:${ieCol}">${isC?r.I_e.toFixed(1):'—'}</td>
+          <td style="color:${ieCol}">${isC?r.a_e.toFixed(3):'—'}</td>
+          <td style="font-weight:600">${isS?r.jerk.toFixed(4):'—'}</td>
+          <td>${isS?badge(r.JkSt,{ok:'優良',warn:'普通',fail:'不舒適'}[r.JkSt]):badge('na','N/A')}</td>
+          <td>${c.Vd}</td><td>${ve}</td>
+          <td style="color:#185FA5;font-weight:600">${r.Vmax.toFixed(1)}</td>
+          <td style="color:#185FA5;font-weight:600">${r.Vmin.toFixed(1)}</td>
+          <td>${isC?badge(r.overall,{ok:'通過',warn:'注意',fail:'不通過'}[r.overall]):isS?badge(r.LsSt,r.LsSt==='fail'?'不符':'符合'):'—'}</td>
+          <td style="text-align:left;font-size:10px;color:#5a7a9a;max-width:180px;white-space:normal">
+            ${isC?(r.notes.join('；')||'—'):isS&&r.LsSt==='fail'?`Ls=${c.Ls.toFixed(1)}m<需${r.LsReq.toFixed(1)}m`:'—'}
+          </td>
+        </tr>`;
+      });
+    });
+  });
+}
+
+// ── 圖表 ──
+function updateChart(){
+  if(!routes.length)return;
+  const p=getP();
+  const type=document.querySelector('input[name="ch"]:checked')?.value||'i';
+  const allCurves=[];
+  routes.forEach(route=>route.curves.forEach(c=>allCurves.push({route:route.name,c,key:getCurveKey(route.name,c.id)})));
+  const labels=allCurves.map(x=>x.c.id.replace(/.*-/,'')+(routes.length>1?'\n'+x.route:''));
+  let data,colors,ylabel;
+  const sc={i:'#e74c3c',ok:'#27ae60',warn:'#f39c12',pref:'#378ADD'};
+  if(type==='i'){
+    data=allCurves.map(x=>+(CR[x.key]?.I_d||0).toFixed(2));
+    colors=data.map(v=>v>p.iMax2?'#e74c3c':v>p.iMax1?'#f39c12':v>p.iBase?'#378ADD':'#27ae60');
+    ylabel='超高不足 I (mm) @V_design';
+  }else if(type==='iv'){
+    data=allCurves.map(x=>+(CR[x.key]?.I_e||0).toFixed(2));
+    colors=data.map(v=>Math.abs(v)>p.iMax2?'#e74c3c':Math.abs(v)>p.iMax1?'#f39c12':'#27ae60');
+    ylabel='超高偏差 (mm) @V_eval';
+  }else if(type==='cr'){
+    data=allCurves.map(x=>+(CR[x.key]?.dls_actual||0).toFixed(5));
+    const lim=p.dlsLim||1/440;
+    colors=data.map(v=>v>lim?'#e74c3c':'#27ae60');
+    ylabel='超高縱坡 D/Ls (實際值)';
+  }else{
+    data=allCurves.map(x=>+(CR[x.key]?.cantRate_actual||0).toFixed(2));
+    colors=data.map(v=>v>p.cdr2?'#e74c3c':v>p.cdr1?'#f39c12':'#27ae60');
+    ylabel='超高時變率 (mm/s)';
+  }
+  if(mainChart)mainChart.destroy();
+  mainChart=new Chart(document.getElementById('mainChart'),{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderColor:colors,borderWidth:1}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{title:{display:true,text:ylabel,font:{size:10}},
+                 grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10}}},
+              x:{ticks:{font:{size:10},autoSkip:false}}}}
+  });
+
+  // Jerk 圖表
+  const jdata=allCurves.map(x=>+(CR[x.key]?.jerk||0).toFixed(5));
+  const jcolors=jdata.map(v=>v>=p.j2?'#e74c3c':v>=p.j1?'#f39c12':'#27ae60');
+  if(jerkChartObj)jerkChartObj.destroy();
+  jerkChartObj=new Chart(document.getElementById('jerkChart'),{
+    type:'bar',
+    data:{labels,datasets:[{data:jdata,backgroundColor:jcolors,borderColor:jcolors,borderWidth:1}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{title:{display:true,text:'Jerk (m/s³) @V_design',font:{size:10}},
+                 grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{size:10}}},
+              x:{ticks:{font:{size:10},autoSkip:false}}}}
+  });
+}
+
+// ── 地圖 ──
+function initMap(){
+  if(map)return;
+  map=L.map('map',{zoomControl:true}).setView([24.978,121.433],14);
+  osmL=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);
+  satL=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'© Esri',maxZoom:19});
+}
+function setBase(t){
+  if(!map)return;
+  if(t==='osm'){map.addLayer(osmL);map.removeLayer(satL);}
+  else{map.removeLayer(osmL);map.addLayer(satL);}
+  curBase=t;
+  ['osm','sat'].forEach(k=>document.getElementById('bm-'+k).className='bmbtn'+(k===t?' act':''));
+}
+function setOp(v){if(curBase==='osm')osmL.setOpacity(v);else satL.setOpacity(v);}
+
+// C1: 圓弧方向修正（依 Direction L/R）
+function interpArc(p0,p1,R,dir,n=16){
+  const pts=[];
+  for(let i=0;i<=n;i++){
+    const t=i/n;
+    const lat=p0[0]*(1-t)+p1[0]*t;
+    const lon=p0[1]*(1-t)+p1[1]*t;
+    const chLat=p1[0]-p0[0], chLon=p1[1]-p0[1];
+    const chord=Math.sqrt(chLat**2+chLon**2)*111000;
+    const sagitta=chord>0?chord**2/(8*R):0;
+    const sagDeg=sagitta/111000;
+    const len=Math.sqrt(chLat**2+chLon**2);
+    const perpLat=len>0?-chLon/len:0;
+    const perpLon=len>0? chLat/len:0;
+    // C1: 依彎向決定偏移符號
+    const sign=dir==='L'?-1:1;
+    const bow=sign*4*sagDeg*t*(1-t);
+    pts.push([lat+perpLat*bow, lon+perpLon*bow]);
+  }
+  return pts;
+}
+function interpSpiral(p0,p1,R,dir,n=10){
+  const pts=[];
+  for(let i=0;i<=n;i++){
+    const t=i/n;
+    const lat=p0[0]*(1-t)+p1[0]*t;
+    const lon=p0[1]*(1-t)+p1[1]*t;
+    const chLat=p1[0]-p0[0], chLon=p1[1]-p0[1];
+    const chord=Math.sqrt(chLat**2+chLon**2)*111000;
+    const sagMax=chord>0?chord**2/(8*R)/111000:0;
+    const len=Math.sqrt(chLat**2+chLon**2);
+    const perpLat=len>0?-chLon/len:0;
+    const perpLon=len>0? chLat/len:0;
+    const sign=dir==='L'?-1:1;
+    const bow=sign*sagMax*t**2*(3-2*t)*0.5;
+    pts.push([lat+perpLat*bow, lon+perpLon*bow]);
+  }
+  return pts;
+}
+
+function getColor(key,lyr,p){
+  const r=CR[key];
+  if(!r)return'#95a5a6';
+  if(lyr==='comply') return{fail:'#e74c3c',warn:'#f39c12',ok:'#27ae60'}[r.overall]||'#95a5a6';
+  if(lyr==='cant'){
+    const absI=Math.abs(r.I_d);
+    return absI>p.iMax2?'#e74c3c':absI>p.iMax1?'#f39c12':absI>p.iBase?'#378ADD':'#27ae60';
+  }
+  return r.jerk>=p.j2?'#e74c3c':r.jerk>=p.j1?'#f39c12':'#27ae60';
+}
+
+function redrawMap(){
+  if(!map)return;
+  mapLayers.forEach(l=>map.removeLayer(l));
+  mapLayers=[];
+  const p=getP();
+  const lyr=document.querySelector('input[name="lyr"]:checked')?.value||'comply';
+  const allLats=[], allLons=[];
+
+  routes.forEach(route=>{
+    const curves=route.curves;
+    const pts=route.pts;
+    if(!curves.length)return;
+
+    // 路線起點到第一條曲線
+    const firstC=curves[0];
+    const firstStart=firstC.tcct?firstC.keyPts.TC:firstC.keyPts.TS;
+    const firstPt=pts.find(pt=>pt.abb==='TT');
+    if(firstPt&&firstStart){
+      const startPt=twd97ToWgs84(firstPt.e,firstPt.n);
+      mapLayers.push(L.polyline([startPt,firstStart],{color:'#95a5a6',weight:3,opacity:.8}).addTo(map));
+      allLats.push(startPt[0]); allLons.push(startPt[1]);
+    }
+
+    curves.forEach((c,idx)=>{
+      const key=getCurveKey(route.name,c.id);
+      const col=getColor(key,lyr,p);
+      const r=CR[key];
+      const w=r?.overall==='fail'?5:r?.overall==='warn'?4:3;
+      const kp=c.keyPts;
+
+      if(c.tcct){
+        // TC/CT：直接畫圓弧，無螺旋線
+        const TC=kp.TC, CT=kp.CT;
+        if(TC&&CT){
+          mapLayers.push(L.polyline(interpArc(TC,CT,c.R,c.dir),
+            {color:col,weight:w+1,opacity:.9}).addTo(map));
+          allLats.push(TC[0],CT[0]); allLons.push(TC[1],CT[1]);
+          [['TC',TC],['CT',CT]].forEach(([lbl,pt])=>{
+            const tip=`${c.id} ${lbl}<br>R=${c.R}m（${c.spiralExempt?'依規範免設緩和曲線':'⚠️應設緩和曲線'}）<br>D=${c.D}mm<br>I=${r?.I_d.toFixed(1)||'—'}mm<br>彎向=${c.dir}（外積）`;
+            const mk=L.circleMarker(pt,{radius:5,color:col,fillColor:col,fillOpacity:.9,weight:2});
+            mk.bindTooltip(tip,{direction:'top'});
+            mk.addTo(map); mapLayers.push(mk);
+          });
+        }
+      }else{
+        // 標準 TS/SC/CS/ST（方向已由外積確定）
+        const TS=kp.TS, SC=kp.SC, CS=kp.CS, ST=kp.ST;
+        if(TS&&SC&&CS&&ST){
+          mapLayers.push(L.polyline(interpSpiral(TS,SC,c.R,c.dir),
+            {color:col,weight:w,opacity:.85,dashArray:'6 3'}).addTo(map));
+          mapLayers.push(L.polyline(interpArc(SC,CS,c.R,c.dir),
+            {color:col,weight:w+1,opacity:.9}).addTo(map));
+          mapLayers.push(L.polyline(interpSpiral(CS,ST,c.R,c.dir),
+            {color:col,weight:w,opacity:.85,dashArray:'6 3'}).addTo(map));
+          allLats.push(...[TS,SC,CS,ST].map(pt=>pt[0]));
+          allLons.push(...[TS,SC,CS,ST].map(pt=>pt[1]));
+          [['SC',SC],['CS',CS]].forEach(([lbl,pt])=>{
+            const tip=`${c.id} ${lbl}<br>R=${c.R}m D=${c.D}mm<br>彎向=${c.dir}（外積判斷）<br>I=${r?.I_d.toFixed(1)||'—'}mm<br>Jerk=${r?.jerk.toFixed(4)||'—'}m/s³<br>D/Ls=${r?.dls_actual.toFixed(4)||'—'}<br>時變率=${r?.cantRate_actual.toFixed(1)||'—'}mm/s`;
+            const mk=L.circleMarker(pt,{radius:5,color:col,fillColor:col,fillOpacity:.9,weight:2});
+            mk.bindTooltip(tip,{direction:'top'});
+            mk.addTo(map); mapLayers.push(mk);
+          });
+        }
+      }
+
+      // 直線到下一曲線
+      const nextC=curves[idx+1];
+      const curEnd=c.tcct?kp.CT:kp.ST;
+      const nextStart=nextC?(nextC.tcct?nextC.keyPts.TC:nextC.keyPts.TS):null;
+      if(curEnd&&nextStart){
+        mapLayers.push(L.polyline([curEnd,nextStart],{color:'#95a5a6',weight:3,opacity:.8}).addTo(map));
+      }else if(curEnd){
+        const lastPt=pts.slice().reverse().find(pt=>pt.abb==='TT');
+        if(lastPt){
+          const endPt=twd97ToWgs84(lastPt.e,lastPt.n);
+          mapLayers.push(L.polyline([curEnd,endPt],{color:'#95a5a6',weight:3,opacity:.8}).addTo(map));
+        }
+      }
+    });
+  });
+
+  // 自動縮放
+  if(allLats.length){
+    const minLat=Math.min(...allLats),maxLat=Math.max(...allLats);
+    const minLon=Math.min(...allLons),maxLon=Math.max(...allLons);
+    map.fitBounds([[minLat,minLon],[maxLat,maxLon]],{padding:[30,30]});
+  }
+}
+
+// ── 功能分頁 ──
+function swFTab(name,el){
+  if(el.classList.contains('disabled'))return;
+  document.querySelectorAll('.ftab:not(.disabled)').forEach(t=>t.classList.remove('act'));
+  el.classList.add('act');
+  document.getElementById('tab-chart').style.display=name==='chart'?'flex':'none';
+  document.getElementById('tab-detail').style.display=name==='detail'?'block':'none';
+  document.getElementById('tab-jerk').style.display=name==='jerk'?'flex':'none';
+  if(name==='chart'||name==='jerk')updateChart();
+}
+
+// ── 模式切換 ──
+function setMode(mode){
+  const left=document.getElementById('left');
+  const bottom=document.getElementById('bottom');
+  if(mode==='eng'){
+    left.classList.remove('hidden');
+    bottom.style.display='flex';
+    document.getElementById('btn-eng').classList.add('act');
+    document.getElementById('btn-pre').classList.remove('act');
+  }else{
+    left.classList.add('hidden');
+    bottom.style.display='none';
+    document.getElementById('btn-pre').classList.add('act');
+    document.getElementById('btn-eng').classList.remove('act');
+  }
+  setTimeout(()=>map&&map.invalidateSize(),350);
+}
+
+// ── Q3: 拖動分隔條 ──
+function initDrag(divId,isVert,el1Id){
+  const div=document.getElementById(divId);
+  let drag=false;
+  div.addEventListener('mousedown',e=>{drag=true;e.preventDefault();});
+  document.addEventListener('mousemove',e=>{
+    if(!drag)return;
+    if(isVert){
+      const ar=document.getElementById('app').getBoundingClientRect();
+      document.getElementById(el1Id).style.width=Math.max(160,Math.min(460,e.clientX-ar.left))+'px';
+    }else{
+      const rr=document.getElementById('right').getBoundingClientRect();
+      const newH=Math.max(60,Math.min(500,e.clientY-rr.top));
+      document.getElementById('map-wrap').style.height=(rr.height-newH-4)+'px';
+      document.getElementById('map-wrap').style.flex='none';
+      document.getElementById('bottom').style.height=newH+'px';
+    }
+  });
+  document.addEventListener('mouseup',()=>{drag=false;map&&map.invalidateSize();});
+}
+initDrag('div-v',true,'left');
+initDrag('div-h',false,'map-wrap');
+</script>
+</body>
+</html>
