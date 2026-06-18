@@ -1711,7 +1711,13 @@ function buildSuggestion(){
 // ── PROJ MANAGER ──
 function openProjModal(){S.editingProj=null;renderProjList();document.getElementById('proj-modal').classList.add('show');}
 function renderProjList(){
-  document.getElementById('proj-list').innerHTML=S.projects.map((p,idx)=>{
+  const sorted=[...S.projects].sort((a,b)=>{
+    if(a.code==='0000X')return 1;
+    if(b.code==='0000X')return -1;
+    const na=parseInt(a.code)||0,nb=parseInt(b.code)||0;
+    return na-nb;
+  });
+  document.getElementById('proj-list').innerHTML=sorted.map((p,idx)=>{
     const c=p.code==='0000X'?'#aaa':cHex(p.code);
     const isEditing=S.editingProj===p.code;
     return`<div>
@@ -2343,7 +2349,7 @@ async function saveResearch(){
 
   if(S.editingResearch){
     const r=S.research.find(r=>r.id===S.editingResearch);
-    if(!r)return;
+    if(!r){closeModal('res-modal');return;}
     r.title=title;
     r.field=document.getElementById('r-field').value.trim();
     r.status=document.getElementById('r-status').value;
@@ -2373,10 +2379,11 @@ async function saveResearch(){
     S.research.push(r);
   }
 
-  await saveResearchToFirebase();
+  // 先關 modal、更新畫面，再背景同步
   closeModal('res-modal');
   renderResearch();
   toast('✅ 研究項目已儲存','ok');
+  saveResearchToFirebase();
 }
 
 async function addSparkQuick(id){
