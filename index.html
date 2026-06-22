@@ -1665,7 +1665,7 @@ function buildSuggestion(){
   const el=document.getElementById('sug-txt');
   const tags=document.getElementById('sug-tags');
   const today=fmtDate(new Date());
-  const pending=S.tasks.filter(t=>!t.done).sort((a,b)=>a.date>b.date?1:-1);
+  const pending=S.tasks.filter(t=>!t.done&&!t.archived).sort((a,b)=>a.date>b.date?1:-1);
 
   let parts=[];
   let tagHtml='';
@@ -2504,6 +2504,8 @@ function renderResearch(){
 }
 
 
+
+function closeModal(id){document.getElementById(id).classList.remove('show');}
 
 function openTypeModal(){renderTypeList();document.getElementById('type-modal').classList.add('show');}
 function renderTypeList(){
