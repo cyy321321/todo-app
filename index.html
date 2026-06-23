@@ -1479,8 +1479,8 @@ function renderWeek(){
   const CELL_H=52;
 
   // Separate spanning vs single-day tasks
-  const spanTasks=S.tasks.filter(t=>t.endDate&&t.endDate!==t.date&&getTaskDates(t).some(d=>weekDates.includes(d)));
-  const singleTasks=S.tasks.filter(t=>weekDates.includes(t.date)&&(!t.endDate||t.endDate===t.date));
+  const spanTasks=S.tasks.filter(t=>!t.archived&&t.endDate&&t.endDate!==t.date&&getTaskDates(t).some(d=>weekDates.includes(d)));
+  const singleTasks=S.tasks.filter(t=>!t.archived&&weekDates.includes(t.date)&&(!t.endDate||t.endDate===t.date));
 
   const el=document.getElementById('main-view');
 
@@ -1605,7 +1605,7 @@ function renderCal(){
         const isToday=c.date===today;
         // Sort: private first, then by start date
         const dayTasks=S.tasks
-          .filter(t=>getTaskDates(t).includes(c.date))
+          .filter(t=>!t.archived&&getTaskDates(t).includes(c.date))
           .sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
 
         return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}">
