@@ -413,7 +413,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
         <div style="background:var(--bg);border-radius:var(--r-sm);padding:14px;border:1.5px solid var(--border2)">
           <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px">將 Claude 整理好的任務清單貼在這裡：</div>
           <div class="ai-row">
-            <textarea id="paste-box" placeholder="任務名稱：台中出差&#10;計畫代碼：1278P&#10;類型：公事&#10;開始日期：2026-06-20&#10;結束日期：2026-06-22&#10;開始時間：09:00&#10;優先級：高&#10;說明：參加客戶簡報&#10;---&#10;任務名稱：台中旅遊&#10;類型：私人&#10;開始日期：2026-06-28&#10;結束日期：2026-06-30"></textarea>
+            <textarea id="paste-box" placeholder="任務名稱：台中出差&#10;計畫代碼：1278P&#10;類型：公事&#10;分類：會議&#10;開始日期：2026-06-20&#10;結束日期：2026-06-22&#10;開始時間：09:00&#10;優先級：高&#10;說明：參加客戶簡報&#10;---&#10;任務名稱：台中旅遊&#10;類型：私人&#10;開始日期：2026-06-28&#10;結束日期：2026-06-30"></textarea>
             <div class="ai-btns">
               <button class="btn btn-ora" onclick="parsePaste()">⚡ 解析</button>
               <button class="btn btn-soft" onclick="document.getElementById('paste-box').value=''">清除</button>
@@ -704,6 +704,7 @@ const CLAUDE_PROMPT=`請幫我整理以下信件或訊息中的待辦事項，�
 任務名稱：（20字內，具體清晰）
 計畫代碼：（若有4碼數字+1碼大寫英文如1234A則填入，否則填「待確認」）
 類型：（公事 或 私人）
+分類：（若為公事，請從「會議／交報告／交簡報／審查意見／交付／回覆／其他」擇一填入；若為私人則略過）
 開始日期：（YYYY-MM-DD）
 結束日期：（YYYY-MM-DD，若為跨日行程或出差請填，單日略過）
 開始時間：（HH:MM，若有則填，否則略過）
@@ -936,6 +937,7 @@ function parsePaste(){
     if(!title)return;
     const typeRaw=get(['類型','type']);
     const codeRaw=get(['計畫代碼','代碼','code']);
+    const catRaw=get(['分類','類別','category']);
     const dateRaw=get(['開始日期','截止日期','日期','date']);
     const edateRaw=get(['結束日期','end.?date','enddate']);
     const startRaw=get(['開始時間','time','start']);
@@ -943,6 +945,11 @@ function parsePaste(){
     const prioRaw=get(['優先級','優先','priority']);
     const note=get(['說明','備註','note']);
     const type=(typeRaw.includes('私人')||typeRaw.toLowerCase()==='private')?'private':'work';
+    let taskType=null;
+    if(type==='work'&&catRaw){
+      const found=S.taskTypes.find(tt=>catRaw.includes(tt.name)||tt.name.includes(catRaw));
+      if(found)taskType=found.id;
+    }
     const codeFromField=codeRaw?codeRaw.match(/\d{4}[A-Z]/):null;
     const codeFromBlock=block.match(/\d{4}[A-Z]/);
     const codeMatch=codeFromField||codeFromBlock;
@@ -954,7 +961,7 @@ function parsePaste(){
     const startMatch=(startRaw||'').match(/\d{1,2}:\d{2}/);
     const endMatch=(endRaw||'').match(/\d{1,2}:\d{2}/);
     const prioMap={'高':'high','中':'medium','低':'low','緊急':'high'};
-    tasks.push({title,type,code,date,endDate,time:startMatch?startMatch[0]:null,timeEnd:endMatch?endMatch[0]:null,priority:prioMap[prioRaw]||'medium',note,rawBlock:block});
+    tasks.push({title,type,taskType,code,date,endDate,time:startMatch?startMatch[0]:null,timeEnd:endMatch?endMatch[0]:null,priority:prioMap[prioRaw]||'medium',note,rawBlock:block});
   });
   if(!tasks.length){toast('找不到任務格式，請確認內容','err');return;}
   S.pending=tasks;showConfirmModal();
@@ -972,7 +979,11 @@ function showConfirmModal(){
     <div class="fi"><label>任務名稱</label><input type="text" value="${t.title}" id="pt${i}-title"></div>
     ${t.type==='work'?`<div class="fi"><label>計畫代碼 ${t.code==='0000X'?'<span style="color:var(--red);font-size:10px">⚠ 請確認</span>':''}</label>
     <select id="pt${i}-code" class="${t.code==='0000X'?'warn-sel':''}" onchange="this.className=this.value==='0000X'?'warn-sel':''">
-    ${opts.replace(`value="${t.code}"`,`value="${t.code}" selected`)}</select></div>`:''}
+    ${opts.replace(`value="${t.code}"`,`value="${t.code}" selected`)}</select></div>
+    <div class="fi"><label>分類</label><select id="pt${i}-type">
+    <option value="">－ 未分類 －</option>
+    ${S.taskTypes.map(x=>`<option value="${x.id}" ${t.taskType===x.id?'selected':''}>${x.icon} ${x.name}</option>`).join('')}
+    </select></div>`:''}
     <div class="fi-row">
       <div class="fi"><label>開始日期</label><input type="date" value="${t.date||''}" id="pt${i}-date"></div>
       <div class="fi"><label>結束日期（跨日選填）</label><input type="date" value="${t.endDate||''}" id="pt${i}-edate"></div>
@@ -1000,9 +1011,10 @@ async function commitTasks(){
     const start=document.getElementById(`pt${i}-start`)?.value||null;
     const end=document.getElementById(`pt${i}-end`)?.value||null;
     const code=t.type==='work'?(document.getElementById(`pt${i}-code`)?.value||'0000X'):null;
+    const taskType=t.type==='work'?(document.getElementById(`pt${i}-type`)?.value||null):null;
     const prio=document.getElementById(`pt${i}-prio`).value;
     if(!title||!date){toast('請填寫所有必填欄位','err');return;}
-    const task={id:Date.now()+i,type:t.type,title,code,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:prio,done:false,calEventId:null,note:t.note||'',rawInfo:t.rawBlock||'',createdAt:Date.now()};
+    const task={id:Date.now()+i,type:t.type,title,code,taskType,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:prio,done:false,calEventId:null,note:t.note||'',rawInfo:t.rawBlock||'',createdAt:Date.now()};
     const evId=await pushCal(task);if(evId)task.calEventId=evId;
     newT.push(task);
   }
