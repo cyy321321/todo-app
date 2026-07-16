@@ -50,7 +50,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .login-sub{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:32px}
 #login-err{color:var(--red);font-size:13px;margin-top:16px;display:none;padding:10px;background:var(--red-bg);border-radius:10px}
 
-#app{display:none;flex-direction:column;min-height:100vh}
+#app{display:none;flex-direction:column;min-height:100vh;justify-content:space-between}
 
 /* HEADER */
 .hdr{background:var(--ora);border-bottom:2px solid var(--ora2);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:center;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
@@ -99,15 +99,18 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .sug-mini-dot{position:absolute;right:2px;bottom:2px;width:5px;height:5px;border-radius:50%;background:var(--red)}
 .sug-mini-dot.travel{background:var(--amber)}
 
-/* CYCLE CARD */
-.cycle-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin:10px 20px 0;box-shadow:var(--shadow)}
-.cycle-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-.cycle-title{font-size:12px;font-weight:700;color:var(--text2)}
-.cycle-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.cycle-actions{display:flex;gap:6px;flex-wrap:wrap}
-.cycle-body{display:flex;gap:8px;flex-wrap:wrap}
+/* CYCLE (footer, hidden entry) */
+.footer-hidden-link{text-align:center;padding:14px 20px 22px}
+.footer-hidden-link span{font-size:11px;color:var(--border2);cursor:pointer;letter-spacing:.05em;user-select:none}
+.footer-hidden-link span:hover{color:var(--text3)}
+.cycle-sub{font-size:11px;color:var(--text3);margin-top:2px;margin-bottom:10px;line-height:1.6}
 .cycle-pill{font-size:11px;padding:5px 8px;border-radius:999px;background:var(--ora-bg);color:var(--ora2);border:1px solid var(--ora-mid)}
 .cycle-pill.alt{background:var(--amber-bg);color:var(--amber);border-color:#FDE68A}
+.cycle-stat-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
+.cycle-stat-table th{text-align:left;color:var(--text3);font-weight:600;padding:4px 6px;border-bottom:1.5px solid var(--border)}
+.cycle-stat-table td{padding:4px 6px;border-bottom:1px solid var(--border);color:var(--text2)}
+.cycle-stat-table .cst-del{color:var(--text3);cursor:pointer;font-size:11px}
+.cycle-stat-table .cst-del:hover{color:var(--red)}
 
 /* HINT */
 .hint-bar{background:var(--ora-bg);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;justify-content:center}
@@ -357,27 +360,34 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .res-detail.open{display:block}
 .res-act-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 
+.cycle-inputs{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.cycle-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em}
+.cycle-input{border:1.5px solid var(--border2);border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white);color:var(--text)}
+.cycle-result{background:var(--ora-bg);border:1px solid var(--ora-mid);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--text2);line-height:1.5}
+
 @media(max-width:700px){
   .sug-inner{grid-template-columns:1fr}
   .sug-mini{min-width:0}
   .seg-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
   .seg{width:100%;text-align:center;justify-content:center}
-  .view-bar{padding:8px 12px}
-  .view-bar-inner{height:auto;flex-direction:column;align-items:stretch;gap:8px}
-  .view-tabs{flex-wrap:wrap}
-  .vtab{flex:1 1 calc(50% - 4px);text-align:center;justify-content:center}
-  .view-nav{justify-content:center}
+  .view-bar{padding:0}
+  .view-bar-inner{height:auto;flex-direction:column;align-items:stretch}
+  .view-tabs{flex-wrap:nowrap;overflow-x:auto;gap:6px;padding:10px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .view-tabs::-webkit-scrollbar{display:none}
+  .vtab{flex:0 0 auto;white-space:nowrap;text-align:center;justify-content:center;font-size:12px;padding:6px 14px}
+  .view-nav{justify-content:center;padding:6px 12px 10px;border-top:1px solid var(--border);gap:10px;margin-top:0}
+  .nav-label{min-width:auto}
+  .nav-btn{width:26px;height:26px;font-size:11px}
   .man-row{flex-direction:column;align-items:stretch}
   .fld{min-width:100%}
   .edit-row{grid-template-columns:1fr}
+  .cycle-inputs{flex-direction:column}
+  .cycle-inputs>*{width:100%}
 }
 @media(max-width:600px){
   .hdr-email{display:none}
   .week-grid{grid-template-columns:36px repeat(5,1fr)}
   .btn{width:100%;justify-content:center}
-  .cycle-head{flex-direction:column;align-items:flex-start}
-  .cycle-actions{width:100%}
-  .cycle-actions .btn{flex:1}
 }
 </style>
 </head>
@@ -429,8 +439,6 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <div class="sug-mini" id="sug-mini"></div>
     </div>
   </div>
-
-  <div class="cycle-card" id="cycle-card"></div>
 
   <div class="hint-bar">
     <div class="hint-inner">
@@ -504,6 +512,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
         <button class="vtab" id="vt-cal" onclick="setView('cal')">📅 月曆</button>
         <button class="vtab" id="vt-notes" onclick="setView('notes')">📝 筆記</button>
         <button class="vtab" id="vt-research" onclick="setView('research')">🔬 研究</button>
+        <button class="vtab" id="vt-travel" onclick="setView('travel')">✈️ 出差</button>
         <button class="vtab" id="vt-search" onclick="setView('search')">🔍 搜尋</button>
       </div>
       <div class="view-nav">
@@ -515,6 +524,8 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
   </div>
 
   <div id="main-view"></div>
+
+  <div class="footer-hidden-link"><span onclick="openCycleModal()">·</span></div>
 </div>
 
 <!-- CONFIRM MODAL -->
@@ -729,6 +740,17 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
   </div>
 </div>
 
+<!-- CYCLE MODAL (private, tucked away) -->
+<div class="modal-overlay" id="cycle-modal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title">🩸 週期記錄</div>
+    <div id="cycle-modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-soft" onclick="closeModal('cycle-modal')">關閉</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -797,10 +819,10 @@ function loadCycleState(){
     const raw=localStorage.getItem('tm-cycle');
     if(raw){
       const parsed=JSON.parse(raw);
-      return {lastStart:parsed.lastStart||'',cycleLength:Number(parsed.cycleLength)||28,periodDays:Number(parsed.periodDays)||5};
+      return {lastStart:parsed.lastStart||'',cycleLength:Number(parsed.cycleLength)||28,periodDays:Number(parsed.periodDays)||5,history:Array.isArray(parsed.history)?parsed.history:[]};
     }
   }catch(e){}
-  return {lastStart:'',cycleLength:28,periodDays:5};
+  return {lastStart:'',cycleLength:28,periodDays:5,history:[]};
 }
 
 function saveCycleState(cycle){localStorage.setItem('tm-cycle',JSON.stringify(cycle));}
@@ -839,7 +861,6 @@ let S={
   pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
   editingProj:null,
   cycle:loadCycleState(),
-  cycleOpen:false,
 };
 
 const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -1187,16 +1208,17 @@ async function deleteCal(eventId){
 }
 
 // ── VIEW ──
-function setView(v){S.view=v;['list','week','cal','notes','research','search'].forEach(x=>{const el=document.getElementById('vt-'+x);if(el)el.className='vtab'+(x===v?' on':'');});renderView();}
+function setView(v){S.view=v;['list','week','cal','notes','research','travel','search'].forEach(x=>{const el=document.getElementById('vt-'+x);if(el)el.className='vtab'+(x===v?' on':'');});renderView();}
 function navPrev(){if(S.view==='cal'){S.calMonth--;if(S.calMonth<0){S.calMonth=11;S.calYear--;}}else if(S.view==='week'){S.weekOffset--;}renderView();}
 function navNext(){if(S.view==='cal'){S.calMonth++;if(S.calMonth>11){S.calMonth=0;S.calYear++;}}else if(S.view==='week'){S.weekOffset++;}renderView();}
 function renderView(){
-  fillCodeSel();fillNoteCodeSel();renderMiniCalendar();renderCycleCard();
+  fillCodeSel();fillNoteCodeSel();renderMiniCalendar();
   if(S.view==='list')renderList();
   else if(S.view==='week')renderWeek();
   else if(S.view==='cal')renderCal();
   else if(S.view==='notes')renderNotes();
   else if(S.view==='research')renderResearch();
+  else if(S.view==='travel')renderTravel();
   else if(S.view==='search')renderSearch();
 }
 
@@ -1238,49 +1260,90 @@ function renderMiniCalendar(){
   }).join('')}</div>`;
 }
 
-function toggleCycleCard(){S.cycleOpen=!S.cycleOpen;renderCycleCard();}
+function openCycleModal(){renderCycleModal();document.getElementById('cycle-modal').classList.add('show');}
 
-function saveCycle(){
+function saveCycleEntry(){
   const lastStart=document.getElementById('cycle-last')?.value||'';
-  const cycleLength=document.getElementById('cycle-len')?.value||28;
-  const periodDays=document.getElementById('cycle-days')?.value||5;
-  S.cycle={lastStart,cycleLength:Number(cycleLength)||28,periodDays:Number(periodDays)||5};
-  saveCycleState(S.cycle);renderCycleCard();toast('✅ 月經週期已更新','ok');
+  const cycleLength=Number(document.getElementById('cycle-len')?.value)||28;
+  const periodDays=Number(document.getElementById('cycle-days')?.value)||5;
+  if(!lastStart){toast('請先選擇本次開始日期','err');return;}
+  const history=(S.cycle.history||[]).filter(h=>h.date!==lastStart);
+  history.push({date:lastStart,periodDays});
+  history.sort((a,b)=>a.date>b.date?1:-1);
+  S.cycle={lastStart,cycleLength,periodDays,history};
+  saveCycleState(S.cycle);
+  renderCycleModal();
+  toast('✅ 已記錄','ok');
 }
 
-function renderCycleCard(){
-  const el=document.getElementById('cycle-card');
-  if(!el)return;
-  const cycle=S.cycle||{lastStart:'',cycleLength:28,periodDays:5};
-  const summary=getCycleSummary(cycle);
-  if(!S.cycleOpen){
-    el.innerHTML=`<div class="cycle-head">
-      <div>
-        <div class="cycle-title">🩸 月經週期</div>
-        <div class="cycle-sub">私人設定，點我打開</div>
-      </div>
-      <button class="btn btn-soft" onclick="toggleCycleCard()" style="padding:6px 10px;font-size:12px">展開</button>
-    </div>`;
-    return;
+function deleteCycleEntry(date){
+  S.cycle.history=(S.cycle.history||[]).filter(h=>h.date!==date);
+  if(S.cycle.lastStart===date){
+    const latest=S.cycle.history[S.cycle.history.length-1];
+    S.cycle.lastStart=latest?latest.date:'';
   }
-  el.innerHTML=`<div class="cycle-head">
-    <div>
-      <div class="cycle-title">🩸 月經週期</div>
-      <div class="cycle-sub">記錄上次月經開始日，系統會預估下次來潮</div>
+  saveCycleState(S.cycle);
+  renderCycleModal();
+}
+
+function renderCycleModal(){
+  const el=document.getElementById('cycle-modal-body');
+  if(!el)return;
+  const cycle=S.cycle||{lastStart:'',cycleLength:28,periodDays:5,history:[]};
+  const summary=getCycleSummary(cycle);
+  const historyDesc=(cycle.history||[]).slice().sort((a,b)=>a.date<b.date?1:-1);
+  const chron=(cycle.history||[]).slice().sort((a,b)=>a.date>b.date?1:-1);
+  const intervals={};
+  for(let i=1;i<chron.length;i++){
+    const d1=new Date(chron[i-1].date+'T00:00:00'),d2=new Date(chron[i].date+'T00:00:00');
+    intervals[chron[i].date]=Math.round((d2-d1)/(1000*60*60*24));
+  }
+  el.innerHTML=`
+    <div class="cycle-sub">私人紀錄。填寫「本次開始日期」後按「儲存本次紀錄」，系統會依「平均週期天數」推估下次來潮日，並自動加進下方紀錄表。</div>
+    <div class="cycle-inputs">
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div class="cycle-label">本次開始日期</div>
+        <input type="date" id="cycle-last" value="${cycle.lastStart||''}" class="cycle-input">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div class="cycle-label">平均週期天數</div>
+        <input type="number" id="cycle-len" min="20" max="45" value="${cycle.cycleLength||28}" class="cycle-input" style="max-width:80px">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div class="cycle-label">經期天數</div>
+        <input type="number" id="cycle-days" min="1" max="14" value="${cycle.periodDays||5}" class="cycle-input" style="max-width:80px">
+      </div>
+      <button class="btn btn-ora" onclick="saveCycleEntry()" style="padding:8px 14px;font-size:12px">儲存本次紀錄</button>
     </div>
-    <div class="cycle-actions">
-      <input type="date" id="cycle-last" value="${cycle.lastStart||''}" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white)">
-      <input type="number" id="cycle-len" min="20" max="45" value="${cycle.cycleLength||28}" style="width:70px;border:1.5px solid var(--border2);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white)">
-      <input type="number" id="cycle-days" min="1" max="14" value="${cycle.periodDays||5}" style="width:70px;border:1.5px solid var(--border2);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white)">
-      <button class="btn btn-ora" onclick="saveCycle()" style="padding:6px 12px;font-size:12px">儲存</button>
-      <button class="btn btn-soft" onclick="toggleCycleCard()" style="padding:6px 10px;font-size:12px">收合</button>
+    <div class="cycle-pill" style="display:inline-block;margin-top:10px">${summary?`預估下次來潮：${summary.nextDate}（還有 ${summary.daysLeft} 天）`:'尚未有紀錄'}</div>
+    ${historyDesc.length?`
+    <table class="cycle-stat-table">
+      <thead><tr><th>開始日期</th><th>間隔(天)</th><th>經期(天)</th><th></th></tr></thead>
+      <tbody>
+        ${historyDesc.map(h=>`<tr><td>${h.date}</td><td>${intervals[h.date]!=null?intervals[h.date]:'—'}</td><td>${h.periodDays||'—'}</td><td><span class="cst-del" onclick="deleteCycleEntry('${h.date}')">✕</span></td></tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:10px">
+      <button class="btn btn-soft" onclick="copyCycleStats()" style="font-size:12px;padding:6px 12px">📋 複製紀錄</button>
     </div>
-  </div>
-  <div class="cycle-body">
-    <div class="cycle-pill">上次月經 ${cycle.lastStart?cycle.lastStart:'未設定'}</div>
-    <div class="cycle-pill alt">週期 ${cycle.cycleLength||28} 天</div>
-    <div class="cycle-pill">${summary?`預估下次：${summary.nextDate}（${summary.daysLeft} 天後）`:'尚未設定預估日'}</div>
-  </div>`;
+    `:''}
+  `;
+}
+
+function copyCycleStats(){
+  const cycle=S.cycle||{};
+  const chron=(cycle.history||[]).slice().sort((a,b)=>a.date>b.date?1:-1);
+  if(!chron.length){toast('尚無紀錄','err');return;}
+  let text='【月經週期紀錄】\n\n';
+  chron.forEach((h,i)=>{
+    let interval='';
+    if(i>0){
+      const d1=new Date(chron[i-1].date+'T00:00:00'),d2=new Date(h.date+'T00:00:00');
+      interval=`  間隔 ${Math.round((d2-d1)/(1000*60*60*24))} 天`;
+    }
+    text+=`${h.date}  經期 ${h.periodDays||'—'} 天${interval}\n`;
+  });
+  navigator.clipboard.writeText(text.trim()).then(()=>toast('✅ 已複製到剪貼簿','ok')).catch(()=>toast('請手動複製','err'));
 }
 
 // ── LIST ──
@@ -1487,6 +1550,29 @@ function renderList(){
 
   el.innerHTML=html;
   fillCodeSel();
+}
+
+function renderTravel(){
+  document.getElementById('nav-label').textContent='';
+  const el=document.getElementById('main-view');
+  const today=new Date().toISOString().split('T')[0];
+  const trips=S.tasks.filter(t=>t.isTravel&&!t.archived).sort((a,b)=>a.date>b.date?1:-1);
+  if(!trips.length){
+    el.innerHTML=`<div class="empty"><div class="empty-ico">✈️</div>目前沒有標記「出差 / 商務」的行程。<br>新增任務時勾選「這次是出差」即可顯示在這裡。</div>`;
+    return;
+  }
+  const upcoming=trips.filter(t=>!t.done&&(t.endDate||t.date)>=today);
+  const past=trips.filter(t=>t.done||(t.endDate||t.date)<today);
+  let html='';
+  if(upcoming.length){
+    html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">✈️ 即將出差 / 商務（${upcoming.length}）</div>`;
+    html+=upcoming.map(t=>taskCardHTML(t,today,t.type==='private'?privHex(t.id):cHex(t.code))).join('');
+  }
+  if(past.length){
+    html+=`<div style="margin-top:14px;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">📁 過去的出差 / 商務（${past.length}）</div>`;
+    html+=past.sort((a,b)=>a.date<b.date?1:-1).map(t=>taskCardHTML(t,today,t.type==='private'?privHex(t.id):cHex(t.code))).join('');
+  }
+  el.innerHTML=html;
 }
 
 function toggleProj(code){
@@ -1846,6 +1932,7 @@ function openCalLink(task){
 }
 
 // ── SUGGESTION ──
+
 function buildSuggestion(){
   const el=document.getElementById('sug-txt');
   const tags=document.getElementById('sug-tags');
