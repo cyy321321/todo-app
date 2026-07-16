@@ -75,9 +75,9 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 /* SUGGESTION */
 .sug{background:var(--white);border-bottom:2px solid var(--border);padding:14px 20px;display:flex;justify-content:center}
-.sug-inner{display:flex;align-items:flex-start;gap:12px;max-width:var(--max-w);width:100%}
+.sug-inner{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;max-width:var(--max-w);width:100%}
 .sug-ico{font-size:20px;flex-shrink:0}
-.sug-body{flex:1}
+.sug-body{flex:1;min-width:0}
 .sug-title{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase}
 .sug-txt{font-size:13px;color:var(--text);line-height:1.7}
 .sug-txt b{color:var(--red)}
@@ -88,6 +88,24 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .stag-o{background:var(--green-bg);color:var(--green);border:1px solid var(--green-mid)}
 .sug-refresh{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:8px;font-family:inherit;margin-top:6px;display:block}
 .sug-refresh:hover{background:var(--border)}
+.sug-mini{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px;min-width:182px}
+.sug-mini-title{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase}
+.sug-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.sug-mini-cell{position:relative;aspect-ratio:1/1;border-radius:7px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--text2);background:var(--white)}
+.sug-mini-cell.other-month{opacity:.45}
+.sug-mini-cell.today{border-color:var(--ora);color:var(--ora2);box-shadow:inset 0 0 0 1px var(--ora-mid)}
+.sug-mini-cell.travel{background:var(--amber-bg);border-color:var(--amber)}
+.sug-mini-dot{position:absolute;right:2px;bottom:2px;width:5px;height:5px;border-radius:50%;background:var(--red)}
+
+/* CYCLE CARD */
+.cycle-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin:10px 20px 0;box-shadow:var(--shadow)}
+.cycle-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.cycle-title{font-size:12px;font-weight:700;color:var(--text2)}
+.cycle-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.cycle-actions{display:flex;gap:6px;flex-wrap:wrap}
+.cycle-body{display:flex;gap:8px;flex-wrap:wrap}
+.cycle-pill{font-size:11px;padding:5px 8px;border-radius:999px;background:var(--ora-bg);color:var(--ora2);border:1px solid var(--ora-mid)}
+.cycle-pill.alt{background:var(--amber-bg);color:var(--amber);border-color:#FDE68A}
 
 /* HINT */
 .hint-bar{background:var(--ora-bg);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;justify-content:center}
@@ -102,7 +120,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .t-arrow{font-size:10px;transition:transform .25s;margin-left:auto}
 .t-arrow.open{transform:rotate(180deg)}
 .input-panel{background:var(--white);border-bottom:2px solid var(--border);overflow:hidden;max-height:0;transition:max-height .3s ease;display:flex;justify-content:center}
-.input-panel.open{max-height:560px}
+.input-panel.open{max-height:760px}
 .input-inner{padding:16px 20px;width:100%;max-width:var(--max-w)}
 .seg-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
 .seg{font-size:12px;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:none;cursor:pointer;font-family:inherit;color:var(--text2);font-weight:500;transition:all .15s}
@@ -118,6 +136,8 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .fld label{font-size:11px;font-weight:500;color:var(--text2)}
 .fld input,.fld select{border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--text);outline:none;transition:border .15s}
 .fld input:focus,.fld select:focus{border-color:var(--ora)}
+.fld-check .check-pill{display:flex;align-items:center;gap:8px;border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;background:var(--bg);color:var(--text2);font-size:13px;min-height:41px;cursor:pointer}
+.fld-check input[type="checkbox"]{width:15px;height:15px;accent-color:var(--ora)}
 
 /* BUTTONS */
 .btn{border:none;border-radius:var(--r-xs);padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
@@ -222,17 +242,22 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .cal-week-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}
 .cal-wday{text-align:center;font-size:11px;font-weight:500;color:var(--text3);padding:4px 0}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
-.cal-cell{background:var(--white);border-radius:var(--r-xs);padding:5px;min-height:68px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.cal-cell{background:var(--white);border-radius:var(--r-xs);padding:5px;min-height:68px;border:1px solid var(--border);cursor:pointer;transition:all .15s;position:relative}
 .cal-cell:hover{border-color:var(--ora)}
 .cal-cell.today{border-color:var(--ora);border-width:2px}
 .cal-cell.other-month{opacity:.35}
+.cal-cell.travel-day{background:var(--amber-bg);border-color:var(--amber)}
 .cal-num{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:3px}
 .cal-cell.today .cal-num{color:var(--ora);font-weight:700}
+.cal-cell.travel-day .cal-num{color:var(--amber)}
 .cal-ev-dot{font-size:9px;padding:1px 4px;border-radius:5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
 .cal-ev-dot.done-dot{opacity:.3;filter:grayscale(1)}
 .cal-ev-dot.span-dot{border-radius:0;margin-left:-5px;margin-right:-5px;padding-left:6px}
 .cal-ev-dot.span-start{border-radius:5px 0 0 5px;margin-right:-5px;padding-right:6px}
 .cal-ev-dot.span-end{border-radius:0 5px 5px 0;margin-left:-5px;padding-left:6px}
+.cal-day-flag{position:absolute;right:4px;bottom:4px;width:6px;height:6px;border-radius:50%;background:var(--red)}
+.week-flag{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-left:4px;vertical-align:middle}
+.week-flag.travel{background:var(--amber)}
 
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(80,30,0,.4);z-index:100;align-items:center;justify-content:center;padding:20px}
@@ -330,12 +355,27 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .res-detail.open{display:block}
 .res-act-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 
+@media(max-width:700px){
+  .sug-inner{grid-template-columns:1fr}
+  .sug-mini{min-width:0}
+  .seg-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .seg{width:100%;text-align:center;justify-content:center}
+  .view-bar{padding:8px 12px}
+  .view-bar-inner{height:auto;flex-direction:column;align-items:stretch;gap:8px}
+  .view-tabs{flex-wrap:wrap}
+  .vtab{flex:1 1 calc(50% - 4px);text-align:center;justify-content:center}
+  .view-nav{justify-content:center}
+  .man-row{flex-direction:column;align-items:stretch}
+  .fld{min-width:100%}
+  .edit-row{grid-template-columns:1fr}
+}
 @media(max-width:600px){
   .hdr-email{display:none}
-  .man-row{flex-direction:column}
-  .fld{min-width:100%}
   .week-grid{grid-template-columns:36px repeat(5,1fr)}
-  .edit-row{grid-template-columns:1fr}
+  .btn{width:100%;justify-content:center}
+  .cycle-head{flex-direction:column;align-items:flex-start}
+  .cycle-actions{width:100%}
+  .cycle-actions .btn{flex:1}
 }
 </style>
 </head>
@@ -384,8 +424,11 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
         <div class="sug-tags" id="sug-tags"></div>
         <button class="sug-refresh" onclick="buildSuggestion()">↻ 重新分析</button>
       </div>
+      <div class="sug-mini" id="sug-mini"></div>
     </div>
   </div>
+
+  <div class="cycle-card" id="cycle-card"></div>
 
   <div class="hint-bar">
     <div class="hint-inner">
@@ -430,6 +473,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
           <div class="fld"><label>任務類型（選填）</label><select id="w-type"><option value="">－ 選填 －</option></select></div>
           <div class="fld"><label>開始時間（選填）</label><input type="time" id="w-start"></div>
           <div class="fld"><label>結束時間（選填）</label><input type="time" id="w-end"></div>
+          <div class="fld fld-check"><label>出差 / 商務</label><label class="check-pill" for="w-travel"><input type="checkbox" id="w-travel"> <span>這次是出差</span></label></div>
           <button class="btn btn-ora" onclick="addWork()" style="align-self:flex-end">新增</button>
         </div>
       </div>
@@ -441,6 +485,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
           <div class="fld"><label>開始時間（選填）</label><input type="time" id="p-start"></div>
           <div class="fld"><label>結束時間（選填）</label><input type="time" id="p-end"></div>
           <div class="fld"><label>地點（選填）</label><input type="text" id="p-loc" placeholder="例：台中"></div>
+          <div class="fld fld-check"><label>出差 / 商務</label><label class="check-pill" for="p-travel"><input type="checkbox" id="p-travel"> <span>這次是出差</span></label></div>
           <button class="btn btn-grn" onclick="addPriv()" style="align-self:flex-end">新增</button>
         </div>
       </div>
@@ -734,6 +779,36 @@ function cHex(code){const i=getCI(code);return i<0?'#607D8B':COLORS[i]||'#888';}
 function cBg(code){const i=getCI(code);return i<0?'#ECEFF1':COLOR_BG[i]||'#f5f5f5';}
 function cMid(code){const i=getCI(code);return i<0?'#CFD8DC':COLOR_MID[i]||'#ddd';}
 
+function sortProjects(list){
+  return [...list].sort((a,b)=>{
+    if(a.code==='0000X')return 1;
+    if(b.code==='0000X')return -1;
+    const na=parseInt(a.code)||0,nb=parseInt(b.code)||0;
+    return na-nb;
+  });
+}
+
+function loadCycleState(){
+  try{
+    const raw=localStorage.getItem('tm-cycle');
+    if(raw){
+      const parsed=JSON.parse(raw);
+      return {lastStart:parsed.lastStart||'',cycleLength:Number(parsed.cycleLength)||28,periodDays:Number(parsed.periodDays)||5};
+    }
+  }catch(e){}
+  return {lastStart:'',cycleLength:28,periodDays:5};
+}
+
+function saveCycleState(cycle){localStorage.setItem('tm-cycle',JSON.stringify(cycle));}
+function getCycleSummary(cycle){
+  if(!cycle||!cycle.lastStart)return null;
+  const start=new Date(cycle.lastStart+'T00:00:00');
+  const next=new Date(start);next.setDate(start.getDate()+Number(cycle.cycleLength||28));
+  const now=new Date();
+  const diff=Math.ceil((next-now)/(1000*60*60*24));
+  return {nextDate:fmtDate(next),daysLeft:diff<0?0:diff};
+}
+
 let S={
   view:'list',inputOpen:false,itab:'paste',
   calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),
@@ -759,6 +834,7 @@ let S={
   tasks:[],
   pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
   editingProj:null,
+  cycle:loadCycleState(),
 };
 
 const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -968,7 +1044,7 @@ function parsePaste(){
 }
 
 function showConfirmModal(){
-  const opts=S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
+  const opts=sortProjects(S.projects).map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
   document.getElementById('parsed-list').innerHTML=S.pending.map((t,i)=>`
   <div class="parsed-item">
     <div class="pi-head">
@@ -1028,7 +1104,8 @@ async function commitTasks(){
 function fillCodeSel(){
   const s=document.getElementById('w-code');
   if(!s)return;
-  s.innerHTML=S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
+  const sorted=sortProjects(S.projects);
+  s.innerHTML=sorted.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
   // Fill task type selectors
   ['w-type','filter-type'].forEach(id=>{
     const el=document.getElementById(id);
@@ -1047,10 +1124,11 @@ async function addWork(){
   const start=document.getElementById('w-start').value||null;
   const end=document.getElementById('w-end').value||null;
   const taskType=document.getElementById('w-type')?.value||null;
+  const isTravel=document.getElementById('w-travel')?.checked||false;
   if(!title){toast('請輸入任務名稱','err');return;}
   if(!date){toast('請選擇日期','err');return;}
   if(edate&&edate<date){toast('結束日期不可早於開始日期，已自動清除','info');edate=null;}
-  const task={id:Date.now(),type:'work',title,code,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:'medium',taskType:taskType,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
+  const task={id:Date.now(),type:'work',title,code,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:'medium',taskType:taskType,isTravel,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
   const evId=await pushCal(task);if(evId)task.calEventId=evId;
   S.tasks.push(task);await save();renderView();buildSuggestion();
   document.getElementById('w-title').value='';
@@ -1064,10 +1142,11 @@ async function addPriv(){
   const start=document.getElementById('p-start').value||null;
   const end=document.getElementById('p-end').value||null;
   const loc=document.getElementById('p-loc').value.trim();
+  const isTravel=document.getElementById('p-travel')?.checked||false;
   if(!title){toast('請輸入行程名稱','err');return;}
   if(!date){toast('請選擇日期','err');return;}
   if(edate&&edate<date){toast('結束日期不可早於開始日期，已自動清除','info');edate=null;}
-  const task={id:Date.now(),type:'private',title,date,endDate:edate,time:start,timeEnd:end,loc,code:null,priority:'medium',done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
+  const task={id:Date.now(),type:'private',title,date,endDate:edate,time:start,timeEnd:end,loc,code:null,priority:'medium',isTravel,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
   const evId=await pushCal(task);if(evId)task.calEventId=evId;
   S.tasks.push(task);await save();renderView();buildSuggestion();
   document.getElementById('p-title').value='';document.getElementById('p-loc').value='';
@@ -1107,7 +1186,7 @@ function setView(v){S.view=v;['list','week','cal','notes','research','search'].f
 function navPrev(){if(S.view==='cal'){S.calMonth--;if(S.calMonth<0){S.calMonth=11;S.calYear--;}}else if(S.view==='week'){S.weekOffset--;}renderView();}
 function navNext(){if(S.view==='cal'){S.calMonth++;if(S.calMonth>11){S.calMonth=0;S.calYear++;}}else if(S.view==='week'){S.weekOffset++;}renderView();}
 function renderView(){
-  fillCodeSel();fillNoteCodeSel();
+  fillCodeSel();fillNoteCodeSel();renderMiniCalendar();renderCycleCard();
   if(S.view==='list')renderList();
   else if(S.view==='week')renderWeek();
   else if(S.view==='cal')renderCal();
@@ -1122,6 +1201,68 @@ function getTaskDates(task){
   const dates=[];const cur=new Date(task.date+'T00:00:00');const end=new Date(task.endDate+'T00:00:00');
   while(cur<=end){dates.push(fmtDate(cur));cur.setDate(cur.getDate()+1);}
   return dates;
+}
+
+function isTravelDay(date){
+  return S.tasks.some(t=>!t.archived&&t.isTravel&&getTaskDates(t).includes(date));
+}
+function hasImportantDate(date){
+  return S.tasks.some(t=>!t.archived&&!t.done&&getTaskDates(t).includes(date));
+}
+
+function renderMiniCalendar(){
+  const el=document.getElementById('sug-mini');
+  if(!el)return;
+  const today=new Date();
+  const year=today.getFullYear();
+  const month=today.getMonth();
+  const first=new Date(year,month,1);
+  let startDay=first.getDay()-1;if(startDay<0)startDay=6;
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const cells=[];
+  for(let i=0;i<startDay;i++){const d=new Date(year,month,1-startDay+i);cells.push({date:fmtDate(d),other:true});}
+  for(let d=1;d<=daysInMonth;d++)cells.push({date:`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,other:false});
+  while(cells.length%7!==0)cells.push({date:'',other:true});
+  const todayStr=fmtDate(today);
+  el.innerHTML=`<div class="sug-mini-title">本月小日歷</div><div class="sug-mini-grid">${cells.map(c=>{
+    if(!c.date)return '<div class="sug-mini-cell"></div>';
+    const isToday=c.date===todayStr;
+    const isTravel=isTravelDay(c.date);
+    const important=hasImportantDate(c.date);
+    return `<div class="sug-mini-cell${c.other?' other-month':''}${isToday?' today':''}${isTravel?' travel':''}">${parseInt(c.date.split('-')[2])}${important?'<span class="sug-mini-dot"></span>':''}</div>`;
+  }).join('')}</div>`;
+}
+
+function saveCycle(){
+  const lastStart=document.getElementById('cycle-last')?.value||'';
+  const cycleLength=document.getElementById('cycle-len')?.value||28;
+  const periodDays=document.getElementById('cycle-days')?.value||5;
+  S.cycle={lastStart,cycleLength:Number(cycleLength)||28,periodDays:Number(periodDays)||5};
+  saveCycleState(S.cycle);renderCycleCard();toast('✅ 月經週期已更新','ok');
+}
+
+function renderCycleCard(){
+  const el=document.getElementById('cycle-card');
+  if(!el)return;
+  const cycle=S.cycle||{lastStart:'',cycleLength:28,periodDays:5};
+  const summary=getCycleSummary(cycle);
+  el.innerHTML=`<div class="cycle-head">
+    <div>
+      <div class="cycle-title">🩸 私人月經週期</div>
+      <div class="cycle-sub">記錄上次月經開始日，系統會預估下次來潮</div>
+    </div>
+    <div class="cycle-actions">
+      <input type="date" id="cycle-last" value="${cycle.lastStart||''}" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white)">
+      <input type="number" id="cycle-len" min="20" max="45" value="${cycle.cycleLength||28}" style="width:70px;border:1.5px solid var(--border2);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white)">
+      <input type="number" id="cycle-days" min="1" max="14" value="${cycle.periodDays||5}" style="width:70px;border:1.5px solid var(--border2);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white)">
+      <button class="btn btn-ora" onclick="saveCycle()" style="padding:6px 12px;font-size:12px">儲存</button>
+    </div>
+  </div>
+  <div class="cycle-body">
+    <div class="cycle-pill">上次月經 ${cycle.lastStart?cycle.lastStart:'未設定'}</div>
+    <div class="cycle-pill alt">週期 ${cycle.cycleLength||28} 天</div>
+    <div class="cycle-pill">${summary?`預估下次：${summary.nextDate}（${summary.daysLeft} 天後）`:'尚未設定預估日'}</div>
+  </div>`;
 }
 
 // ── LIST ──
@@ -1360,6 +1501,7 @@ function taskCardHTML(t,today,color){
         <span class="task-date">${dateDisplay}</span>
         <span class="prio ${pc}">${pl}</span>
         ${t.code?`<span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">${t.code}</span>`:''}
+        ${t.isTravel?`<span style="font-size:10px;background:var(--amber-bg);color:var(--amber);padding:1px 6px;border-radius:6px">✈️ 出差</span>`:''}
         ${(()=>{const tt=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;return tt?`<span style="font-size:10px;background:var(--border);color:var(--text2);padding:1px 6px;border-radius:6px">${tt.icon} ${tt.name}</span>`:''})()}
         ${t.calEventId?`<span class="synced">✓ 已同步</span>`:''}
       </div>
@@ -1395,6 +1537,7 @@ function taskCardHTML(t,today,color){
         <div class="edit-field"><label>結束時間</label><input type="time" id="e-end-${t.id}" value="${t.timeEnd||''}"></div>
       </div>
       <div class="edit-field" style="margin-bottom:8px"><label>地點（選填）</label><input type="text" id="e-loc-${t.id}" value="${t.loc||''}"></div>
+      <div class="edit-field" style="margin-bottom:8px;grid-column:1/-1"><label>出差 / 商務</label><label style="display:flex;align-items:center;gap:8px;border:1.5px solid var(--border2);border-radius:6px;padding:6px 8px;background:var(--white)"><input type="checkbox" id="e-travel-${t.id}" ${t.isTravel?'checked':''}> <span style="font-size:12px;color:var(--text2)">這次是出差</span></label></div>
       <div class="edit-field" style="margin-bottom:10px"><label>備註</label><textarea class="detail-note" id="e-note-${t.id}">${t.note||''}</textarea></div>
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button class="btn btn-soft" onclick="cancelEdit()" style="font-size:12px;padding:6px 12px">取消</button>
@@ -1424,6 +1567,7 @@ async function saveEdit(id){
   t.taskType=document.getElementById(`e-type-${id}`)?.value||null;
   t.note=document.getElementById(`e-note-${id}`).value;
   t.loc=document.getElementById(`e-loc-${id}`)?.value||'';
+  t.isTravel=document.getElementById(`e-travel-${id}`)?.checked||false;
   if(t.type==='work')t.code=document.getElementById(`e-code-${id}`).value;
   S.editingCard=null;await save();renderView();buildSuggestion();toast('✅ 已儲存','ok');
 }
@@ -1506,7 +1650,9 @@ function renderWeek(){
     ${days.map(d=>{
       const ds=fmtDate(d);
       const isToday=ds===todayStr;
-      return`<td style="text-align:center;padding:5px 2px;font-size:11px;font-weight:500;color:${isToday?'var(--ora2)':'var(--text2)'};background:${isToday?'var(--ora-bg)':'var(--bg)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-bottom:none;border-radius:8px 8px 0 0">${dayNames[(d.getDay()+6)%7]} ${d.getMonth()+1}/${d.getDate()}</td>`;
+      const isTravel=isTravelDay(ds);
+      const important=hasImportantDate(ds);
+      return`<td style="text-align:center;padding:5px 2px;font-size:11px;font-weight:500;color:${isToday?'var(--ora2)':isTravel?'var(--amber)':'var(--text2)'};background:${isToday?'var(--ora-bg)':isTravel?'var(--amber-bg)':'var(--bg)'};border:1.5px solid ${isToday?'var(--ora)':isTravel?'var(--amber)':'var(--border)'};border-bottom:none;border-radius:8px 8px 0 0">${dayNames[(d.getDay()+6)%7]} ${d.getMonth()+1}/${d.getDate()}${important?`<span class="week-flag${isTravel?' travel':''}"></span>`:''}</td>`;
     }).join('')}
   </tr>
 
@@ -1516,8 +1662,10 @@ function renderWeek(){
     ${days.map(d=>{
       const ds=fmtDate(d);
       const isToday=ds===todayStr;
+      const isTravel=isTravelDay(ds);
+      const important=hasImportantDate(ds);
       const daySpan=spanTasks.filter(t=>getTaskDates(t).includes(ds));
-      return`<td style="background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-bottom:none;padding:2px 0;min-height:${daySpan.length?28:8}px;vertical-align:top">
+      return`<td style="background:${isTravel?'var(--amber-bg)':isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isTravel?'var(--amber)':isToday?'var(--ora)':'var(--border)'};border-top:none;border-bottom:none;padding:2px 0;min-height:${daySpan.length?28:8}px;vertical-align:top">
         ${daySpan.map(t=>{
           const isPriv=t.type==='private';
           const c=isPriv?privHex(t.id):cHex(t.code);
@@ -1543,6 +1691,8 @@ function renderWeek(){
     ${days.map(d=>{
       const ds=fmtDate(d);
       const isToday=ds===todayStr;
+      const isTravel=isTravelDay(ds);
+      const important=hasImportantDate(ds);
       // Show tasks that start in this hour
       const slotTasks=singleTasks
         .filter(t=>t.date===ds)
@@ -1552,7 +1702,7 @@ function renderWeek(){
           return taskH===h;
         })
         .sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
-      return`<td style="height:${CELL_H}px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:1px solid var(--border);border-bottom:none;padding:2px 3px;vertical-align:top;overflow:visible">
+      return`<td style="height:${CELL_H}px;background:${isTravel?'var(--amber-bg)':isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isTravel?'var(--amber)':isToday?'var(--ora)':'var(--border)'};border-top:1px solid var(--border);border-bottom:none;padding:2px 3px;vertical-align:top;overflow:visible">
         ${slotTasks.map(t=>{
           const isPriv=t.type==='private';
           const c=isPriv?privHex(t.id):cHex(t.code);
@@ -1574,8 +1724,10 @@ function renderWeek(){
   <tr>
     <td></td>
     ${days.map(d=>{
-      const isToday=fmtDate(d)===todayStr;
-      return`<td style="height:4px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-radius:0 0 8px 8px"></td>`;
+      const ds=fmtDate(d);
+      const isToday=ds===todayStr;
+      const isTravel=isTravelDay(ds);
+      return`<td style="height:4px;background:${isTravel?'var(--amber-bg)':isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isTravel?'var(--amber)':isToday?'var(--ora)':'var(--border)'};border-top:none;border-radius:0 0 8px 8px"></td>`;
     }).join('')}
   </tr>
 
@@ -1615,12 +1767,14 @@ function renderCal(){
       <div class="cal-grid">${cells.map(c=>{
         if(!c.date)return`<div class="cal-cell other-month"></div>`;
         const isToday=c.date===today;
+        const isTravel=isTravelDay(c.date);
+        const important=hasImportantDate(c.date);
         // Sort: private first, then by start date
         const dayTasks=S.tasks
           .filter(t=>!t.archived&&getTaskDates(t).includes(c.date))
           .sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
 
-        return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}">
+        return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}${isTravel?' travel-day':''}">
           <div class="cal-num">${parseInt(c.date.split('-')[2])}</div>
           ${dayTasks.slice(0,3).map(t=>{
             const isPriv=t.type==='private';
@@ -1654,6 +1808,7 @@ function renderCal(){
             </div>`;
           }).join('')}
           ${dayTasks.length>3?`<div style="font-size:9px;color:var(--text3)">+${dayTasks.length-3}</div>`:''}
+          ${important?`<div class="cal-day-flag"></div>`:''}
         </div>`;
       }).join('')}</div>
     </div>`;
