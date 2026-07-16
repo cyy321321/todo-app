@@ -89,13 +89,15 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .sug-refresh{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:8px;font-family:inherit;margin-top:6px;display:block}
 .sug-refresh:hover{background:var(--border)}
 .sug-mini{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px;min-width:182px}
-.sug-mini-title{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase}
+.sug-mini-title{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase}
+.sug-mini-note{font-size:10px;color:var(--text3);margin-bottom:8px;line-height:1.4}
 .sug-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .sug-mini-cell{position:relative;aspect-ratio:1/1;border-radius:7px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--text2);background:var(--white)}
 .sug-mini-cell.other-month{opacity:.45}
 .sug-mini-cell.today{border-color:var(--ora);color:var(--ora2);box-shadow:inset 0 0 0 1px var(--ora-mid)}
 .sug-mini-cell.travel{background:var(--amber-bg);border-color:var(--amber)}
 .sug-mini-dot{position:absolute;right:2px;bottom:2px;width:5px;height:5px;border-radius:50%;background:var(--red)}
+.sug-mini-dot.travel{background:var(--amber)}
 
 /* CYCLE CARD */
 .cycle-card{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin:10px 20px 0;box-shadow:var(--shadow)}
@@ -465,6 +467,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
         </div>
       </div>
       <div id="area-work" style="display:none">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">✈️ 出差 / 商務：在新增表單右側勾選「這次是出差」，會在週曆與月曆上用不同底色標示</div>
         <div class="man-row">
           <div class="fld"><label>任務名稱</label><input type="text" id="w-title" placeholder="例：審核合約文件"></div>
           <div class="fld"><label>計畫代碼</label><select id="w-code"></select></div>
@@ -478,6 +481,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
         </div>
       </div>
       <div id="area-priv" style="display:none">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">✈️ 出差 / 商務：在新增表單右側勾選「這次是出差」，會在週曆與月曆上用不同底色標示</div>
         <div class="man-row">
           <div class="fld"><label>行程名稱</label><input type="text" id="p-title" placeholder="例：台中旅遊、看診"></div>
           <div class="fld"><label>開始日期</label><input type="date" id="p-date"></div>
@@ -835,6 +839,7 @@ let S={
   pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
   editingProj:null,
   cycle:loadCycleState(),
+  cycleOpen:false,
 };
 
 const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -1207,7 +1212,7 @@ function isTravelDay(date){
   return S.tasks.some(t=>!t.archived&&t.isTravel&&getTaskDates(t).includes(date));
 }
 function hasImportantDate(date){
-  return S.tasks.some(t=>!t.archived&&!t.done&&getTaskDates(t).includes(date));
+  return S.tasks.some(t=>!t.archived&&!t.done&&getTaskDates(t).includes(date)&&(t.priority==='high'||t.isTravel));
 }
 
 function renderMiniCalendar(){
@@ -1224,14 +1229,16 @@ function renderMiniCalendar(){
   for(let d=1;d<=daysInMonth;d++)cells.push({date:`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,other:false});
   while(cells.length%7!==0)cells.push({date:'',other:true});
   const todayStr=fmtDate(today);
-  el.innerHTML=`<div class="sug-mini-title">本月小日歷</div><div class="sug-mini-grid">${cells.map(c=>{
+  el.innerHTML=`<div class="sug-mini-title">本月小日曆</div><div class="sug-mini-note">小點點表示高優先或出差日</div><div class="sug-mini-grid">${cells.map(c=>{
     if(!c.date)return '<div class="sug-mini-cell"></div>';
     const isToday=c.date===todayStr;
     const isTravel=isTravelDay(c.date);
     const important=hasImportantDate(c.date);
-    return `<div class="sug-mini-cell${c.other?' other-month':''}${isToday?' today':''}${isTravel?' travel':''}">${parseInt(c.date.split('-')[2])}${important?'<span class="sug-mini-dot"></span>':''}</div>`;
+    return `<div class="sug-mini-cell${c.other?' other-month':''}${isToday?' today':''}${isTravel?' travel':''}">${parseInt(c.date.split('-')[2])}${important?`<span class="sug-mini-dot${isTravel?' travel':''}"></span>`:''}</div>`;
   }).join('')}</div>`;
 }
+
+function toggleCycleCard(){S.cycleOpen=!S.cycleOpen;renderCycleCard();}
 
 function saveCycle(){
   const lastStart=document.getElementById('cycle-last')?.value||'';
@@ -1246,9 +1253,19 @@ function renderCycleCard(){
   if(!el)return;
   const cycle=S.cycle||{lastStart:'',cycleLength:28,periodDays:5};
   const summary=getCycleSummary(cycle);
+  if(!S.cycleOpen){
+    el.innerHTML=`<div class="cycle-head">
+      <div>
+        <div class="cycle-title">🩸 月經週期</div>
+        <div class="cycle-sub">私人設定，點我打開</div>
+      </div>
+      <button class="btn btn-soft" onclick="toggleCycleCard()" style="padding:6px 10px;font-size:12px">展開</button>
+    </div>`;
+    return;
+  }
   el.innerHTML=`<div class="cycle-head">
     <div>
-      <div class="cycle-title">🩸 私人月經週期</div>
+      <div class="cycle-title">🩸 月經週期</div>
       <div class="cycle-sub">記錄上次月經開始日，系統會預估下次來潮</div>
     </div>
     <div class="cycle-actions">
@@ -1256,6 +1273,7 @@ function renderCycleCard(){
       <input type="number" id="cycle-len" min="20" max="45" value="${cycle.cycleLength||28}" style="width:70px;border:1.5px solid var(--border2);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white)">
       <input type="number" id="cycle-days" min="1" max="14" value="${cycle.periodDays||5}" style="width:70px;border:1.5px solid var(--border2);border-radius:8px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--white)">
       <button class="btn btn-ora" onclick="saveCycle()" style="padding:6px 12px;font-size:12px">儲存</button>
+      <button class="btn btn-soft" onclick="toggleCycleCard()" style="padding:6px 10px;font-size:12px">收合</button>
     </div>
   </div>
   <div class="cycle-body">
