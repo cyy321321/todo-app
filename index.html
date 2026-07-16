@@ -4,67 +4,58 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My To Do List</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="My To Do List">
-<meta name="theme-color" content="#F59332">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#FFF8F0;--white:#FFFFFF;--card:#FFFCF8;
-  --ora:#F59332;--ora2:#E07820;--ora-bg:#FFF3E0;--ora-mid:#FFD699;
-  --border:#EDD9C0;--border2:#D4B896;
-  --text:#2C1810;--text2:#6B4226;--text3:#B07850;
-  --red:#E53935;--red-bg:#FFF0F0;--red-mid:#FFCDD2;
+  --bg:#FFF8E7;
+  --white:#FFFFFF;
+  --border:#E8E8E8;--border2:#D0D0D0;
+  --text:#1A1A1A;--text2:#555;--text3:#999;
+  --ora:#F59332; --ora-hover:#E07820; --ora-bg:#FFF3E0; --ora-mid:#FFD699;
+  --red:#E53935;--red-bg:#FFF0F0;
   --amber:#F59E0B;--amber-bg:#FFFBEB;
-  --green:#16A34A;--green-bg:#F0FDF4;--green-mid:#BBF7D0;
+  --green:#16A34A;--green-bg:#F0FDF4;
   --shadow:0 2px 8px rgba(180,100,30,.10);
   --shadow-md:0 4px 20px rgba(180,100,30,.14);
   --r:14px;--r-sm:10px;--r-xs:8px;
   --max-w:860px;
 }
-/* 案子色板 */
-.cc0{--c:#E53935;--cb:#FFF0F0;--cm:#FFCDD2}
-.cc1{--c:#1E88E5;--cb:#E3F2FD;--cm:#BBDEFB}
-.cc2{--c:#43A047;--cb:#E8F5E9;--cm:#C8E6C9}
-.cc3{--c:#8E24AA;--cb:#F3E5F5;--cm:#E1BEE7}
-.cc4{--c:#F4511E;--cb:#FBE9E7;--cm:#FFCCBC}
-.cc5{--c:#00897B;--cb:#E0F2F1;--cm:#B2DFDB}
-.cc6{--c:#3949AB;--cb:#E8EAF6;--cm:#C5CAE9}
-.cc7{--c:#F9A825;--cb:#FFFDE7;--cm:#FFF9C4}
-.cc-priv{--c:#607D8B;--cb:#ECEFF1;--cm:#CFD8DC}
+.color-0{--c:#E53935;--cb:#FFF0F0;--cm:#FFCDD2}
+.color-1{--c:#1E88E5;--cb:#E3F2FD;--cm:#BBDEFB}
+.color-2{--c:#43A047;--cb:#E8F5E9;--cm:#C8E6C9}
+.color-3{--c:#8E24AA;--cb:#F3E5F5;--cm:#E1BEE7}
+.color-4{--c:#F4511E;--cb:#FBE9E7;--cm:#FFCCBC}
+.color-5{--c:#00897B;--cb:#E0F2F1;--cm:#B2DFDB}
+.color-6{--c:#3949AB;--cb:#E8EAF6;--cm:#C5CAE9}
+.color-7{--c:#F9A825;--cb:#FFFDE7;--cm:#FFF9C4}
+.color-priv{--c:#FB8C00;--cb:#FFF3E0;--cm:#FFE0B2}
 
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 .mono{font-family:'JetBrains Mono',monospace}
-.center{max-width:var(--max-w);margin:0 auto;width:100%}
+.center-wrap{max-width:var(--max-w);margin:0 auto;width:100%}
 
-/* LOGIN */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#FFF8F0,#FFF0E0)}
-.login-card{background:var(--white);border-radius:24px;padding:48px 40px;box-shadow:var(--shadow-md);max-width:400px;width:100%;text-align:center;border:2px solid var(--ora-mid)}
-.login-ico{font-size:52px;margin-bottom:16px}
-.login-title{font-size:24px;font-weight:700;color:var(--ora2);margin-bottom:8px}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#FFF8F0,#F0F4FF)}
+.login-card{background:var(--white);border-radius:24px;padding:48px 40px;box-shadow:var(--shadow-md);max-width:400px;width:100%;text-align:center;border:1px solid var(--border)}
+.login-ico{font-size:48px;margin-bottom:16px}
+.login-title{font-size:24px;font-weight:700;margin-bottom:8px;color:var(--ora)}
 .login-sub{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:32px}
 #login-err{color:var(--red);font-size:13px;margin-top:16px;display:none;padding:10px;background:var(--red-bg);border-radius:10px}
 
 #app{display:none;flex-direction:column;min-height:100vh}
 
-/* HEADER */
-.hdr{background:var(--ora);border-bottom:2px solid var(--ora2);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:center;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
+.hdr{background:var(--ora);border-bottom:1px solid var(--ora-hover);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:center;position:sticky;top:0;z-index:50;box-shadow:var(--shadow)}
 .hdr-inner{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:var(--max-w)}
-.hdr-left{display:flex;align-items:center;gap:10px}
-.hdr-logo{font-size:22px}
-.hdr-title{font-size:16px;font-weight:700;color:#fff}
+.hdr-left{display:flex;align-items:center;gap:10px;color:#fff}
+.hdr-logo{font-size:20px}
+.hdr-title{font-size:15px;font-weight:700}
 .hdr-right{display:flex;align-items:center;gap:8px}
-.avatar{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1.5px solid rgba(255,255,255,.5)}
-.hdr-email{font-size:12px;color:rgba(255,255,255,.85);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pill-btn{background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
-.pill-btn:hover{background:rgba(255,255,255,.35)}
+.avatar{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.3);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:1px solid rgba(255,255,255,0.5)}
+.hdr-email{font-size:12px;color:rgba(255,255,255,0.9);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill-btn{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
+.pill-btn:hover{background:rgba(255,255,255,0.35)}
 
-/* SYNC STATUS */
 .sync-bar{background:var(--ora-bg);border-bottom:1px solid var(--border);padding:6px 20px;display:flex;justify-content:center}
 .sync-inner{display:flex;align-items:center;gap:8px;max-width:var(--max-w);width:100%}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
@@ -73,42 +64,42 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .sync-txt{font-size:11px;color:var(--text2)}
 
-/* SUGGESTION */
-.sug{background:var(--white);border-bottom:2px solid var(--border);padding:14px 20px;display:flex;justify-content:center}
-.sug-inner{display:flex;align-items:flex-start;gap:12px;max-width:var(--max-w);width:100%}
-.sug-ico{font-size:20px;flex-shrink:0}
-.sug-body{flex:1}
-.sug-title{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase}
-.sug-txt{font-size:13px;color:var(--text);line-height:1.7}
-.sug-txt b{color:var(--red)}
-.sug-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.stag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
-.stag-u{background:var(--red-bg);color:var(--red);border:1px solid var(--red-mid)}
-.stag-s{background:var(--amber-bg);color:var(--amber);border:1px solid #FDE68A}
-.stag-o{background:var(--green-bg);color:var(--green);border:1px solid var(--green-mid)}
-.sug-refresh{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:8px;font-family:inherit;margin-top:6px;display:block}
-.sug-refresh:hover{background:var(--border)}
-
-/* HINT */
+.sug{background:var(--white);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;justify-content:center}
 .hint-bar{background:var(--ora-bg);border-bottom:1px solid var(--border);padding:8px 20px;display:flex;justify-content:center}
-.hint-inner{display:flex;align-items:center;gap:10px;max-width:var(--max-w);width:100%}
+.hint-inner, .sug-inner{display:flex;align-items:flex-start;gap:12px;max-width:var(--max-w);width:100%}
+.hint-inner{align-items:center;gap:10px}
 .hint-txt{font-size:12px;color:var(--text2);flex:1;line-height:1.5}
-.hint-copy{font-size:11px;color:var(--ora2);background:var(--white);border:1.5px solid var(--ora-mid);border-radius:20px;padding:4px 12px;cursor:pointer;font-family:inherit;font-weight:500;white-space:nowrap}
+.hint-copy{font-size:11px;color:var(--ora);background:var(--white);border:1px solid var(--ora-mid);border-radius:20px;padding:4px 12px;cursor:pointer;font-family:inherit;font-weight:500}
 .hint-copy:hover{background:var(--ora-bg)}
 
-/* INPUT TOGGLE */
+.sug-ico{font-size:20px;flex-shrink:0}
+.sug-body{flex:1}
+.sug-side{display:flex;flex-direction:column;gap:8px;min-width:240px}
+.sug-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px;letter-spacing:.04em}
+.sug-txt{font-size:13px;color:var(--text);line-height:1.7}
+.sug-txt b{color:var(--red)}
+.sug-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.sug-tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;border:1px solid var(--border)}
+.sug-tag.urgent{background:var(--red-bg);color:var(--red);border-color:#FFCDD2}
+.sug-tag.soon{background:var(--amber-bg);color:var(--amber);border-color:#FDE68A}
+.sug-tag.ok{background:var(--green-bg);color:var(--green);border-color:#BBF7D0}
+.sug-refresh{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:8px;font-family:inherit;margin-top:8px;display:block}
+
 .toggle-bar{background:var(--white);border-bottom:1px solid var(--border);padding:0 20px;display:flex;justify-content:center}
-.toggle-btn{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ora2);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:500;padding:10px 0;width:100%;max-width:var(--max-w)}
+.toggle-btn{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ora);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:500;padding:10px 0;width:100%;max-width:var(--max-w)}
 .t-arrow{font-size:10px;transition:transform .25s;margin-left:auto}
 .t-arrow.open{transform:rotate(180deg)}
-.input-panel{background:var(--white);border-bottom:2px solid var(--border);overflow:hidden;max-height:0;transition:max-height .3s ease;display:flex;justify-content:center}
-.input-panel.open{max-height:560px}
+.input-panel{background:var(--white);border-bottom:1px solid var(--border);overflow:hidden;max-height:0;transition:max-height .3s ease;display:flex;justify-content:center}
+.input-panel.open{max-height:600px}
 .input-inner{padding:16px 20px;width:100%;max-width:var(--max-w)}
 .seg-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
-.seg{font-size:12px;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:none;cursor:pointer;font-family:inherit;color:var(--text2);font-weight:500;transition:all .15s}
+.seg{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:none;cursor:pointer;font-family:inherit;color:var(--text2);font-weight:500;transition:all .15s;white-space:nowrap}
 .seg.on{background:var(--ora);color:#fff;border-color:var(--ora)}
 .seg:hover:not(.on){background:var(--ora-bg)}
-textarea{width:100%;height:100px;border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:10px;font-size:12px;font-family:'JetBrains Mono',monospace;resize:none;outline:none;background:var(--bg);color:var(--text);transition:border .15s}
+.fld-check{min-width:110px}
+.check-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border2);border-radius:999px;padding:7px 10px;background:var(--bg);font-size:12px;color:var(--text2);cursor:pointer;user-select:none}
+.check-pill input{accent-color:var(--ora);width:14px;height:14px}
+textarea{width:100%;height:100px;border:1px solid var(--border2);border-radius:var(--r-sm);padding:10px;font-size:12px;font-family:'JetBrains Mono',monospace;resize:none;outline:none;background:var(--bg);color:var(--text);transition:border .15s}
 textarea:focus{border-color:var(--ora)}
 textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .ai-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start}
@@ -116,52 +107,81 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .man-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
 .fld{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
 .fld label{font-size:11px;font-weight:500;color:var(--text2)}
-.fld input,.fld select{border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--text);outline:none;transition:border .15s}
+.fld input,.fld select{border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--text);outline:none;transition:border .15s}
 .fld input:focus,.fld select:focus{border-color:var(--ora)}
 
-/* BUTTONS */
 .btn{border:none;border-radius:var(--r-xs);padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
-.btn-ora{background:var(--ora);color:#fff}.btn-ora:hover{background:var(--ora2)}
-.btn-grn{background:var(--green);color:#fff}.btn-grn:hover{background:#15803D}
-.btn-soft{background:var(--ora-bg);color:var(--text2);border:1.5px solid var(--border2)}.btn-soft:hover{background:var(--border)}
-.btn-red{background:var(--red);color:#fff}
+.btn-ora{background:var(--ora);color:#fff}.btn-ora:hover{background:var(--ora-hover)}
+.btn-grn{background:#16A34A;color:#fff}.btn-grn:hover{background:#15803D}
+.btn-soft{background:var(--white);color:var(--text2);border:1px solid var(--border2)}.btn-soft:hover{background:var(--border)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#C62828}
 
-/* VIEW BAR */
-.view-bar{background:var(--white);border-bottom:2px solid var(--border);padding:0 20px;display:flex;justify-content:center}
-.view-bar-inner{display:flex;align-items:center;justify-content:space-between;height:44px;width:100%;max-width:var(--max-w)}
-.view-tabs{display:flex;gap:4px}
-.vtab{font-size:12px;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:none;cursor:pointer;font-family:inherit;color:var(--text2);font-weight:500;transition:all .15s}
+.view-bar{background:var(--white);border-bottom:1px solid var(--border);padding:0 20px;display:flex;justify-content:center}
+.view-bar-inner{display:flex;align-items:center;justify-content:space-between;min-height:44px;width:100%;max-width:var(--max-w);gap:8px;flex-wrap:wrap;padding:8px 0}
+.view-tabs{display:flex;gap:4px;flex-wrap:wrap}
+.vtab{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border2);background:none;cursor:pointer;font-family:inherit;color:var(--text2);font-weight:500;transition:all .15s;white-space:nowrap}
 .vtab.on{background:var(--ora);color:#fff;border-color:var(--ora)}
 .vtab:hover:not(.on){background:var(--ora-bg)}
 .view-nav{display:flex;align-items:center;gap:6px}
-.nav-btn{background:var(--ora-bg);border:1.5px solid var(--border2);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--text2)}
-.nav-btn:hover{background:var(--ora-mid)}
-.nav-label{font-size:13px;font-weight:500;color:var(--text2);min-width:80px;text-align:center}
+.nav-btn{background:var(--bg);border:1px solid var(--border2);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--text2)}
+.nav-btn:hover{background:var(--border)}
+.nav-label{font-size:13px;font-weight:500;min-width:80px;text-align:center}
+.mini-cal{width:220px;min-width:180px;background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:10px;box-shadow:var(--shadow)}
+.mini-cal-title{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:.04em}
+.mini-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.mini-cal-cell{display:flex;align-items:center;justify-content:center;aspect-ratio:1;border-radius:8px;font-size:10px;font-weight:600;color:var(--text2);background:var(--bg);position:relative}
+.mini-cal-cell.today{background:var(--ora-bg);color:var(--ora);font-weight:700}
+.mini-cal-cell.travel{background:var(--amber-bg);color:var(--amber)}
+.mini-cal-cell.travel.today{background:linear-gradient(135deg,var(--ora-bg),var(--amber-bg));color:var(--ora)}
+.mini-cal-cell .today-dot{position:absolute;right:2px;bottom:2px;font-size:7px;color:var(--red)}
+.week-day-col.travel-day{background:var(--amber-bg);border-color:var(--amber)}
+.week-day-col.today-col.travel-day{background:linear-gradient(135deg,var(--ora-bg),var(--amber-bg));border-color:var(--ora)}
+.week-day-hdr{position:relative}
+.week-day-hdr .today-badge{position:absolute;right:4px;top:4px;font-size:8px;color:var(--red)}
+.cal-cell.travel-day{background:var(--amber-bg);border-color:var(--amber)}
+.cal-cell.today.travel-day{background:linear-gradient(135deg,var(--ora-bg),var(--amber-bg));border-color:var(--ora)}
+.cal-cell .today-dot{position:absolute;right:4px;bottom:4px;font-size:8px;color:var(--red)}
+.travel-badge{font-size:10px;padding:2px 6px;border-radius:999px;background:var(--amber-bg);color:var(--amber);font-weight:600}
+.menstrual-card{margin-top:10px;background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:10px;box-shadow:var(--shadow)}
+.menstrual-title{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;letter-spacing:.04em}
+.menstrual-form{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.menstrual-form label{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--text2)}
+.menstrual-form input{border:1px solid var(--border2);border-radius:6px;padding:6px 8px;font-size:11px;font-family:inherit;background:var(--white)}
+.menstrual-form .btn{justify-content:center;margin-top:2px;grid-column:1/-1}
+.menstrual-summary{font-size:10px;color:var(--text2);line-height:1.5;margin-top:8px}
+@media (max-width:700px){
+  .sug-inner{flex-direction:column;align-items:stretch}
+  .sug-body{width:100%}
+  .sug-side{min-width:0;width:100%}
+  .view-bar-inner{flex-direction:column;align-items:stretch}
+  .view-tabs{justify-content:center}
+  .vtab{flex:1 1 calc(50% - 6px);justify-content:center}
+  .view-nav{justify-content:center}
+  .mini-cal{width:100%}
+  .menstrual-form{grid-template-columns:1fr}
+}
 
-/* MAIN */
 #main-view{padding:16px 20px;max-width:var(--max-w);margin:0 auto;width:100%}
 
-/* PROJ BLOCK */
 .proj-block{border-radius:var(--r);margin-bottom:10px;border:1.5px solid var(--cm);overflow:hidden;box-shadow:var(--shadow)}
 .proj-header{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;background:var(--cb);transition:filter .15s;user-select:none}
 .proj-header:hover{filter:brightness(.97)}
 .proj-color-dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex-shrink:0}
 .proj-code-badge{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--c);color:#fff;padding:2px 8px;border-radius:6px;font-weight:500}
 .proj-name-text{font-size:13px;font-weight:500;flex:1;color:var(--text)}
-.proj-stats{display:flex;gap:5px;align-items:center}
+.proj-stats{display:flex;gap:6px;align-items:center}
 .stat-pill{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600}
 .stat-urgent{background:var(--red-bg);color:var(--red)}
-.stat-count{background:rgba(255,255,255,.8);color:var(--text2);border:1px solid var(--border)}
+.stat-count{background:var(--white);color:var(--text2);border:1px solid var(--border)}
 .stat-date{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}
 .proj-arrow{font-size:11px;color:var(--text3);transition:transform .2s;flex-shrink:0}
 .proj-arrow.open{transform:rotate(90deg)}
 .proj-tasks{display:none;padding:6px 10px 10px}
 .proj-tasks.open{display:block}
 
-/* TASK CARD */
 .task-card{background:var(--white);border-radius:var(--r-sm);border:1px solid var(--border);padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;align-items:flex-start;transition:all .15s;border-left:3px solid var(--c)}
 .task-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-.task-card.priv{border-left-color:#607D8B}
+.task-card.priv{border-left-color:#FB8C00}
 .task-card.done-card{opacity:.4}
 .task-card.done-card .task-title{text-decoration:line-through;color:var(--text3)}
 .task-card.overdue-card{border-left-color:var(--red)}
@@ -170,7 +190,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .chk.on{background:var(--ora);border-color:var(--ora);color:#fff}
 .chk.gn{background:var(--green);border-color:var(--green);color:#fff}
 .task-body{flex:1;min-width:0;cursor:pointer}
-.task-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:4px;color:var(--text)}
+.task-title{font-size:13px;font-weight:500;line-height:1.4;margin-bottom:4px}
 .task-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .task-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
 .prio{font-size:10px;padding:2px 6px;border-radius:6px;font-weight:600}
@@ -184,159 +204,88 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .t-btn:hover{background:var(--ora);border-color:var(--ora);color:#fff}
 .t-btn.del:hover{background:var(--red);border-color:var(--red);color:#fff}
 
-/* TASK DETAIL */
-.task-detail{display:none;padding:10px 12px;border-top:1px solid var(--border);background:var(--ora-bg)}
+.task-detail{display:none;padding:10px 12px;border-top:1px solid var(--border);background:#FAFAFA}
 .task-detail.open{display:block}
-.detail-label{font-size:11px;font-weight:600;color:var(--text3);margin-bottom:4px;letter-spacing:.04em}
-.detail-content{font-size:12px;color:var(--text);line-height:1.6;background:var(--white);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:8px;white-space:pre-wrap}
-.detail-note{width:100%;border:1.5px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:12px;font-family:inherit;color:var(--text);outline:none;resize:none;height:60px;background:var(--white)}
+.detail-section{margin-bottom:10px}
+.detail-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px;letter-spacing:.04em}
+.detail-content{font-size:12px;color:var(--text);line-height:1.6;background:var(--white);border:1px solid var(--border);border-radius:6px;padding:8px 10px}
+.detail-note{width:100%;border:1px solid var(--border2);border-radius:6px;padding:8px 10px;font-size:12px;font-family:inherit;color:var(--text);outline:none;resize:none;height:60px;background:var(--white)}
 .detail-note:focus{border-color:var(--ora)}
+.edit-form{display:none}
+.edit-form.open{display:block}
 .edit-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .edit-field{display:flex;flex-direction:column;gap:3px}
 .edit-field label{font-size:11px;font-weight:500;color:var(--text2)}
-.edit-field input,.edit-field select{border:1.5px solid var(--border2);border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit;color:var(--text);outline:none;background:var(--white)}
+.edit-field input,.edit-field select{border:1px solid var(--border2);border-radius:6px;padding:6px 8px;font-size:12px;font-family:inherit;color:var(--text);outline:none;background:var(--white)}
 .edit-field input:focus,.edit-field select:focus{border-color:var(--ora)}
 
 .empty{text-align:center;padding:48px 20px;color:var(--text3);font-size:13px}
 .empty-ico{font-size:36px;margin-bottom:10px}
 
-/* WEEK */
 .week-wrap{overflow-x:auto}
 .week-grid{display:grid;grid-template-columns:44px repeat(5,1fr);gap:4px;min-width:500px}
 .time-col{display:flex;flex-direction:column}
 .time-slot{height:52px;display:flex;align-items:flex-start;justify-content:flex-end;padding-right:6px;font-size:10px;color:var(--text3);padding-top:3px;font-family:'JetBrains Mono',monospace}
-.week-day-col{background:var(--white);border-radius:var(--r-sm);border:1.5px solid var(--border);overflow:hidden;min-height:260px}
+.week-day-col{background:var(--white);border-radius:var(--r-sm);border:1px solid var(--border);overflow:hidden;min-height:260px}
 .week-day-col.today-col{border-color:var(--ora);border-width:2px}
 .week-day-hdr{text-align:center;padding:6px 4px;font-size:11px;font-weight:500;color:var(--text2);border-bottom:1px solid var(--border);background:var(--bg)}
-.week-day-col.today-col .week-day-hdr{color:var(--ora2);background:var(--ora-bg)}
+.week-day-col.today-col .week-day-hdr{color:var(--ora);background:var(--ora-bg)}
 .week-events{padding:4px}
-.week-ev{border-radius:6px;padding:4px 6px;margin-bottom:3px;cursor:pointer;border-left:2px solid var(--c);background:var(--cb)}
+.week-ev{border-radius:6px;padding:4px 6px;margin-bottom:3px;cursor:pointer;transition:opacity .15s;border-left:2px solid var(--c)}
 .week-ev:hover{opacity:.8}
-.week-ev.done-ev{opacity:.3;filter:grayscale(1)}
 .week-ev-time{font-size:9px;color:var(--text3);margin-bottom:1px;font-family:'JetBrains Mono',monospace}
 .week-ev-title{font-size:10px;font-weight:500;line-height:1.3;color:var(--text)}
-.week-ev-sub{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.week-ev-code{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace}
 .week-ev-synced{font-size:9px;color:var(--green);margin-top:1px}
+.week-ev.done-ev{opacity:.3}
 
-/* CAL */
 .cal-week-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}
 .cal-wday{text-align:center;font-size:11px;font-weight:500;color:var(--text3);padding:4px 0}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .cal-cell{background:var(--white);border-radius:var(--r-xs);padding:5px;min-height:68px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
-.cal-cell:hover{border-color:var(--ora)}
+.cal-cell:hover{background:var(--bg);border-color:var(--ora)}
 .cal-cell.today{border-color:var(--ora);border-width:2px}
 .cal-cell.other-month{opacity:.35}
 .cal-num{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:3px}
 .cal-cell.today .cal-num{color:var(--ora);font-weight:700}
-.cal-ev-dot{font-size:9px;padding:1px 4px;border-radius:5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
-.cal-ev-dot.done-dot{opacity:.3;filter:grayscale(1)}
-.cal-ev-dot.span-dot{border-radius:0;margin-left:-5px;margin-right:-5px;padding-left:6px}
-.cal-ev-dot.span-start{border-radius:5px 0 0 5px;margin-right:-5px;padding-right:6px}
-.cal-ev-dot.span-end{border-radius:0 5px 5px 0;margin-left:-5px;padding-left:6px}
+.cal-ev-dot{font-size:9px;padding:1px 4px;border-radius:5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;background:var(--cm);color:var(--c)}
+.cal-ev-dot.done-dot{opacity:.35;filter:grayscale(1)}
 
-/* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(80,30,0,.4);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
 .modal{background:var(--white);border-radius:20px;padding:24px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-md);border:2px solid var(--ora-mid)}
-.modal-title{font-size:16px;font-weight:700;color:var(--ora2);margin-bottom:18px}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:18px;color:var(--ora)}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
-.parsed-item{background:var(--bg);border-radius:var(--r-sm);padding:14px;margin-bottom:12px;border:1.5px solid var(--border)}
+.parsed-item{background:var(--bg);border-radius:var(--r-sm);padding:14px;margin-bottom:12px;border:1px solid var(--border)}
 .pi-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;font-weight:600}
 .fi{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
 .fi label{font-size:11px;font-weight:500;color:var(--text2)}
-.fi input,.fi select{border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:7px 9px;font-size:12px;font-family:inherit;background:var(--white);color:var(--text);outline:none;width:100%}
+.fi input,.fi select{border:1px solid var(--border2);border-radius:var(--r-xs);padding:7px 9px;font-size:12px;font-family:inherit;background:var(--white);color:var(--text);outline:none;width:100%}
 .fi input:focus,.fi select:focus{border-color:var(--ora)}
 .fi-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .warn-sel{border-color:var(--red)!important}
-.proj-item-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
-.proj-code-s{font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 8px;border-radius:6px;color:#fff;flex-shrink:0}
-.proj-nm{flex:1;color:var(--text2)}
-.proj-edit-btn{color:var(--text3);background:none;border:none;cursor:pointer;padding:3px 8px;font-size:12px;border-radius:6px;font-family:inherit}
-.proj-edit-btn:hover{color:var(--ora2);background:var(--ora-bg)}
-.pdel{color:var(--text3);background:none;border:none;cursor:pointer;padding:3px 8px;font-size:13px;border-radius:6px}
+.proj-item{display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px}
+.proj-item-row{display:flex;align-items:center;gap:8px;width:100%}
+.proj-code-s{font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 8px;border-radius:6px;color:#fff}
+.proj-nm{flex:1;color:var(--text2);font-weight:500}
+.pbtn{color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 8px;font-size:12px;border-radius:6px;transition:all .15s}
+.pbtn:hover{color:var(--ora);background:var(--ora-bg)}
 .pdel:hover{color:var(--red);background:var(--red-bg)}
-.proj-edit-row{display:flex;gap:6px;margin-top:4px;margin-bottom:8px;padding:8px;background:var(--ora-bg);border-radius:8px;border:1px solid var(--border)}
-.proj-edit-row input{flex:1;border:1.5px solid var(--border2);border-radius:6px;padding:6px 9px;font-size:12px;font-family:inherit;color:var(--text);outline:none;background:var(--white)}
-.proj-edit-row input:focus{border-color:var(--ora)}
+.proj-edit-box{display:flex;gap:6px;background:var(--ora-bg);padding:8px;border-radius:6px;border:1px solid var(--border)}
+.proj-edit-box input{flex:1;border:1px solid var(--border2);border-radius:4px;padding:6px;font-size:12px;outline:none}
+.proj-edit-box input:focus{border-color:var(--ora)}
 .padd-row{display:flex;gap:8px;margin-top:12px}
-.padd-row input{flex:1;border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--white)}
+.padd-row input{flex:1;border:1px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--white)}
 .padd-row input:focus{border-color:var(--ora)}
 
-/* TOAST */
-.toast{position:fixed;bottom:24px;right:20px;padding:10px 18px;border-radius:12px;font-size:13px;z-index:999;opacity:0;transform:translateY(60px);transition:all .3s;pointer-events:none;font-weight:500}
+.toast{position:fixed;bottom:24px;right:20px;padding:10px 18px;border-radius:12px;font-size:13px;z-index:999;opacity:0;transform:translateY(60px);transition:all .3s;pointer-events:none;font-weight:500;box-shadow:var(--shadow)}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.ok{background:#15803D;color:#fff}
 .toast.err{background:#B91C1C;color:#fff}
-.toast.info{background:var(--ora2);color:#fff}
+.toast.info{background:var(--ora);color:#fff}
 
-.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:4px}
-@keyframes sp{to{transform:rotate(360deg)}}
 ::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:var(--ora-mid);border-radius:2px}
-
-/* NOTES */
-.note-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .15s;border-left:3px solid var(--ora)}
-.note-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-.note-card:hover .note-del{opacity:1!important}
-.proj-header:hover .proj-archive-btn{opacity:1!important}
-.note-card.priv-note{border-left-color:#607D8B}
-.note-title{font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px}
-.note-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-.note-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
-.note-type{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:500;background:var(--ora-bg);color:var(--ora2)}
-.note-preview{font-size:12px;color:var(--text2);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.note-editor{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:20px;margin-bottom:12px}
-.note-editor-title{width:100%;border:none;font-size:18px;font-weight:700;color:var(--text);font-family:inherit;outline:none;margin-bottom:12px;background:transparent}
-.note-section{margin-bottom:16px}
-.note-section-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.05em;margin-bottom:6px;text-transform:uppercase}
-.note-section-input{width:100%;border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--white);resize:vertical;min-height:60px;transition:border .15s}
-.note-section-input:focus{border-color:var(--ora)}
-.note-free-input{width:100%;border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);outline:none;background:var(--white);resize:vertical;min-height:200px;line-height:1.7;transition:border .15s}
-.note-free-input:focus{border-color:var(--ora)}
-.search-input{width:100%;border:1.5px solid var(--border2);border-radius:var(--r);padding:12px 16px;font-size:14px;font-family:inherit;color:var(--text);outline:none;background:var(--white);transition:border .15s;margin-bottom:16px}
-.search-input:focus{border-color:var(--ora)}
-.search-result{background:var(--white);border-radius:var(--r-sm);border:1.5px solid var(--border);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:all .15s}
-.search-result:hover{border-color:var(--ora);box-shadow:var(--shadow)}
-.search-result-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
-.search-result-meta{font-size:11px;color:var(--text3);margin-bottom:4px}
-.search-highlight{background:#FFF3CD;color:var(--text);border-radius:2px;padding:0 2px}
-.search-result-preview{font-size:12px;color:var(--text2);line-height:1.5}
-
-/* RESEARCH */
-:root{--teal:#0D9488;--teal-bg:#F0FDFA;--teal-mid:#99F6E4;--teal2:#0F766E;--purple:#7C3AED;--purple-bg:#F5F3FF;--purple-mid:#DDD6FE;}
-.res-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--teal);transition:all .15s;cursor:pointer}
-.res-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
-.res-card.dormant{border-left-color:var(--amber)}
-.res-card.done-res{border-left-color:var(--green);opacity:.6}
-.res-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:5px}
-.res-field{font-size:11px;color:var(--teal2);font-weight:500;margin-bottom:8px}
-.res-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-.res-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
-.rs-idea{background:var(--purple-bg);color:var(--purple)}
-.rs-active{background:var(--teal-bg);color:var(--teal2)}
-.rs-dormant{background:var(--amber-bg);color:var(--amber)}
-.rs-done{background:var(--green-bg);color:var(--green)}
-.res-deadline{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
-.res-dormant-warn{font-size:10px;color:var(--amber);font-weight:600}
-.res-next{font-size:12px;color:var(--text2);background:var(--teal-bg);border-radius:6px;padding:6px 10px;margin-bottom:8px;border-left:2px solid var(--teal-mid)}
-.spark-list{margin-top:8px;border-top:1px solid var(--border);padding-top:8px}
-.spark-item{display:flex;gap:8px;align-items:flex-start;padding:4px 0;border-bottom:1px solid var(--bg)}
-.spark-date{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0;margin-top:2px}
-.spark-txt{font-size:12px;color:var(--text);line-height:1.5;flex:1}
-.paper-list{margin-top:6px}
-.paper-item{font-size:11px;color:var(--text2);padding:3px 0;border-bottom:1px solid var(--bg);display:flex;gap:6px}
-.paper-item::before{content:'📄';font-size:11px;flex-shrink:0}
-.res-detail{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.res-detail.open{display:block}
-.res-act-row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-
-@media(max-width:600px){
-  .hdr-email{display:none}
-  .man-row{flex-direction:column}
-  .fld{min-width:100%}
-  .week-grid{grid-template-columns:36px repeat(5,1fr)}
-  .edit-row{grid-template-columns:1fr}
-}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
 </head>
 <body>
@@ -345,9 +294,9 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
   <div class="login-card">
     <div class="login-ico">🍊</div>
     <div class="login-title">My To Do List</div>
-    <div class="login-sub">整理公事與私人行程，同步 Google Calendar。<br>請使用指定 Google 帳號登入。</div>
+    <div class="login-sub">整理公事與私人行程，同步 Google Sheets 與 Calendar。<br>請使用指定 Google 帳號登入。</div>
     <div id="g-btn" style="display:flex;justify-content:center"></div>
-    <div id="login-err">❌ 此帳號無使用權限</div>
+    <div id="login-err">❌ 初始化中...</div>
   </div>
 </div>
 
@@ -360,14 +309,12 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       </div>
       <div class="hdr-right">
         <div class="avatar" id="u-av">U</div>
-        <button class="pill-btn" onclick="refreshData()">↻ 重新整理</button>
-        <button class="pill-btn" onclick="openXunModal()">📋 旬卡摘要</button>
-        <button class="pill-btn" onclick="openArchiveModal()">📦 封存</button>
+        <span class="hdr-email" id="u-em"></span>
         <button class="pill-btn" onclick="openProjModal()">⚙ 管理案子</button>
       </div>
     </div>
   </div>
-
+  
   <div class="sync-bar">
     <div class="sync-inner">
       <div class="sync-dot" id="sync-dot"></div>
@@ -381,8 +328,21 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <div class="sug-body">
         <div class="sug-title">今日建議</div>
         <div class="sug-txt" id="sug-txt"><span style="color:var(--text3);font-style:italic">分析中…</span></div>
-        <div class="sug-tags" id="sug-tags"></div>
+        <div class="sug-actions" id="sug-tags"></div>
         <button class="sug-refresh" onclick="buildSuggestion()">↻ 重新分析</button>
+      </div>
+      <div class="sug-side">
+        <div id="mini-cal" class="mini-cal"></div>
+        <div class="menstrual-card">
+          <div class="menstrual-title">🩸 月經週期</div>
+          <div class="menstrual-form">
+            <label>上次月經開始日<input type="date" id="m-last-start"></label>
+            <label>週期長度(天)<input type="number" id="m-cycle" min="20" max="45" value="28"></label>
+            <label>持續天數<input type="number" id="m-duration" min="1" max="10" value="5"></label>
+            <button class="btn btn-soft" onclick="saveMenstrual()">儲存</button>
+          </div>
+          <div class="menstrual-summary" id="menstrual-summary">尚未紀錄</div>
+        </div>
       </div>
     </div>
   </div>
@@ -391,7 +351,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
     <div class="hint-inner">
       <span style="font-size:15px">💡</span>
       <div class="hint-txt">用 Claude 整理信件或 Line 訊息後，把結果貼到下方匯入。</div>
-      <button class="hint-copy" onclick="copyPrompt()">複製 Claude 提示詞</button>
+      <button class="hint-copy" onclick="copyPrompt()">複製提示詞</button>
     </div>
   </div>
 
@@ -410,10 +370,10 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
         <button class="seg" id="it-priv" onclick="setITab('priv')">🏠 手動新增私人行程</button>
       </div>
       <div id="area-paste">
-        <div style="background:var(--bg);border-radius:var(--r-sm);padding:14px;border:1.5px solid var(--border2)">
+        <div style="background:var(--bg);border-radius:var(--r-sm);padding:14px;border:1px solid var(--border2)">
           <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:8px">將 Claude 整理好的任務清單貼在這裡：</div>
           <div class="ai-row">
-            <textarea id="paste-box" placeholder="任務名稱：台中出差&#10;計畫代碼：1278P&#10;類型：公事&#10;分類：會議&#10;開始日期：2026-06-20&#10;結束日期：2026-06-22&#10;開始時間：09:00&#10;優先級：高&#10;說明：參加客戶簡報&#10;---&#10;任務名稱：台中旅遊&#10;類型：私人&#10;開始日期：2026-06-28&#10;結束日期：2026-06-30"></textarea>
+            <textarea id="paste-box" placeholder="任務名稱：審核 Q3 財報&#10;計畫代碼：1278P&#10;類型：公事&#10;開始日期：2026-06-13&#10;結束日期：2026-06-15&#10;開始時間：10:00&#10;結束時間：12:00&#10;優先級：高&#10;說明：財務部要求完成&#10;---"></textarea>
             <div class="ai-btns">
               <button class="btn btn-ora" onclick="parsePaste()">⚡ 解析</button>
               <button class="btn btn-soft" onclick="document.getElementById('paste-box').value=''">清除</button>
@@ -426,21 +386,22 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
           <div class="fld"><label>任務名稱</label><input type="text" id="w-title" placeholder="例：審核合約文件"></div>
           <div class="fld"><label>計畫代碼</label><select id="w-code"></select></div>
           <div class="fld"><label>開始日期</label><input type="date" id="w-date"></div>
-          <div class="fld"><label>結束日期（選填）</label><input type="date" id="w-edate"></div>
-          <div class="fld"><label>任務類型（選填）</label><select id="w-type"><option value="">－ 選填 －</option></select></div>
-          <div class="fld"><label>開始時間（選填）</label><input type="time" id="w-start"></div>
-          <div class="fld"><label>結束時間（選填）</label><input type="time" id="w-end"></div>
+          <div class="fld"><label>結束日期(選填)</label><input type="date" id="w-edate"></div>
+          <div class="fld"><label>開始時間</label><input type="time" id="w-start" value="09:00"></div>
+          <div class="fld"><label>結束時間</label><input type="time" id="w-end" value="10:00"></div>
+          <div class="fld fld-check"><label>是否出差</label><label class="check-pill"><input type="checkbox" id="w-travel"> <span>出差</span></label></div>
           <button class="btn btn-ora" onclick="addWork()" style="align-self:flex-end">新增</button>
         </div>
       </div>
       <div id="area-priv" style="display:none">
         <div class="man-row">
-          <div class="fld"><label>行程名稱</label><input type="text" id="p-title" placeholder="例：台中旅遊、看診"></div>
+          <div class="fld"><label>行程名稱</label><input type="text" id="p-title" placeholder="例：看診、家庭聚餐"></div>
           <div class="fld"><label>開始日期</label><input type="date" id="p-date"></div>
-          <div class="fld"><label>結束日期（選填）</label><input type="date" id="p-edate"></div>
-          <div class="fld"><label>開始時間（選填）</label><input type="time" id="p-start"></div>
-          <div class="fld"><label>結束時間（選填）</label><input type="time" id="p-end"></div>
-          <div class="fld"><label>地點（選填）</label><input type="text" id="p-loc" placeholder="例：台中"></div>
+          <div class="fld"><label>結束日期(選填)</label><input type="date" id="p-edate"></div>
+          <div class="fld"><label>開始時間</label><input type="time" id="p-start" value="18:00"></div>
+          <div class="fld"><label>結束時間</label><input type="time" id="p-end" value="20:00"></div>
+          <div class="fld"><label>地點(選填)</label><input type="text" id="p-loc" placeholder="例：台大醫院"></div>
+          <div class="fld fld-check"><label>是否出差</label><label class="check-pill"><input type="checkbox" id="p-travel"> <span>出差</span></label></div>
           <button class="btn btn-grn" onclick="addPriv()" style="align-self:flex-end">新增</button>
         </div>
       </div>
@@ -451,15 +412,12 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
     <div class="view-bar-inner">
       <div class="view-tabs">
         <button class="vtab on" id="vt-list" onclick="setView('list')">📋 清單</button>
-        <button class="vtab" id="vt-week" onclick="setView('week')">📆 週曆</button>
+        <button class="vtab" id="vt-week" onclick="setView('week')">📆 週視圖</button>
         <button class="vtab" id="vt-cal" onclick="setView('cal')">📅 月曆</button>
-        <button class="vtab" id="vt-notes" onclick="setView('notes')">📝 筆記</button>
-        <button class="vtab" id="vt-research" onclick="setView('research')">🔬 研究</button>
-        <button class="vtab" id="vt-search" onclick="setView('search')">🔍 搜尋</button>
       </div>
       <div class="view-nav">
         <button class="nav-btn" onclick="navPrev()">‹</button>
-        <span class="nav-label" id="nav-label"></span>
+        <span class="nav-label" id="nav-label">清單</span>
         <button class="nav-btn" onclick="navNext()">›</button>
       </div>
     </div>
@@ -468,10 +426,9 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
   <div id="main-view"></div>
 </div>
 
-<!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal">
-    <div class="modal-title">🍊 確認並調整任務資訊</div>
+    <div class="modal-title">確認並調整任務資訊</div>
     <div id="parsed-list"></div>
     <div class="modal-actions">
       <button class="btn btn-soft" onclick="closeModal('confirm-modal')">取消</button>
@@ -480,7 +437,6 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
   </div>
 </div>
 
-<!-- PROJ MODAL -->
 <div class="modal-overlay" id="proj-modal">
   <div class="modal">
     <div class="modal-title">⚙ 管理案子清單</div>
@@ -490,193 +446,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <input type="text" id="new-name" placeholder="案子名稱">
       <button class="btn btn-ora" onclick="addProj()">新增</button>
     </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-      <button class="btn btn-soft" onclick="closeModal('proj-modal');openTypeModal()">管理任務類型</button>
-      <button class="btn btn-ora" onclick="closeModal('proj-modal')">完成</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="type-modal">
-  <div class="modal">
-    <div class="modal-title">📌 管理任務類型</div>
-    <div id="type-list"></div>
-    <div class="padd-row">
-      <input type="text" id="new-type-icon" placeholder="📋" maxlength="2" style="max-width:50px;text-align:center">
-      <input type="text" id="new-type-name" placeholder="類型名稱">
-      <button class="btn btn-ora" onclick="addTaskType()">新增</button>
-    </div>
-    <div class="modal-actions"><button class="btn btn-ora" onclick="closeModal('type-modal')">完成</button></div>
-  </div>
-</div>
-
-<!-- NOTE EDITOR MODAL -->
-<div class="modal-overlay" id="note-modal">
-  <div class="modal" style="max-width:620px;max-height:92vh">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div class="modal-title" style="margin:0" id="note-modal-title">新增筆記</div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-soft" onclick="closeModal('note-modal')" style="font-size:12px;padding:6px 12px">取消</button>
-        <button class="btn btn-ora" onclick="saveNote()" style="font-size:12px;padding:6px 12px">儲存</button>
-      </div>
-    </div>
-
-    <!-- Basic fields -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
-      <div class="fld"><label>日期</label><input type="date" id="n-date"></div>
-      <div class="fld"><label>計畫代碼</label>
-        <select id="n-code">
-          <option value="">私人備忘</option>
-        </select>
-      </div>
-      <div class="fld"><label>筆記類型</label>
-        <select id="n-type" onchange="toggleNoteType()">
-          <option value="meeting">📅 會議紀錄</option>
-          <option value="free">📝 工作筆記</option>
-          <option value="decision">✅ 決議事項</option>
-          <option value="info">📌 重要資訊</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="fld" style="margin-bottom:14px">
-      <label>標題</label>
-      <input type="text" id="n-title" placeholder="例：第60次協調會議、專案重要聯絡人…" style="font-size:14px;font-weight:500">
-    </div>
-
-    <!-- Meeting format -->
-    <div id="n-meeting-fields">
-      <div class="note-section">
-        <div class="note-section-label">出席人員</div>
-        <textarea class="note-section-input" id="n-attendees" placeholder="例：王工程師、李主任、陳顧問…" rows="2"></textarea>
-      </div>
-      <div class="note-section">
-        <div class="note-section-label">議題</div>
-        <textarea class="note-section-input" id="n-agenda" placeholder="本次會議討論事項…" rows="2"></textarea>
-      </div>
-      <div class="note-section">
-        <div class="note-section-label">討論內容</div>
-        <textarea class="note-section-input" id="n-discussion" placeholder="各方意見、討論過程…" rows="4"></textarea>
-      </div>
-      <div class="note-section">
-        <div class="note-section-label">決議事項</div>
-        <textarea class="note-section-input" id="n-decisions" placeholder="1. 
-2. 
-3. " rows="3"></textarea>
-      </div>
-      <div class="note-section">
-        <div class="note-section-label">待辦追蹤</div>
-        <textarea class="note-section-input" id="n-actions" placeholder="• 負責人：事項（期限）" rows="3"></textarea>
-      </div>
-    </div>
-
-    <!-- Free format -->
-    <div id="n-free-fields" style="display:none">
-      <div class="note-section">
-        <div class="note-section-label">內容</div>
-        <textarea class="note-free-input" id="n-content" placeholder="自由輸入內容…"></textarea>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ARCHIVE MODAL -->
-<div class="modal-overlay" id="archive-modal">
-  <div class="modal" style="max-width:600px;max-height:92vh">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div class="modal-title" style="margin:0">📦 封存區</div>
-      <button class="btn btn-ora" onclick="closeModal('archive-modal')" style="padding:6px 14px;font-size:12px">關閉</button>
-    </div>
-    <!-- Sort controls -->
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
-      <div style="display:flex;gap:4px">
-        <button id="arc-grp-proj" onclick="setArchiveGroup('proj')" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--ora);color:#fff">依計畫</button>
-        <button id="arc-grp-date" onclick="setArchiveGroup('date')" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--white);color:var(--text2)">依日期</button>
-      </div>
-      <div style="display:flex;gap:4px" id="arc-date-unit-wrap" style="display:none">
-        <button id="arc-unit-month" onclick="setArchiveDateUnit('month')" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--white);color:var(--text2)">依月</button>
-        <button id="arc-unit-year" onclick="setArchiveDateUnit('year')" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--white);color:var(--text2)">依年</button>
-      </div>
-      <button id="arc-sort-dir" onclick="toggleArchiveSort()" style="font-size:12px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border2);cursor:pointer;font-family:inherit;background:var(--white);color:var(--text2);margin-left:auto">近→遠 ↓</button>
-    </div>
-    <div id="archive-list" style="max-height:calc(92vh - 200px);overflow-y:auto"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-      <button class="btn btn-red" onclick="clearAllArchive()" style="font-size:12px;padding:6px 14px">🗑 清除全部封存</button>
-      <span style="font-size:11px;color:var(--text3)" id="arc-count"></span>
-    </div>
-  </div>
-</div>
-
-<!-- XUN MODAL -->
-<div class="modal-overlay" id="xun-modal">
-  <div class="modal" style="max-width:520px">
-    <div class="modal-title">📋 旬卡摘要</div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-      <select id="xun-year" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;background:var(--white);outline:none"></select>
-      <select id="xun-month" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;background:var(--white);outline:none">
-        <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
-        <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
-        <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
-        <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
-      </select>
-      <select id="xun-period" style="border:1.5px solid var(--border2);border-radius:8px;padding:6px 10px;font-size:13px;font-family:inherit;background:var(--white);outline:none">
-        <option value="upper">上旬（1-10日）</option>
-        <option value="mid">中旬（11-20日）</option>
-        <option value="lower">下旬（21-31日）</option>
-      </select>
-      <button class="btn btn-ora" onclick="genXunSummary()" style="padding:7px 14px">產生摘要</button>
-    </div>
-    <div id="xun-result" style="background:var(--bg);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:14px;font-size:12px;line-height:1.8;min-height:120px;font-family:'JetBrains Mono',monospace;white-space:pre-wrap;color:var(--text)"></div>
-    <div class="modal-actions">
-      <button class="btn btn-soft" onclick="copyXun()">📋 複製</button>
-      <button class="btn btn-ora" onclick="closeModal('xun-modal')">關閉</button>
-    </div>
-  </div>
-</div>
-
-<!-- RESEARCH MODAL -->
-<div class="modal-overlay" id="res-modal">
-  <div class="modal" style="max-width:640px;max-height:94vh;overflow-y:auto">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <div class="modal-title" style="margin:0" id="res-modal-title">新增研究項目</div>
-      <div style="display:flex;gap:6px">
-        <button class="btn btn-soft" onclick="closeModal('res-modal')" style="font-size:12px;padding:6px 12px">取消</button>
-        <button class="btn btn-ora" onclick="saveResearch()" style="font-size:12px;padding:6px 12px">儲存</button>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:12px">
-      <div class="fld"><label>研究主題</label><input type="text" id="r-title" placeholder="例：鋼橋鋼腹版振動噪音解法研究"></div>
-      <div class="fld"><label>狀態</label>
-        <select id="r-status">
-          <option value="idea">💡 構思中</option>
-          <option value="active">🔬 進行中</option>
-          <option value="dormant">💤 擱置中</option>
-          <option value="done">✅ 完成</option>
-        </select>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div class="fld"><label>研究領域 / 關聯</label><input type="text" id="r-field" placeholder="例：噪音振動、軌道幾何"></div>
-      <div class="fld"><label>目標期限（選填）</label><input type="date" id="r-deadline"></div>
-    </div>
-
-    <div class="fld" style="margin-bottom:12px">
-      <label>下一步行動</label>
-      <input type="text" id="r-nextstep" placeholder="例：找 3 篇關於正交各向異性板振動的 paper">
-    </div>
-
-    <div class="fld" style="margin-bottom:14px">
-      <label>💡 新增靈感記錄</label>
-      <textarea id="r-spark" placeholder="把現在腦子裡的想法先記下來…" style="height:70px;font-family:'Noto Sans TC',sans-serif;font-size:13px"></textarea>
-    </div>
-
-    <div class="fld" style="margin-bottom:14px">
-      <label>📄 文獻清單（每行一篇）</label>
-      <textarea id="r-papers" placeholder="例：Chen & Li (2021) - Vibration of orthotropic plate&#10;Remington (1987) - Wheel/rail noise" style="height:90px;font-size:12px"></textarea>
-    </div>
-
+    <div class="modal-actions"><button class="btn btn-ora" onclick="closeModal('proj-modal')">完成</button></div>
   </div>
 </div>
 
@@ -686,147 +456,154 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 const CFG={
   CLIENT_ID:'622489782668-81884uub8oh42pqofhl0psh03cloc3so.apps.googleusercontent.com',
   ALLOWED_EMAIL:'uoii910986@gmail.com',
+  SHEET_ID: '1hyT0xPGhdKfW7lhg_UU4Fi3T-SpL2wcyZ9yNOsbn2Ic', 
 };
-
-// Firebase 設定
-const firebaseConfig={
-  apiKey:'AIzaSyC3AUR1YQkmDS5oVHVOZVjJrjpgX2tze_E',
-  authDomain:'my-todo-list-f90b8.firebaseapp.com',
-  databaseURL:'https://my-todo-list-f90b8-default-rtdb.firebaseio.com',
-  projectId:'my-todo-list-f90b8',
-  appId:'1:372805580919:web:5097b978044d67f0bb6e72',
-};
-firebase.initializeApp(firebaseConfig);
-let db=null;
-
 const CLAUDE_PROMPT=`請幫我整理以下信件或訊息中的待辦事項，輸出格式如下，每個任務用 --- 分隔：
 
 任務名稱：（20字內，具體清晰）
 計畫代碼：（若有4碼數字+1碼大寫英文如1234A則填入，否則填「待確認」）
 類型：（公事 或 私人）
-分類：（若為公事，請從「會議／交報告／交簡報／審查意見／交付／回覆／其他」擇一填入；若為私人則略過）
 開始日期：（YYYY-MM-DD）
-結束日期：（YYYY-MM-DD，若為跨日行程或出差請填，單日略過）
+結束日期：（YYYY-MM-DD，若為跨日填寫，單日免填）
 開始時間：（HH:MM，若有則填，否則略過）
 結束時間：（HH:MM，若有則填，否則略過）
 優先級：（高 / 中 / 低）
-說明：（50字內背景說明）
+說明：（50字內背景說明，包含重要細節）
 
 以下是要整理的內容：
 ---
-（請將信件或Line訊息貼在這裡）`;
+`;
 
 const COLORS=['#E53935','#1E88E5','#43A047','#8E24AA','#F4511E','#00897B','#3949AB','#F9A825'];
 const COLOR_BG=['#FFF0F0','#E3F2FD','#E8F5E9','#F3E5F5','#FBE9E7','#E0F2F1','#E8EAF6','#FFFDE7'];
 const COLOR_MID=['#FFCDD2','#BBDEFB','#C8E6C9','#E1BEE7','#FFCCBC','#B2DFDB','#C5CAE9','#FFF9C4'];
-let colorMap={},colorIdx=0;
-function getCI(code){if(code===null||code===undefined)return -1;if(!colorMap[code]){colorMap[code]=colorIdx%COLORS.length;colorIdx++;}return colorMap[code];}
-const PRIV_COLORS=['#546E7A','#607D8B','#78909C','#455A64','#37474F','#4DB6AC','#5C6BC0','#6D4C41'];
-const PRIV_BG=['#ECEFF1','#E8EAF6','#E0F2F1','#E3F2FD','#F3E5F5','#E8F5E9','#EDE7F6','#EFEBE9'];
-const PRIV_MID=['#CFD8DC','#C5CAE9','#B2DFDB','#BBDEFB','#E1BEE7','#C8E6C9','#D1C4E9','#D7CCC8'];
-let privColorMap={},privColorIdx=0;
-function getPrivCI(id){if(privColorMap[id]===undefined){privColorMap[id]=privColorIdx%PRIV_COLORS.length;privColorIdx++;}return privColorMap[id];}
-function privHex(id){return PRIV_COLORS[getPrivCI(id)];}
-function privBg(id){return PRIV_BG[getPrivCI(id)];}
-function privMid(id){return PRIV_MID[getPrivCI(id)];}
+let colorMap={};
+let colorIdx=0;
+function getColor(code){
+  if(!colorMap[code]){colorMap[code]=colorIdx%COLORS.length;colorIdx++;}
+  return colorMap[code];
+}
+function cHex(code){return COLORS[getColor(code)];}
+function cBg(code){return COLOR_BG[getColor(code)];}
+function cMid(code){return COLOR_MID[getColor(code)];}
+function normalizeTask(task){return{...task,isTravel:!!task.isTravel,done:!!task.done};}
+function getCodeSortValue(code){const m=(code||'').match(/(\d+)/);return m?parseInt(m[1],10):Number.MAX_SAFE_INTEGER;}
+function getSortedProjects(){return [...S.projects].sort((a,b)=>{const av=getCodeSortValue(a.code),bv=getCodeSortValue(b.code);if(av!==bv)return av-bv;return (a.code||'').localeCompare(b.code||'');});}
+function getProjectOptionHTML(selectedCode){return getSortedProjects().map(p=>`<option value="${p.code}" ${p.code===selectedCode?'selected':''}>${p.code} — ${p.name}</option>`).join('');}
 
-function cHex(code){const i=getCI(code);return i<0?'#607D8B':COLORS[i]||'#888';}
-function cBg(code){const i=getCI(code);return i<0?'#ECEFF1':COLOR_BG[i]||'#f5f5f5';}
-function cMid(code){const i=getCI(code);return i<0?'#CFD8DC':COLOR_MID[i]||'#ddd';}
-
+// 優先載入 localStorage 作為基底
 let S={
   view:'list',inputOpen:false,itab:'paste',
   calYear:new Date().getFullYear(),calMonth:new Date().getMonth(),
   weekOffset:0,
-  projects:JSON.parse(localStorage.getItem('tm-projs')||'null')||[{code:'0000X',name:'待確認 / 其他'}],
-  taskTypes:JSON.parse(localStorage.getItem('tm-types')||'null')||[
-    {id:'meeting',icon:'📅',name:'會議'},
-    {id:'report',icon:'📝',name:'交報告'},
-    {id:'slides',icon:'📊',name:'交簡報'},
-    {id:'review',icon:'🔍',name:'審查意見'},
-    {id:'deliver',icon:'📤',name:'交付'},
-    {id:'reply',icon:'✉️',name:'回覆'},
-    {id:'other',icon:'📌',name:'其他'},
-  ],
-  filterType:null,
-  showUrgentOnly:false,
-  _autoExpandDone:false,
-  sortMode:'proj',
-  notes:[],
-  research:[],
-  editingResearch:null,
-  noteFilter:null,
-  tasks:[],
-  pending:[],calToken:null,expandedProjs:new Set(),expandedCards:new Set(),editingCard:null,
+  projects: JSON.parse(localStorage.getItem('tm-projs') || 'null') || [{code:'0000X',name:'待確認 / 其他'}],
+  tasks: (JSON.parse(localStorage.getItem('tm-tasks') || '[]')).map(normalizeTask),
+  pending:[],calToken:null,sheetsToken:null,
+  expandedProjs:new Set(),
+  expandedCards:new Set(),
+  editingCard:null,
   editingProj:null,
+  menstrual: JSON.parse(localStorage.getItem('tm-menstrual') || 'null') || {lastStart:'',cycleLength:28,duration:5}
 };
 
 const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const addH=t=>{const[h,m]=t.split(':').map(Number);return`${String((h+1)%24).padStart(2,'0')}:${String(m).padStart(2,'0')}`;};
 
-// ── GOOGLE AUTH ──
 let tokenClient;
-window.onload=async()=>{
-  google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onLogin});
-  google.accounts.id.renderButton(document.getElementById('g-btn'),{theme:'outline',size:'large',width:240});
 
-  // Init Firebase DB
-  db=firebase.database();
+function populateMenstrualForm(){
+  const last=document.getElementById('m-last-start');
+  const cycle=document.getElementById('m-cycle');
+  const duration=document.getElementById('m-duration');
+  if(!last||!cycle||!duration)return;
+  last.value=S.menstrual?.lastStart||'';
+  cycle.value=S.menstrual?.cycleLength||28;
+  duration.value=S.menstrual?.duration||5;
+}
+function renderMenstrualSummary(){
+  const el=document.getElementById('menstrual-summary');
+  if(!el)return;
+  const {lastStart='',cycleLength=28,duration=5}=S.menstrual||{};
+  if(!lastStart){el.textContent='尚未紀錄';return;}
+  const start=new Date(lastStart);
+  const next=new Date(start);next.setDate(start.getDate()+cycleLength);
+  const today=new Date();
+  const diff=Math.ceil((next-today)/(1000*60*60*24));
+  el.innerHTML=`<div>上次：${lastStart}</div><div>週期 ${cycleLength} 天・持續 ${duration} 天</div><div>預估下次：${fmtDate(next)}${diff>=0?`（還有 ${diff} 天）`:'（已經預估來潮）'}</div>`;
+}
+function saveMenstrual(){
+  const last=document.getElementById('m-last-start').value;
+  const cycle=parseInt(document.getElementById('m-cycle').value,10)||28;
+  const duration=parseInt(document.getElementById('m-duration').value,10)||5;
+  if(!last){toast('請填上次月經開始日','err');return;}
+  S.menstrual={lastStart:last,cycleLength:cycle,duration};
+  localStorage.setItem('tm-menstrual', JSON.stringify(S.menstrual));
+  renderMenstrualSummary();toast('✅ 已紀錄月經週期','ok');
+}
+function hasTravelOnDate(dateStr){return S.tasks.some(t=>t.isTravel&&getTaskDates(t).includes(dateStr));}
+function renderMiniCalendar(){
+  const el=document.getElementById('mini-cal');
+  if(!el)return;
+  const today=new Date();
+  const year=today.getFullYear();const month=today.getMonth();
+  const first=new Date(year,month,1);const last=new Date(year,month+1,0);
+  let startDay=first.getDay()-1;if(startDay<0)startDay=6;let cells=[];
+  for(let i=0;i<startDay;i++){const d=new Date(year,month,1-startDay+i);cells.push({date:fmtDate(d),other:true});}
+  for(let d=1;d<=last.getDate();d++)cells.push({date:`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,other:false});
+  while(cells.length%7!==0)cells.push({date:'',other:true});
+  const todayStr=fmtDate(today);
+  el.innerHTML=`<div class="mini-cal-title">本月小日歷</div><div class="mini-cal-grid">${cells.map(c=>{
+    if(!c.date)return '<div class="mini-cal-cell"></div>';
+    const isToday=c.date===todayStr;const travel=hasTravelOnDate(c.date);
+    return `<div class="mini-cal-cell${c.other?'':''}${isToday?' today':''}${travel?' travel':''}">${parseInt(c.date.split('-')[2])}${isToday?'<span class="today-dot">●</span>':''}</div>`;
+  }).join('')}</div>`;
+}
 
-  // Calendar token client (only Calendar, no Sheets needed)
-  tokenClient=google.accounts.oauth2.initTokenClient({
-    client_id:CFG.CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/calendar.events',
-    callback:r=>{
-      if(r.access_token){
-        S.calToken=r.access_token;
-        console.log('Calendar token OK');
+window.onload=()=>{
+  try {
+    if(typeof google === 'undefined') {
+      throw new Error("無法連線至 Google 驗證服務。");
+    }
+    document.getElementById('login-err').style.display='none';
+    google.accounts.id.initialize({client_id:CFG.CLIENT_ID,callback:onLogin});
+    google.accounts.id.renderButton(document.getElementById('g-btn'),{theme:'outline',size:'large',width:240});
+    
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CFG.CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/spreadsheets',
+      callback: async r => {
+        S.calToken = r.access_token;
+        S.sheetsToken = r.access_token;
+        await initAndSyncSheet(); 
       }
-    },
-    error_callback:e=>{
-      console.log('Calendar token error (non-fatal):',e);
-    },
-  });
+    });
 
-  // Check if already logged in via sessionStorage
-  const storedUser=sessionStorage.getItem('guser');
-  const storedEmail=storedUser?JSON.parse(storedUser).email:null;
-  if(storedEmail===CFG.ALLOWED_EMAIL){
-    showApp(storedEmail);
-    return;
+    const td=new Date().toISOString().split('T')[0];
+    ['w-date','p-date','w-edate','p-edate'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    if(document.getElementById('w-date'))document.getElementById('w-date').value=td;
+    if(document.getElementById('p-date'))document.getElementById('p-date').value=td;
+    populateMenstrualForm();
+  } catch(e) {
+    const errDiv = document.getElementById('login-err');
+    errDiv.textContent = '❌ 初始化錯誤: ' + e.message;
+    errDiv.style.display = 'block';
   }
-  const td=new Date().toISOString().split('T')[0];
-  ['w-date','p-date','w-edate','p-edate'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
-  document.getElementById('w-date')&&(document.getElementById('w-date').value=td);
-  document.getElementById('p-date')&&(document.getElementById('p-date').value=td);
 };
 
 function onLogin(resp){
   const pl=JSON.parse(atob(resp.credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-  if(pl.email!==CFG.ALLOWED_EMAIL){document.getElementById('login-err').style.display='block';return;}
-  sessionStorage.setItem('guser',JSON.stringify({email:pl.email}));
-  showApp(pl.email);
-}
-
-async function showApp(email){
+  if(pl.email!==CFG.ALLOWED_EMAIL){
+    const errDiv = document.getElementById('login-err');
+    errDiv.textContent = '❌ 此帳號無使用權限';
+    errDiv.style.display='block';
+    return;
+  }
   document.getElementById('login-screen').style.display='none';
-  const app=document.getElementById('app');app.style.display='flex';app.style.flexDirection='column';
-  const uem=document.getElementById('u-em');
-  if(uem)uem.textContent=email;
-  const uav=document.getElementById('u-av');
-  if(uav)uav.textContent=email[0].toUpperCase();
-
-  // 先載入 Firebase 資料（不等 Calendar token）
-  setSyncStatus('syncing','載入資料中…');
-  await loadFromFirebase();
-  setSyncStatus('ok','已同步 Firebase ✓');
-  S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
-  fillCodeSel();renderView();buildSuggestion();
-
-  // Calendar token 背景取得（不阻塞主流程）
-  try{
-    if(tokenClient)tokenClient.requestAccessToken({prompt:''});
-  }catch(e){console.log('Calendar token skipped:',e);}
+  const app=document.getElementById('app');app.style.display='flex';
+  document.getElementById('u-em').textContent=pl.email;
+  document.getElementById('u-av').textContent=pl.email[0].toUpperCase();
+  
+  tokenClient.requestAccessToken({prompt:''});
 }
 
 function setSyncStatus(state,msg){
@@ -836,96 +613,96 @@ function setSyncStatus(state,msg){
   txt.textContent=msg;
 }
 
-// ── FIREBASE API ──
-async function loadFromFirebase(){
-  if(!db)return;
-  return new Promise((resolve)=>{
-    // 即時監聽 tasks
-    db.ref('cyy321_todo_9x7k/tasks').on('value',snap=>{
-      S.tasks=[];
-      if(snap.exists()){
-        const data=snap.val();
-        S.tasks=Object.values(data).map(t=>({...t,done:t.done===true||t.done==='true'}));
-      }
-      saveLocal();
-      renderView();buildSuggestion();
-      setSyncStatus('ok','已同步 ✓');
-      resolve();
-    });
-    // 即時監聽 notes
-    db.ref('cyy321_todo_9x7k/notes').on('value',snap=>{
-      S.notes=[];
-      if(snap.exists()){
-        const data=snap.val();
-        if(data)S.notes=Object.values(data);
-      }
-      if(S.view==='notes')renderNotes();
-    });
-
-    // 即時監聽 research
-    db.ref('cyy321_todo_9x7k/research').on('value',snap=>{
-      S.research=[];
-      if(snap.exists()){
-        const data=snap.val();
-        if(data)S.research=Object.values(data);
-      }
-      if(S.view==='research')renderResearch();
-    });
-
-    // 即時監聽 projects
-    db.ref('cyy321_todo_9x7k/projects').on('value',snap=>{
-      if(snap.exists()){
-        const loaded=Object.values(snap.val());
-        if(loaded.length>0){
-          S.projects=loaded;
-          localStorage.setItem('tm-projs',JSON.stringify(S.projects));
-          fillCodeSel();
-        }
-      }
-    });
-  });
+// 封裝共用 API 請求
+async function sheetsFetch(method, path, body) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${CFG.SHEET_ID}${path}`;
+  const opts = { method, headers: { 'Authorization': `Bearer ${S.sheetsToken}`, 'Content-Type': 'application/json' }};
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  if(!r.ok) throw new Error(await r.text());
+  return r.status === 204 ? null : r.json();
 }
 
-async function saveTasksToFirebase(){
-  if(!db)return;
+// 包含防呆與雙向初始化的同步邏輯
+async function initAndSyncSheet() {
+  setSyncStatus('syncing', '讀取本機資料與初始化雲端…');
+  renderView(); // 立即渲染從 S 中已經讀取的本機 localStorage 資料
+
+  try {
+    const info = await sheetsFetch('GET', '');
+    const sheetTitles = info.sheets.map(s => s.properties.title);
+    
+    // 檢查並建立所需的工作表分頁，防止 400 錯誤
+    if (!sheetTitles.includes('Tasks')) {
+      await sheetsFetch('POST', ':batchUpdate', { requests: [{ addSheet: { properties: { title: 'Tasks' } } }] });
+    }
+    if (!sheetTitles.includes('Projects')) {
+      await sheetsFetch('POST', ':batchUpdate', { requests: [{ addSheet: { properties: { title: 'Projects' } } }] });
+    }
+
+    // 嘗試讀取雲端資料
+    const data = await sheetsFetch('GET', '/values:batchGet?ranges=Tasks!A2:Z&ranges=Projects!A2:Z');
+    const tRows = data.valueRanges[0].values || [];
+    const pRows = data.valueRanges[1].values || [];
+
+    if (tRows.length > 0 || pRows.length > 0) {
+        // 若雲端有資料，以雲端為主覆寫本機 (雙裝置切換情境)
+        if (tRows.length > 0) {
+            S.tasks = tRows.map(r => normalizeTask({
+                id: parseInt(r[0]), type: r[1], title: r[2], code: r[3]||null,
+                date: r[4], endDate: r[5]||null, time: r[6]||null, timeEnd: r[7]||null,
+                loc: r[8]||'', priority: r[9], done: r[10]==='true', calEventId: r[11]||null,
+                note: r[12]||'', rawInfo: r[13]||'', isTravel: r[14]==='true'
+            }));
+        }
+        if (pRows.length > 0) {
+            S.projects = pRows.map(r => ({code: r[0], name: r[1]}));
+        }
+        localStorage.setItem('tm-tasks', JSON.stringify(S.tasks));
+        localStorage.setItem('tm-projs', JSON.stringify(S.projects));
+        setSyncStatus('ok', '已同步雲端資料');
+    } else {
+        // 若雲端無資料 (新建立的表)，將本機資料推播至雲端 (轉移情境)
+        if (S.tasks.length > 0 || S.projects.length > 1) {
+            await saveToSheet(); 
+        } else {
+            setSyncStatus('ok', '已連線 (無資料)');
+        }
+    }
+  } catch(e) {
+    setSyncStatus('err', '雲端連線異常，目前為離線模式');
+    console.error(e);
+  }
+  
+  S.projects.forEach(p => { if(p.code!=='0000X') getColor(p.code); });
+  fillCodeSel(); 
+  renderView(); 
+  buildSuggestion();
+}
+
+async function saveToSheet(){
+  if(!S.sheetsToken) return;
+  setSyncStatus('syncing','儲存中…');
   try{
-    setSyncStatus('syncing','儲存中…');
-    const obj={};
-    S.tasks.forEach(t=>{obj[t.id]=t;});
-    await db.ref('cyy321_todo_9x7k/tasks').set(obj);
-    setSyncStatus('ok','已同步 Firebase ✓');
-  }catch(e){
-    setSyncStatus('err','同步失敗');
-    console.error('saveTasksToFirebase',e);
+    const tData = S.tasks.map(t=>[t.id, t.type, t.title, t.code||'', t.date, t.endDate||'', t.time||'', t.timeEnd||'', t.loc||'', t.priority, t.done, t.calEventId||'', t.note||'', t.rawInfo||'', t.isTravel?'true':'false']);
+    const pData = S.projects.map(p=>[p.code, p.name]);
+    
+    await sheetsFetch('PUT', '/values/Tasks!A2:Z?valueInputOption=RAW', { values: tData });
+    await sheetsFetch('PUT', '/values/Projects!A2:Z?valueInputOption=RAW', { values: pData });
+    
+    // 雙重保險寫入本機
+    localStorage.setItem('tm-projs', JSON.stringify(S.projects));
+    localStorage.setItem('tm-tasks', JSON.stringify(S.tasks));
+    setSyncStatus('ok','已同步 ✓');
+  } catch(e) {
+    setSyncStatus('err','儲存失敗');
   }
 }
 
-async function saveProjectsToFirebase(){
-  if(!db)return;
-  try{
-    const obj={};
-    S.projects.forEach((p,i)=>{obj[i]=p;});
-    await db.ref('cyy321_todo_9x7k/projects').set(obj);
-  }catch(e){console.error('saveProjectsToFirebase',e);}
-}
-
-function saveLocal(){
-  localStorage.setItem('tm-projs',JSON.stringify(S.projects));
-  localStorage.setItem('tm-tasks',JSON.stringify(S.tasks));
-  localStorage.setItem('tm-types',JSON.stringify(S.taskTypes));
-}
-
-async function save(){
-  saveLocal();
-  await saveTasksToFirebase();
-}
-
-// ── INPUT ──
 function toggleInput(){S.inputOpen=!S.inputOpen;document.getElementById('input-panel').classList.toggle('open',S.inputOpen);document.getElementById('t-arrow').classList.toggle('open',S.inputOpen);}
 function setITab(t){S.itab=t;['paste','work','priv'].forEach(x=>{document.getElementById('it-'+x).className='seg'+(x===t?' on':'');document.getElementById('area-'+x).style.display=x===t?'block':'none';});}
-function copyPrompt(){navigator.clipboard.writeText(CLAUDE_PROMPT).then(()=>toast('✅ 提示詞已複製','ok')).catch(()=>toast('請手動複製','err'));}
+function copyPrompt(){navigator.clipboard.writeText(CLAUDE_PROMPT).then(()=>toast('✅ 提示詞已複製','ok')).catch(()=>toast('請手動複製提示詞','err'));}
 
-// ── PARSE ──
 function parsePaste(){
   const text=document.getElementById('paste-box').value.trim();
   if(!text){toast('請先貼上內容','err');return;}
@@ -937,67 +714,60 @@ function parsePaste(){
     if(!title)return;
     const typeRaw=get(['類型','type']);
     const codeRaw=get(['計畫代碼','代碼','code']);
-    const catRaw=get(['分類','類別','category']);
-    const dateRaw=get(['開始日期','截止日期','日期','date']);
-    const edateRaw=get(['結束日期','end.?date','enddate']);
+    const dateRaw=get(['開始日期','日期','date']);
+    const edateRaw=get(['結束日期','end']);
     const startRaw=get(['開始時間','time','start']);
-    const endRaw=get(['結束時間','end']);
+    const endRaw=get(['結束時間','endtime']);
     const prioRaw=get(['優先級','優先','priority']);
-    const note=get(['說明','備註','note']);
+    const note=get(['說明','備註','note','description']);
+    
     const type=(typeRaw.includes('私人')||typeRaw.toLowerCase()==='private')?'private':'work';
-    let taskType=null;
-    if(type==='work'&&catRaw){
-      const found=S.taskTypes.find(tt=>catRaw.includes(tt.name)||tt.name.includes(catRaw));
-      if(found)taskType=found.id;
-    }
-    const codeFromField=codeRaw?codeRaw.match(/\d{4}[A-Z]/):null;
-    const codeFromBlock=block.match(/\d{4}[A-Z]/);
-    const codeMatch=codeFromField||codeFromBlock;
+    const codeMatch=codeRaw?codeRaw.match(/\d{4}[A-Z]/):block.match(/\d{4}[A-Z]/);
     const code=type==='work'?(codeMatch?codeMatch[0]:'0000X'):null;
+    
     const dateMatch=(dateRaw||'').match(/\d{4}-\d{2}-\d{2}/);
-    const edateMatch=(edateRaw||'').match(/\d{4}-\d{2}-\d{2}/);
     const date=dateMatch?dateMatch[0]:new Date().toISOString().split('T')[0];
-    const endDate=edateMatch?edateMatch[0]:null;
+    const edateMatch=(edateRaw||'').match(/\d{4}-\d{2}-\d{2}/);
+    
     const startMatch=(startRaw||'').match(/\d{1,2}:\d{2}/);
     const endMatch=(endRaw||'').match(/\d{1,2}:\d{2}/);
     const prioMap={'高':'high','中':'medium','低':'low','緊急':'high'};
-    tasks.push({title,type,taskType,code,date,endDate,time:startMatch?startMatch[0]:null,timeEnd:endMatch?endMatch[0]:null,priority:prioMap[prioRaw]||'medium',note,rawBlock:block});
+    tasks.push({title,type,code,date,endDate:edateMatch?edateMatch[0]:null,time:startMatch?startMatch[0]:null,timeEnd:endMatch?endMatch[0]:null,priority:prioMap[prioRaw]||'medium',note,rawBlock:block});
   });
   if(!tasks.length){toast('找不到任務格式，請確認內容','err');return;}
   S.pending=tasks;showConfirmModal();
 }
 
 function showConfirmModal(){
-  const opts=S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
-  document.getElementById('parsed-list').innerHTML=S.pending.map((t,i)=>`
-  <div class="parsed-item">
-    <div class="pi-head">
-      <span style="font-size:13px">${t.type==='private'?'🏠':'🏢'}</span>
-      <span style="color:${t.type==='private'?'#607D8B':'#1E88E5'}">${t.type==='private'?'私人行程':'公事任務'}</span>
-      <span style="font-size:11px;color:var(--text3);font-weight:400">${t.note||''}</span>
-    </div>
-    <div class="fi"><label>任務名稱</label><input type="text" value="${t.title}" id="pt${i}-title"></div>
-    ${t.type==='work'?`<div class="fi"><label>計畫代碼 ${t.code==='0000X'?'<span style="color:var(--red);font-size:10px">⚠ 請確認</span>':''}</label>
-    <select id="pt${i}-code" class="${t.code==='0000X'?'warn-sel':''}" onchange="this.className=this.value==='0000X'?'warn-sel':''">
-    ${opts.replace(`value="${t.code}"`,`value="${t.code}" selected`)}</select></div>
-    <div class="fi"><label>分類</label><select id="pt${i}-type">
-    <option value="">－ 未分類 －</option>
-    ${S.taskTypes.map(x=>`<option value="${x.id}" ${t.taskType===x.id?'selected':''}>${x.icon} ${x.name}</option>`).join('')}
-    </select></div>`:''}
-    <div class="fi-row">
-      <div class="fi"><label>開始日期</label><input type="date" value="${t.date||''}" id="pt${i}-date"></div>
-      <div class="fi"><label>結束日期（跨日選填）</label><input type="date" value="${t.endDate||''}" id="pt${i}-edate"></div>
-    </div>
-    <div class="fi-row">
-      <div class="fi"><label>開始時間</label><input type="time" value="${t.time||''}" id="pt${i}-start"></div>
-      <div class="fi"><label>結束時間</label><input type="time" value="${t.timeEnd||''}" id="pt${i}-end"></div>
-    </div>
-    <div class="fi"><label>優先級</label><select id="pt${i}-prio">
-      <option value="high" ${t.priority==='high'?'selected':''}>🔴 緊急</option>
-      <option value="medium" ${t.priority==='medium'?'selected':''}>🟡 一般</option>
-      <option value="low" ${t.priority==='low'?'selected':''}>🟢 低</option>
-    </select></div>
-  </div>`).join('');
+  document.getElementById('parsed-list').innerHTML=S.pending.map((t,i)=>{
+    const taskOpts = getProjectOptionHTML(t.code);
+    return `
+    <div class="parsed-item">
+      <div class="pi-head">
+        <span style="font-size:13px">${t.type==='private'?'🏠':'🏢'}</span>
+        <span style="color:${t.type==='private'?'#FB8C00':'#1E88E5'}">${t.type==='private'?'私人行程':'公事任務'}</span>
+        <span style="font-size:11px;color:var(--text3);font-weight:400">${t.note||''}</span>
+      </div>
+      <div class="fi"><label>任務名稱</label><input type="text" value="${t.title}" id="pt${i}-title"></div>
+      ${t.type==='work'?`<div class="fi"><label>計畫代碼 ${t.code==='0000X'?'<span style="color:var(--red);font-size:10px">⚠ 請確認</span>':''}</label>
+      <select id="pt${i}-code" class="${t.code==='0000X'?'warn-sel':''}" onchange="this.className=this.value==='0000X'?'warn-sel':''">
+      ${taskOpts}</select></div>`:''}
+      <div class="fi-row">
+        <div class="fi"><label>開始日期</label><input type="date" value="${t.date||''}" id="pt${i}-date"></div>
+        <div class="fi"><label>結束日期(跨日)</label><input type="date" value="${t.endDate||''}" id="pt${i}-edate"></div>
+      </div>
+      <div class="fi-row">
+        <div class="fi"><label>開始時間</label><input type="time" value="${t.time||''}" id="pt${i}-start"></div>
+        <div class="fi"><label>結束時間</label><input type="time" value="${t.timeEnd||''}" id="pt${i}-end"></div>
+      </div>
+      <div class="fi"><label>優先級</label><select id="pt${i}-prio">
+          <option value="high" ${t.priority==='high'?'selected':''}>🔴 緊急</option>
+          <option value="medium" ${t.priority==='medium'?'selected':''}>🟡 一般</option>
+          <option value="low" ${t.priority==='low'?'selected':''}>🟢 低</option>
+        </select></div>
+      <div class="fi"><label>是否出差</label><label class="check-pill"><input type="checkbox" id="pt${i}-travel" ${t.isTravel?'checked':''}> <span>出差</span></label></div>
+    </div>`;
+  }).join('');
   document.getElementById('confirm-modal').classList.add('show');
 }
 
@@ -1011,235 +781,135 @@ async function commitTasks(){
     const start=document.getElementById(`pt${i}-start`)?.value||null;
     const end=document.getElementById(`pt${i}-end`)?.value||null;
     const code=t.type==='work'?(document.getElementById(`pt${i}-code`)?.value||'0000X'):null;
-    const taskType=t.type==='work'?(document.getElementById(`pt${i}-type`)?.value||null):null;
     const prio=document.getElementById(`pt${i}-prio`).value;
-    if(!title||!date){toast('請填寫所有必填欄位','err');return;}
-    const task={id:Date.now()+i,type:t.type,title,code,taskType,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:prio,done:false,calEventId:null,note:t.note||'',rawInfo:t.rawBlock||'',createdAt:Date.now()};
+    if(!title||!date){toast('請填寫必填欄位','err');return;}
+    const task={id:Date.now()+i,type:t.type,title,date,endDate:edate,time:start,timeEnd:end,code,priority:prio,done:false,calEventId:null,note:t.note||'',rawInfo:t.rawBlock||''};
     const evId=await pushCal(task);if(evId)task.calEventId=evId;
     newT.push(task);
   }
-  S.tasks.push(...newT);await save();
+  S.tasks.push(...newT); saveToSheet();
   closeModal('confirm-modal');
   document.getElementById('paste-box').value='';
   renderView();buildSuggestion();
-  toast(`✅ 已新增 ${newT.length} 個任務`,'ok');
+  toast(`✅ 已新增 ${newT.length} 個任務`, 'ok');
 }
 
 function fillCodeSel(){
-  const s=document.getElementById('w-code');
-  if(!s)return;
-  s.innerHTML=S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
-  // Fill task type selectors
-  ['w-type','filter-type'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el)return;
-    const cur=el.value;
-    el.innerHTML='<option value="">－ 全部 / 選填 －</option>'+S.taskTypes.map(t=>`<option value="${t.id}">${t.icon} ${t.name}</option>`).join('');
-    if(cur)el.value=cur;
-  });
+  const s=document.getElementById('w-code');if(!s)return;
+  s.innerHTML=getSortedProjects().map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
 }
 
 async function addWork(){
   const title=document.getElementById('w-title').value.trim();
   const code=document.getElementById('w-code').value;
   const date=document.getElementById('w-date').value;
-  let edate=document.getElementById('w-edate').value||null;
-  const start=document.getElementById('w-start').value||null;
-  const end=document.getElementById('w-end').value||null;
-  const taskType=document.getElementById('w-type')?.value||null;
-  if(!title){toast('請輸入任務名稱','err');return;}
-  if(!date){toast('請選擇日期','err');return;}
-  if(edate&&edate<date){toast('結束日期不可早於開始日期，已自動清除','info');edate=null;}
-  const task={id:Date.now(),type:'work',title,code,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:'medium',taskType:taskType,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
+  const edate=document.getElementById('w-edate').value;
+  const start=document.getElementById('w-start').value;
+  const end=document.getElementById('w-end').value;
+  if(!title||!date)return toast('欄位不完整','err');
+  const task={id:Date.now(),type:'work',title,code,date,endDate:edate||null,time:start||null,timeEnd:end||null,priority:'medium',done:false,calEventId:null,note:'',rawInfo:'',isTravel:document.getElementById('w-travel').checked};
   const evId=await pushCal(task);if(evId)task.calEventId=evId;
-  S.tasks.push(task);await save();renderView();buildSuggestion();
-  document.getElementById('w-title').value='';
-  toast('✅ 公事任務已新增','ok');
+  S.tasks.push(task);saveToSheet();renderView();buildSuggestion();
+  document.getElementById('w-title').value='';document.getElementById('w-travel').checked=false;toast('✅ 公事新增成功','ok');
 }
 
 async function addPriv(){
   const title=document.getElementById('p-title').value.trim();
   const date=document.getElementById('p-date').value;
-  let edate=document.getElementById('p-edate').value||null;
-  const start=document.getElementById('p-start').value||null;
-  const end=document.getElementById('p-end').value||null;
+  const edate=document.getElementById('p-edate').value;
+  const start=document.getElementById('p-start').value;
+  const end=document.getElementById('p-end').value;
   const loc=document.getElementById('p-loc').value.trim();
-  if(!title){toast('請輸入行程名稱','err');return;}
-  if(!date){toast('請選擇日期','err');return;}
-  if(edate&&edate<date){toast('結束日期不可早於開始日期，已自動清除','info');edate=null;}
-  const task={id:Date.now(),type:'private',title,date,endDate:edate,time:start,timeEnd:end,loc,code:null,priority:'medium',done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
+  if(!title||!date)return toast('欄位不完整','err');
+  const task={id:Date.now(),type:'private',title,date,endDate:edate||null,time:start,timeEnd:end,loc,code:null,priority:'medium',done:false,calEventId:null,note:'',rawInfo:'',isTravel:document.getElementById('p-travel').checked};
   const evId=await pushCal(task);if(evId)task.calEventId=evId;
-  S.tasks.push(task);await save();renderView();buildSuggestion();
-  document.getElementById('p-title').value='';document.getElementById('p-loc').value='';
-  toast('✅ 私人行程已新增','ok');
+  S.tasks.push(task);saveToSheet();renderView();buildSuggestion();
+  document.getElementById('p-title').value='';document.getElementById('p-loc').value='';document.getElementById('p-travel').checked=false;toast('✅ 私人行程新增成功','ok');
 }
 
-// ── CALENDAR API ──
 async function pushCal(task){
   if(!S.calToken)return null;
-  const hasEndDate=task.endDate&&task.endDate!==task.date;
-  let evStart,evEnd;
-  if(hasEndDate){
-    evStart={date:task.date};
-    const ed=new Date(task.endDate+'T00:00:00');ed.setDate(ed.getDate()+1);
-    evEnd={date:fmtDate(ed)};
-  }else{
-    const st=task.time||'09:00';
-    const et=task.timeEnd||addH(st);
-    evStart={dateTime:`${task.date}T${st}:00`,timeZone:'Asia/Taipei'};
-    evEnd={dateTime:`${task.date}T${et}:00`,timeZone:'Asia/Taipei'};
+  const hasEnd = task.endDate && task.endDate !== task.date;
+  let evStart, evEnd;
+  
+  if(hasEnd){
+    const ed = new Date(task.endDate); ed.setDate(ed.getDate()+1);
+    evStart = {date: task.date}; evEnd = {date: fmtDate(ed)};
+  } else {
+    const st=task.time||'09:00'; const et=task.timeEnd||addH(st);
+    evStart = {dateTime:`${task.date}T${st}:00`,timeZone:'Asia/Taipei'};
+    evEnd = {dateTime:`${task.date}T${et}:00`,timeZone:'Asia/Taipei'};
   }
-  const ev={summary:task.type==='work'?`[${task.code}] ${task.title}`:task.title,start:evStart,end:evEnd,colorId:task.type==='work'?'9':'6',location:task.loc||undefined,description:task.note||undefined};
+
+  const ev={
+    summary:task.type==='work'?`[${task.code}] ${task.title}`:task.title,
+    start:evStart, end:evEnd, colorId:task.type==='work'?'9':'6',
+    location:task.loc||undefined, description:task.note||undefined,
+  };
   try{
-    const r=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{method:'POST',headers:{'Authorization':`Bearer ${S.calToken}`,'Content-Type':'application/json'},body:JSON.stringify(ev)});
+    const r=await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events',{
+      method:'POST',headers:{'Authorization':`Bearer ${S.calToken}`,'Content-Type':'application/json'},body:JSON.stringify(ev)
+    });
     const d=await r.json();return d.id||null;
-  }catch(e){console.error(e);return null;}
+  }catch(e){return null;}
 }
 
 async function deleteCal(eventId){
   if(!S.calToken||!eventId)return;
-  try{await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`,{method:'DELETE',headers:{'Authorization':`Bearer ${S.calToken}`}});}
-  catch(e){console.error(e);}
+  try{await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`,{method:'DELETE',headers:{'Authorization':`Bearer ${S.calToken}`}});}catch(e){}
 }
 
-// ── VIEW ──
-function setView(v){S.view=v;['list','week','cal','notes','research','search'].forEach(x=>{const el=document.getElementById('vt-'+x);if(el)el.className='vtab'+(x===v?' on':'');});renderView();}
+function setView(v){S.view=v;['list','week','cal'].forEach(x=>document.getElementById('vt-'+x).className='vtab'+(x===v?' on':''));renderView();}
 function navPrev(){if(S.view==='cal'){S.calMonth--;if(S.calMonth<0){S.calMonth=11;S.calYear--;}}else if(S.view==='week'){S.weekOffset--;}renderView();}
 function navNext(){if(S.view==='cal'){S.calMonth++;if(S.calMonth>11){S.calMonth=0;S.calYear++;}}else if(S.view==='week'){S.weekOffset++;}renderView();}
-function renderView(){
-  fillCodeSel();fillNoteCodeSel();
-  if(S.view==='list')renderList();
-  else if(S.view==='week')renderWeek();
-  else if(S.view==='cal')renderCal();
-  else if(S.view==='notes')renderNotes();
-  else if(S.view==='research')renderResearch();
-  else if(S.view==='search')renderSearch();
-}
-
-// 展開任務的日期範圍
+function renderView(){fillCodeSel();populateMenstrualForm();renderMiniCalendar();renderMenstrualSummary();if(S.view==='list')renderList();else if(S.view==='week')renderWeek();else renderCal();}
 function getTaskDates(task){
   if(!task.endDate||task.endDate===task.date)return[task.date];
-  const dates=[];const cur=new Date(task.date+'T00:00:00');const end=new Date(task.endDate+'T00:00:00');
+  const dates=[];let cur=new Date(task.date);const end=new Date(task.endDate);
   while(cur<=end){dates.push(fmtDate(cur));cur.setDate(cur.getDate()+1);}
   return dates;
-}
-
-// ── LIST ──
-function setSortMode(mode){
-  S.sortMode=mode;
-  S._autoExpandDone=false;
-  renderView();
-}
-
-function toggleUrgent(){
-  S.showUrgentOnly=!S.showUrgentOnly;
-  // Auto-expand all urgent projects when turning on
-  if(S.showUrgentOnly){
-    const today=new Date().toISOString().split('T')[0];
-    S.projects.forEach(p=>{
-      const pts=S.tasks.filter(t=>t.code===p.code&&!t.done);
-      if(pts.some(t=>t.date<today||t.priority==='high'))S.expandedProjs.add(p.code);
-    });
-    S.expandedProjs.add('__priv__');
-  }
-  renderView();
 }
 
 function renderList(){
   document.getElementById('nav-label').textContent='';
   const el=document.getElementById('main-view');
   const today=new Date().toISOString().split('T')[0];
-  const allPending=S.tasks.filter(t=>!t.done);
-  const urgentCount=allPending.filter(t=>t.date<today||t.priority==='high').length;
+  const wt=S.tasks.filter(t=>t.type==='work');
+  const pt=S.tasks.filter(t=>t.type==='private');
 
-  // Filters
-  const ftasks=t=>(!S.filterType||t.taskType===S.filterType);
-  const furgent=t=>(!S.showUrgentOnly||(t.date<today||t.priority==='high'));
+  if(!wt.length&&!pt.length){el.innerHTML=`<div style="padding:20px"><div class="empty"><div class="empty-ico">🍊</div>目前無任務。</div></div>`;return;}
 
-  // Auto-expand urgent on first render
-  if(!S._autoExpandDone){
-    S._autoExpandDone=true;
-    S.projects.forEach(p=>{
-      const pts=S.tasks.filter(t=>t.code===p.code&&!t.done);
-      if(pts.some(t=>t.date<today||t.priority==='high'))S.expandedProjs.add(p.code);
-    });
-  }
+  S.projects.forEach(p=>{
+    const pts=wt.filter(t=>t.code===p.code);
+    if(pts.some(t=>!t.done&&(t.date<today||t.priority==='high')))S.expandedProjs.add(p.code);
+  });
+  
+  let html='<div class="center-wrap">';
+  if(wt.length){
+    const projWithDate=S.projects.map(p=>{
+      const pts=wt.filter(t=>t.code===p.code&&!t.done);
+      const allPts=wt.filter(t=>t.code===p.code);
+      if(!allPts.length)return null;
+      return{...p,tasks:allPts,pendingTasks:pts,minDate:pts.length?pts.map(t=>t.date).sort()[0]:'9999'};
+    }).filter(Boolean).sort((a,b)=>a.minDate>b.minDate?1:-1);
 
-  const sortBtnStyle=(m)=>`padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1.5px solid var(--border2);background:${S.sortMode===m?'var(--ora)':'var(--white)'};color:${S.sortMode===m?'#fff':'var(--text2)'}`;
-  const filterBar=`<div style="margin-bottom:14px">
-    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-      <button onclick="setSortMode('proj')" style="${sortBtnStyle('proj')}">📁 依計畫</button>
-      <button onclick="setSortMode('date')" style="${sortBtnStyle('date')}">📅 依日期</button>
-      <button onclick="setSortMode('type')" style="${sortBtnStyle('type')}">📌 依類型</button>
-      <div style="flex:1"></div>
-      <button onclick="toggleUrgent()" style="display:flex;align-items:center;gap:5px;background:${S.showUrgentOnly?'var(--red)':'var(--red-bg)'};color:${S.showUrgentOnly?'#fff':'var(--red)'};border:1.5px solid var(--red-mid);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
-        🚨 緊急${urgentCount?' ('+urgentCount+')':''}
-      </button>
-    </div>
-    <select id="filter-type" onchange="S.filterType=this.value||null;renderView()" style="font-size:12px;border:1px solid var(--border2);border-radius:20px;padding:5px 12px;background:var(--white);color:var(--text2);font-family:inherit;outline:none;cursor:pointer">
-      <option value="">📌 全部類型</option>
-    </select>
-  </div>`;
+    const known=S.projects.map(p=>p.code);
+    const unk=wt.filter(t=>!known.includes(t.code));
+    if(unk.length)projWithDate.push({code:'???',name:'未知代碼',tasks:unk,pendingTasks:unk.filter(t=>!t.done),minDate:'9999'});
 
-  // Archive notice
-  const archiveable=S.tasks.filter(t=>{
-    if(!t.done||!t.doneDate)return false;
-    const c=new Date();c.setDate(c.getDate()-7);
-    return t.doneDate<=c.toISOString().split('T')[0];
-  }).length;
-  const doneTotal=S.tasks.filter(t=>t.done).length;
-
-  const wt=S.tasks.filter(t=>t.type==='work'&&ftasks(t)&&furgent(t)&&!t.archived);
-  const pt=S.tasks.filter(t=>t.type==='private'&&furgent(t)&&!t.archived);
-
-  if(!S.tasks.length){
-    el.innerHTML=filterBar+`<div class="empty"><div class="empty-ico">🍊</div>還沒有任務，點上方「新增任務」開始吧！</div>`;
-    fillCodeSel();return;
-  }
-
-  let html=filterBar;
-  if(doneTotal>0){
-    html+=`<div style="font-size:11px;color:var(--text3);margin-bottom:12px">
-      已完成 ${doneTotal} 件
-      ${archiveable?`<span style="color:var(--amber)"> · ${archiveable} 件可封存</span>`:''}
-      　<button onclick="openArchiveModal()" style="color:var(--blue);background:none;border:1px solid var(--blue-border,#BFDBFE);border-radius:10px;cursor:pointer;font-size:11px;font-family:inherit;padding:1px 8px">查看封存區 📦</button>
-    </div>`;
-  }
-
-  // ── 依計畫 ──
-  if(S.sortMode==='proj'){
-    if(wt.length){
-      const projWithDate=S.projects.map(p=>{
-        const all=wt.filter(t=>t.code===p.code);if(!all.length)return null;
-        const pending=all.filter(t=>!t.done);
-        const minDate=pending.length?pending.map(t=>t.date).sort()[0]:'9999';
-        return{...p,tasks:all,pendingTasks:pending,minDate};
-      }).filter(Boolean).sort((a,b)=>a.minDate>b.minDate?1:-1);
-      const known=S.projects.map(p=>p.code);
-      const unk=wt.filter(t=>!known.includes(t.code));
-      if(unk.length)projWithDate.push({code:'???',name:'未知代碼',tasks:unk,pendingTasks:unk.filter(t=>!t.done),minDate:'9999'});
-      html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務</div>`;
+    if(projWithDate.length){
+      html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">🏢 公事任務</div>`;
       projWithDate.forEach(p=>{
-        const c=cHex(p.code==='0000X'||p.code==='???'?null:p.code);
-        const cb=cBg(p.code==='0000X'||p.code==='???'?null:p.code);
-        const cm=cMid(p.code==='0000X'||p.code==='???'?null:p.code);
+        const ci=getColor(p.code); const c=COLORS[ci]||'#888'; const cb=COLOR_BG[ci]||'#f5f5f5'; const cm=COLOR_MID[ci]||'#ddd';
         const isOpen=S.expandedProjs.has(p.code);
         const urgentCnt=p.pendingTasks.filter(t=>t.priority==='high'||t.date<today).length;
-        const nextDate=p.pendingTasks.length?p.pendingTasks.map(t=>t.date).sort()[0]:null;
         html+=`<div class="proj-block" style="--c:${c};--cb:${cb};--cm:${cm}">
           <div class="proj-header" onclick="toggleProj('${p.code}')">
-            <div class="proj-color-dot"></div>
-            <span class="proj-code-badge">${p.code}</span>
-            <span class="proj-name-text">${p.name}</span>
-            <div class="proj-stats">
-              ${urgentCnt?`<span class="stat-pill stat-urgent">⚠ ${urgentCnt}</span>`:''}
-              <span class="stat-pill stat-count">${p.pendingTasks.length} 件</span>
-              ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
-            </div>
-            <button onclick="event.stopPropagation();archiveProject('${p.code}')" title="封存此案子所有任務" style="font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:8px;padding:2px 8px;cursor:pointer;font-family:inherit" class="proj-archive-btn">📦</button>
-            <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-${p.code}">▶</span>
+            <div class="proj-color-dot"></div><span class="proj-code-badge">${p.code}</span><span class="proj-name-text">${p.name}</span>
+            <div class="proj-stats">${urgentCnt?`<span class="stat-pill stat-urgent">⚠ ${urgentCnt}</span>`:''}<span class="stat-pill stat-count">${p.pendingTasks.length}</span></div>
+            <span class="proj-arrow ${isOpen?'open':''}">▶</span>
           </div>
-          <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-${p.code}">
+          <div class="proj-tasks ${isOpen?'open':''}">
             ${p.tasks.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,c)).join('')}
           </div>
         </div>`;
@@ -1247,166 +917,50 @@ function renderList(){
     }
   }
 
-  // ── 依日期 ──
-  else if(S.sortMode==='date'){
-    if(wt.length){
-      html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務（依日期）</div>`;
-      const sorted=wt.sort((a,b)=>a.done===b.done?(a.date>b.date?1:-1):a.done?1:-1);
-      sorted.forEach(t=>{
-        const c=cHex(t.code);
-        html+=taskCardHTML(t,today,c);
-      });
-    }
-  }
-
-  // ── 依類型 ──
-  else if(S.sortMode==='type'){
-    if(wt.length){
-      html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務（依類型）</div>`;
-      // Group by taskType
-      const typeGroups=[];
-      S.taskTypes.forEach(tt=>{
-        const tts=wt.filter(t=>t.taskType===tt.id);
-        if(tts.length)typeGroups.push({...tt,tasks:tts});
-      });
-      // Untyped
-      const untyped=wt.filter(t=>!t.taskType);
-      if(untyped.length)typeGroups.push({id:'_none',icon:'⬜',name:'未分類',tasks:untyped});
-
-      typeGroups.forEach(grp=>{
-        const isOpen=S.expandedProjs.has('type_'+grp.id);
-        const pending=grp.tasks.filter(t=>!t.done);
-        const urgentCnt=pending.filter(t=>t.priority==='high'||t.date<today).length;
-        const nextDate=pending.length?pending.map(t=>t.date).sort()[0]:null;
-        html+=`<div class="proj-block" style="--c:#78909C;--cb:#ECEFF1;--cm:#CFD8DC">
-          <div class="proj-header" onclick="toggleProj('type_${grp.id}')">
-            <span style="font-size:16px">${grp.icon}</span>
-            <span class="proj-name-text" style="font-weight:600">${grp.name}</span>
-            <div class="proj-stats">
-              ${urgentCnt?`<span class="stat-pill stat-urgent">⚠ ${urgentCnt}</span>`:''}
-              <span class="stat-pill stat-count">${pending.length} 件</span>
-              ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
-            </div>
-            <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-type_${grp.id}">▶</span>
-          </div>
-          <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-type_${grp.id}">
-            ${grp.tasks.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>{
-              const c=cHex(t.code);
-              return taskCardHTML(t,today,c);
-            }).join('')}
-          </div>
-        </div>`;
-      });
-    }
-  }
-
-  // ── 私人行程（固定在下方）──
-  const ptFiltered=pt;
-  if(ptFiltered.length){
+  if(pt.length){
     const isOpen=S.expandedProjs.has('__priv__');
-    const pending=ptFiltered.filter(t=>!t.done);
-    const urgentCnt=pending.filter(t=>t.priority==='high'||t.date<today).length;
-    const nextDate=pending.length?pending.map(t=>t.date).sort()[0]:null;
-    html+=`<div style="margin-top:14px;font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏠 私人行程</div>
-    <div class="proj-block" style="--c:#607D8B;--cb:#ECEFF1;--cm:#CFD8DC">
-      <div class="proj-header" onclick="toggleProj('__priv__')">
-        <div class="proj-color-dot"></div>
-        <span class="proj-code-badge">私人</span>
-        <span class="proj-name-text">個人行程</span>
-        <div class="proj-stats">
-          ${urgentCnt?`<span class="stat-pill stat-urgent">⚠ ${urgentCnt}</span>`:''}
-          <span class="stat-pill stat-count">${pending.length} 件</span>
-          ${nextDate?`<span class="stat-date">${nextDate}</span>`:''}
-        </div>
-        <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-__priv__">▶</span>
-      </div>
-      <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-__priv__">
-        ${ptFiltered.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,privHex(t.id))).join('')}
-      </div>
+    const pendingPt=pt.filter(t=>!t.done);
+    html+=`<div style="margin-top:14px;font-size:12px;font-weight:600;color:var(--text3);margin-bottom:10px">🏠 私人行程</div>
+    <div class="proj-block" style="--c:#FB8C00;--cb:#FFF3E0;--cm:#FFE0B2">
+      <div class="proj-header" onclick="toggleProj('__priv__')"><div class="proj-color-dot"></div><span class="proj-code-badge">私人</span><span class="proj-name-text">個人行程</span>
+      <div class="proj-stats"><span class="stat-pill stat-count">${pendingPt.length}</span></div><span class="proj-arrow ${isOpen?'open':''}">▶</span></div>
+      <div class="proj-tasks ${isOpen?'open':''}">${pt.sort((a,b)=>a.done===b.done?a.date>b.date?1:-1:a.done?1:-1).map(t=>taskCardHTML(t,today,'#FB8C00')).join('')}</div>
     </div>`;
   }
-
-  el.innerHTML=html;
-  fillCodeSel();
+  html+='</div>';el.innerHTML=html;
 }
 
-function toggleProj(code){
-  if(S.expandedProjs.has(code))S.expandedProjs.delete(code);
-  else S.expandedProjs.add(code);
-  const isOpen=S.expandedProjs.has(code);
-  const tasksEl=document.getElementById('proj-tasks-'+code);
-  const arrowEl=document.getElementById('proj-arrow-'+code);
-  if(tasksEl&&arrowEl){
-    tasksEl.className='proj-tasks'+(isOpen?' open':'');
-    arrowEl.className='proj-arrow'+(isOpen?' open':'');
-  } else {
-    renderView();
-  }
-}
+function toggleProj(code){if(S.expandedProjs.has(code))S.expandedProjs.delete(code);else S.expandedProjs.add(code);renderView();}
 
 function taskCardHTML(t,today,color){
   const overdue=t.date<today&&!t.done;
   const pc={high:'ph',medium:'pm',low:'pl'}[t.priority]||'pm';
-  const pl={high:'緊急',medium:'一般',low:'低'}[t.priority]||'一般';
-  const isExpanded=S.expandedCards.has(t.id);
-  const isEditing=S.editingCard===t.id;
+  const isExpanded=S.expandedCards.has(t.id); const isEditing=S.editingCard===t.id;
   const codeOpts=S.projects.map(p=>`<option value="${p.code}" ${p.code===t.code?'selected':''}>${p.code} — ${p.name}</option>`).join('');
-  const dateDisplay=t.endDate&&t.endDate!==t.date?`${t.date} — ${t.endDate}`:t.date+(t.time?' '+t.time:'')+(t.timeEnd?' — '+t.timeEnd:'');
-  return`<div class="task-card ${t.type==='private'?'priv':''} ${t.done?'done-card':''} ${overdue?'overdue-card':''}" id="card-${t.id}" style="--c:${color}">
+  return`<div class="task-card ${t.type==='private'?'priv':''} ${t.done?'done-card':''} ${overdue?'overdue-card':''}" style="--c:${color}">
     <div class="chk ${t.done?'on '+(t.type==='private'?'gn':''):''}" onclick="toggleDone(${t.id})">${t.done?'✓':''}</div>
     <div class="task-body" onclick="toggleCard(${t.id})">
-      <div class="task-title">${overdue?'<span style="color:var(--red);font-size:10px">逾期 </span>':''}${t.title}${t.endDate&&t.endDate!==t.date?` <span style="font-size:10px;color:var(--text3);font-weight:400">(跨日)</span>`:''}</div>
-      <div class="task-meta">
-        <span class="task-date">${dateDisplay}</span>
-        <span class="prio ${pc}">${pl}</span>
-        ${t.code?`<span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">${t.code}</span>`:''}
-        ${(()=>{const tt=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;return tt?`<span style="font-size:10px;background:var(--border);color:var(--text2);padding:1px 6px;border-radius:6px">${tt.icon} ${tt.name}</span>`:''})()}
-        ${t.calEventId?`<span class="synced">✓ 已同步</span>`:''}
+      <div class="task-title">${overdue?'<span style="color:var(--red);font-size:10px">逾期 </span>':''}${t.title} ${t.endDate&&t.endDate!==t.date?`<span style="font-size:10px;color:var(--text3)">(跨日)</span>`:''}</div>
+      <div class="task-meta"><span class="task-date">${t.date}</span><span class="prio ${pc}">${t.priority}</span>
+        ${t.isTravel?`<span class="travel-badge">🧳 出差</span>`:''}
+        ${t.calEventId?`<span class="synced">✓</span>`:''}
       </div>
     </div>
-    <div class="task-acts">
-      <button class="t-btn" onclick="startEdit(${t.id})" title="編輯">✏️</button>
-      <button class="t-btn" onclick="archiveTask(${t.id})" title="封存（不做了但留記錄）">📦</button>
-      <button class="t-btn del" onclick="delTask(${t.id})" title="刪除">✕</button>
-    </div>
+    <div class="task-acts"><button class="t-btn" onclick="startEdit(${t.id})">✏️</button><button class="t-btn del" onclick="delTask(${t.id})">✕</button></div>
   </div>
-  <div class="task-detail ${isExpanded||isEditing?'open':''}" id="detail-${t.id}">
+  <div class="task-detail ${isExpanded||isEditing?'open':''}">
     ${isEditing?`
-    <div>
-      <div class="edit-row"><div class="edit-field" style="grid-column:1/-1"><label>任務名稱</label><input type="text" id="e-title-${t.id}" value="${t.title.replace(/"/g,'&quot;')}"></div></div>
-      <div class="edit-row">
-        ${t.type==='work'?`<div class="edit-field"><label>計畫代碼</label><select id="e-code-${t.id}">${codeOpts}</select></div>`:'<div></div>'}
-        <div class="edit-field"><label>優先級</label><select id="e-prio-${t.id}">
-          <option value="high" ${t.priority==='high'?'selected':''}>🔴 緊急</option>
-          <option value="medium" ${t.priority==='medium'?'selected':''}>🟡 一般</option>
-          <option value="low" ${t.priority==='low'?'selected':''}>🟢 低</option>
-        </select></div>
-      <div class="edit-field"><label>任務類型</label><select id="e-type-${t.id}">
-        <option value="">－ 選填 －</option>
-        ${S.taskTypes.map(x=>`<option value="${x.id}" ${t.taskType===x.id?'selected':''}>${x.icon} ${x.name}</option>`).join('')}
-      </select></div>
-      </div>
-      <div class="edit-row">
-        <div class="edit-field"><label>開始日期</label><input type="date" id="e-date-${t.id}" value="${t.date}"></div>
-        <div class="edit-field"><label>結束日期（跨日選填）</label><input type="date" id="e-edate-${t.id}" value="${t.endDate||''}"></div>
-      </div>
-      <div class="edit-row">
-        <div class="edit-field"><label>開始時間</label><input type="time" id="e-start-${t.id}" value="${t.time||''}"></div>
-        <div class="edit-field"><label>結束時間</label><input type="time" id="e-end-${t.id}" value="${t.timeEnd||''}"></div>
-      </div>
-      <div class="edit-field" style="margin-bottom:8px"><label>地點（選填）</label><input type="text" id="e-loc-${t.id}" value="${t.loc||''}"></div>
-      <div class="edit-field" style="margin-bottom:10px"><label>備註</label><textarea class="detail-note" id="e-note-${t.id}">${t.note||''}</textarea></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
-        <button class="btn btn-soft" onclick="cancelEdit()" style="font-size:12px;padding:6px 12px">取消</button>
-        <button class="btn btn-ora" onclick="saveEdit(${t.id})" style="font-size:12px;padding:6px 12px">儲存</button>
-      </div>
-    </div>`:`
-    ${t.rawInfo?`<div class="detail-label">原始資訊</div><div class="detail-content" style="font-size:11px;font-family:'JetBrains Mono',monospace">${t.rawInfo}</div>`:''}
-    ${t.note&&!t.rawInfo?`<div class="detail-label">說明</div><div class="detail-content">${t.note}</div>`:''}
-    <div class="detail-label">備註</div>
-    <textarea class="detail-note" id="note-${t.id}" placeholder="新增備註…" onblur="saveNote(${t.id},this.value)">${t.note&&t.rawInfo?t.note:''}</textarea>
-    ${t.calEventId?`<div style="font-size:11px;color:var(--green);margin-top:6px">✓ 已同步至 Google Calendar</div>`:''}
-    `}
+    <div class="edit-form open">
+      <div class="edit-row"><div class="edit-field" style="grid-column:1/-1"><label>名稱</label><input type="text" id="e-title-${t.id}" value="${t.title}"></div></div>
+      <div class="edit-row">${t.type==='work'?`<div class="edit-field"><label>代碼</label><select id="e-code-${t.id}">${codeOpts}</select></div>`:'<div></div>'}
+      <div class="edit-field"><label>優先級</label><select id="e-prio-${t.id}"><option value="high" ${t.priority==='high'?'selected':''}>高</option><option value="medium" ${t.priority==='medium'?'selected':''}>中</option><option value="low" ${t.priority==='low'?'selected':''}>低</option></select></div></div>
+      <div class="edit-row"><div class="edit-field"><label>開始日期</label><input type="date" id="e-date-${t.id}" value="${t.date}"></div><div class="edit-field"><label>結束日期</label><input type="date" id="e-edate-${t.id}" value="${t.endDate||''}"></div></div>
+      <div class="edit-row"><div class="edit-field"><label>是否出差</label><label class="check-pill"><input type="checkbox" id="e-travel-${t.id}" ${t.isTravel?'checked':''}> <span>出差</span></label></div></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn btn-soft" onclick="cancelEdit()">取消</button><button class="btn btn-ora" onclick="saveEdit(${t.id})">儲存</button></div>
+    </div>`:
+    isExpanded?`
+    ${t.note?`<div class="detail-section"><div class="detail-label">說明</div><div class="detail-content">${t.note}</div></div>`:''}
+    <div class="detail-section"><div class="detail-label">備註</div><textarea class="detail-note" onblur="saveNote(${t.id}, this.value)">${t.note||''}</textarea></div>`:''}
   </div>`;
 }
 
@@ -1415,1144 +969,116 @@ function startEdit(id){S.editingCard=id;S.expandedCards.add(id);renderView();}
 function cancelEdit(){S.editingCard=null;renderView();}
 async function saveEdit(id){
   const t=S.tasks.find(t=>t.id===id);if(!t)return;
-  t.title=document.getElementById(`e-title-${id}`).value.trim()||t.title;
+  t.title=document.getElementById(`e-title-${id}`).value||t.title;
   t.date=document.getElementById(`e-date-${id}`).value||t.date;
   t.endDate=document.getElementById(`e-edate-${id}`).value||null;
-  t.time=document.getElementById(`e-start-${id}`).value||null;
-  t.timeEnd=document.getElementById(`e-end-${id}`).value||null;
   t.priority=document.getElementById(`e-prio-${id}`).value;
-  t.taskType=document.getElementById(`e-type-${id}`)?.value||null;
-  t.note=document.getElementById(`e-note-${id}`).value;
-  t.loc=document.getElementById(`e-loc-${id}`)?.value||'';
+  t.isTravel=document.getElementById(`e-travel-${id}`)?.checked||false;
   if(t.type==='work')t.code=document.getElementById(`e-code-${id}`).value;
-  S.editingCard=null;await save();renderView();buildSuggestion();toast('✅ 已儲存','ok');
+  S.editingCard=null;saveToSheet();renderView();toast('✅ 儲存成功','ok');
 }
-async function saveNote(id,val){const t=S.tasks.find(t=>t.id===id);if(t&&t.note!==val){t.note=val;await save();}}
-async function archiveTask(id){
-  const t=S.tasks.find(t=>t.id===id);
-  if(!t)return;
-  t.archived=true;
-  t.archivedDate=new Date().toISOString().split('T')[0];
-  if(!t.doneDate)t.doneDate=t.archivedDate;
-  await save();renderView();buildSuggestion();
-  toast('📦 已封存','ok');
-}
-
-async function archiveProject(code){
-  const tasks=S.tasks.filter(t=>t.code===code&&!t.archived);
-  if(!tasks.length){toast('此案子沒有待封存的任務','info');return;}
-  if(!confirm(`確定要封存「${code}」的所有 ${tasks.length} 筆任務嗎？`))return;
-  const today=new Date().toISOString().split('T')[0];
-  tasks.forEach(t=>{
-    t.archived=true;
-    t.archivedDate=today;
-    if(!t.doneDate)t.doneDate=today;
-  });
-  await save();renderView();buildSuggestion();
-  toast(`📦 已封存 ${tasks.length} 筆任務`,'ok');
-}
-
-async function toggleDone(id){
-  const t=S.tasks.find(t=>t.id===id);
-  if(t){
-    t.done=!t.done;
-    if(t.done){
-      t.doneDate=new Date().toISOString().split('T')[0];
-    } else {
-      t.doneDate=null;
-    }
-    await save();renderView();buildSuggestion();
-  }
-}
+function saveNote(id,val){const t=S.tasks.find(t=>t.id===id);if(t){t.note=val;saveToSheet();}}
+function toggleDone(id){const t=S.tasks.find(t=>t.id===id);if(t){t.done=!t.done;saveToSheet();renderView();buildSuggestion();}}
 async function delTask(id){
-  if(!confirm('確定要刪除這個任務嗎？'))return;
+  if(!confirm('確定刪除？'))return;
   const t=S.tasks.find(t=>t.id===id);
   if(t&&t.calEventId){await deleteCal(t.calEventId);}
-  S.tasks=S.tasks.filter(t=>t.id!==id);
-  S.expandedCards.delete(id);
-  await save();renderView();buildSuggestion();
-  toast('✅ 已刪除','ok');
+  S.tasks=S.tasks.filter(t=>t.id!==id); S.expandedCards.delete(id); saveToSheet();renderView();
 }
 
-// ── WEEK ──
 function renderWeek(){
-  const today=new Date();
-  const monday=new Date(today);
-  monday.setDate(today.getDate()-((today.getDay()+6)%7)+S.weekOffset*7);
-  const days=[];
-  for(let i=0;i<7;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);days.push(d);}
-  const todayStr=fmtDate(new Date());
-  const endD=new Date(monday);endD.setDate(monday.getDate()+6);
-  document.getElementById('nav-label').textContent=`${monday.getMonth()+1}/${monday.getDate()} — ${endD.getMonth()+1}/${endD.getDate()}`;
-
-  const dayNames=['一','二','三','四','五','六','日'];
-  const weekDates=days.map(d=>fmtDate(d));
-  const HOURS=['09','10','11','12','13','14','15','16','17','18'];
-  const CELL_H=52;
-
-  // Separate spanning vs single-day tasks
-  const spanTasks=S.tasks.filter(t=>!t.archived&&t.endDate&&t.endDate!==t.date&&getTaskDates(t).some(d=>weekDates.includes(d)));
-  const singleTasks=S.tasks.filter(t=>!t.archived&&weekDates.includes(t.date)&&(!t.endDate||t.endDate===t.date));
-
+  const today=new Date();const monday=new Date(today);monday.setDate(today.getDate()-((today.getDay()+6)%7)+S.weekOffset*7);
+  const days=[];for(let i=0;i<5;i++){const d=new Date(monday);d.setDate(monday.getDate()+i);days.push(d);}
+  document.getElementById('nav-label').textContent=`${monday.getMonth()+1}/${monday.getDate()}`;
   const el=document.getElementById('main-view');
-
-  // Build grid
-  let html=`<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;min-width:560px;table-layout:fixed">
-  <colgroup><col style="width:44px">${days.map(()=>'<col>').join('')}</colgroup>
-
-  <!-- Day headers -->
-  <tr>
-    <td></td>
+  el.innerHTML=`<div class="center-wrap"><div class="week-wrap"><div class="week-grid">
+    <div class="time-col">${['09','10','11','12','13','14','15','16','17'].map(h=>`<div class="time-slot">${h}:00</div>`).join('')}</div>
     ${days.map(d=>{
       const ds=fmtDate(d);
-      const isToday=ds===todayStr;
-      return`<td style="text-align:center;padding:5px 2px;font-size:11px;font-weight:500;color:${isToday?'var(--ora2)':'var(--text2)'};background:${isToday?'var(--ora-bg)':'var(--bg)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-bottom:none;border-radius:8px 8px 0 0">${dayNames[(d.getDay()+6)%7]} ${d.getMonth()+1}/${d.getDate()}</td>`;
+      const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(ds)).sort((a,b)=>a.done===b.done?0:a.done?1:-1);
+      const hasTravel=dayTasks.some(t=>t.isTravel);
+      return`<div class="week-day-col${ds===fmtDate(new Date())?' today-col':''}${hasTravel?' travel-day':''}">
+        <div class="week-day-hdr">${d.getMonth()+1}/${d.getDate()}${ds===fmtDate(new Date())?'<span class="today-badge">●</span>':''}</div>
+        <div class="week-events">${dayTasks.map(t=>{
+            const ci=t.type==='private'?-1:getColor(t.code||'0000X'); const c=t.type==='private'?'#FB8C00':COLORS[ci]||'#888';
+            return`<div class="week-ev ${t.done?'done-ev':''}" style="border-left:2px solid ${c}">
+              <div class="week-ev-title">${t.title}</div></div>`;
+          }).join('')}
+        </div>
+      </div>`;
     }).join('')}
-  </tr>
-
-  <!-- Span tasks row -->
-  <tr>
-    <td style="font-size:9px;color:var(--text3);text-align:right;padding-right:3px;vertical-align:top;padding-top:3px"></td>
-    ${days.map(d=>{
-      const ds=fmtDate(d);
-      const isToday=ds===todayStr;
-      const daySpan=spanTasks.filter(t=>getTaskDates(t).includes(ds));
-      return`<td style="background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-bottom:none;padding:2px 0;min-height:${daySpan.length?28:8}px;vertical-align:top">
-        ${daySpan.map(t=>{
-          const isPriv=t.type==='private';
-          const c=isPriv?privHex(t.id):cHex(t.code);
-          const cm=isPriv?privMid(t.id):cMid(t.code);
-          const dates=getTaskDates(t);
-          const isFirst=ds===dates[0];
-          const isLast=ds===dates[dates.length-1];
-          const ml=isFirst?'2px':'0';
-          const mr=isLast?'2px':'0';
-          const br=isFirst&&isLast?'4px':isFirst?'4px 0 0 4px':isLast?'0 4px 4px 0':'0';
-          return`<div style="background:${cm};color:${c};font-size:9px;font-weight:600;padding:3px 5px;margin:1px ${mr} 1px ${ml};border-radius:${br};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:20px;border-left:${isFirst?`2px solid ${c}`:'none'}" title="${t.title}">
-            ${isFirst?t.title:'&nbsp;'}
-          </div>`;
-        }).join('')}
-      </td>`;
-    }).join('')}
-  </tr>
-
-  <!-- Time slots -->
-  ${HOURS.map(h=>`
-  <tr>
-    <td style="font-size:10px;color:var(--text3);text-align:right;padding-right:4px;padding-top:2px;vertical-align:top;font-family:'JetBrains Mono',monospace;height:${CELL_H}px">${h}:00</td>
-    ${days.map(d=>{
-      const ds=fmtDate(d);
-      const isToday=ds===todayStr;
-      // Show tasks that start in this hour
-      const slotTasks=singleTasks
-        .filter(t=>t.date===ds)
-        .filter(t=>{
-          if(!t.time)return h==='09'; // no time -> show in first slot
-          const taskH=t.time.split(':')[0];
-          return taskH===h;
-        })
-        .sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
-      return`<td style="height:${CELL_H}px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:1px solid var(--border);border-bottom:none;padding:2px 3px;vertical-align:top;overflow:visible">
-        ${slotTasks.map(t=>{
-          const isPriv=t.type==='private';
-          const c=isPriv?privHex(t.id):cHex(t.code);
-          const cb=isPriv?privBg(t.id):cBg(t.code);
-          const tt2=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;
-          const done=t.done?'opacity:.4;text-decoration:line-through':'';
-          return`<div style="background:${cb};border-left:2px solid ${c};border-radius:4px;padding:2px 4px;margin-bottom:2px;cursor:pointer;${done}" onclick="openCalLink(${JSON.stringify(t).replace(/"/g,'&quot;')})" title="${t.title}">
-            <div style="font-size:9px;color:${c};font-family:'JetBrains Mono',monospace">${t.time||'全天'}${t.timeEnd?' — '+t.timeEnd:''}</div>
-            <div style="font-size:10px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.title}</div>
-            ${tt2?`<div style="font-size:9px;color:var(--text3)">${tt2.icon} ${tt2.name}</div>`:''}
-            ${t.code?`<div style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace">${t.code}</div>`:''}
-          </div>`;
-        }).join('')}
-      </td>`;
-    }).join('')}
-  </tr>`).join('')}
-
-  <!-- Bottom border -->
-  <tr>
-    <td></td>
-    ${days.map(d=>{
-      const isToday=fmtDate(d)===todayStr;
-      return`<td style="height:4px;background:${isToday?'var(--ora-bg)':'var(--white)'};border:1.5px solid ${isToday?'var(--ora)':'var(--border)'};border-top:none;border-radius:0 0 8px 8px"></td>`;
-    }).join('')}
-  </tr>
-
-  </table></div>`;
-
-  el.innerHTML=html;
+  </div></div></div>`;
 }
 
 function renderCal(){
-  const mn=['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
-  const today=fmtDate(new Date());
-  const months=[];
-  for(let m=0;m<2;m++){
-    let yr=S.calYear,mo=S.calMonth+m;
-    if(mo>11){mo-=12;yr++;}
-    months.push({yr,mo});
-  }
-  document.getElementById('nav-label').textContent=`${months[0].yr}/${mn[months[0].mo]} — ${mn[months[1].mo]}`;
-
-  function buildMonthHTML(yr,mo){
-    const first=new Date(yr,mo,1);
-    const last=new Date(yr,mo+1,0);
-    let startDay=first.getDay()-1;if(startDay<0)startDay=6;
-    let cells=[];
-    for(let i=0;i<startDay;i++){const d=new Date(yr,mo,1-startDay+i);cells.push({date:fmtDate(d),other:true});}
-    for(let d=1;d<=last.getDate();d++)cells.push({date:`${yr}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,other:false});
-    while(cells.length%7!==0)cells.push({date:'',other:true});
-
-    // Pre-compute which tasks appear on which dates
-    const rows=[];
-    for(let r=0;r<cells.length/7;r++)rows.push(cells.slice(r*7,(r+1)*7));
-
-    return `
-    <div style="margin-bottom:24px">
-      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;text-align:center">${yr} ${mn[mo]}</div>
-      <div class="cal-week-hdr">${['一','二','三','四','五','六','日'].map(d=>`<div class="cal-wday">${d}</div>`).join('')}</div>
-      <div class="cal-grid">${cells.map(c=>{
-        if(!c.date)return`<div class="cal-cell other-month"></div>`;
-        const isToday=c.date===today;
-        // Sort: private first, then by start date
-        const dayTasks=S.tasks
-          .filter(t=>!t.archived&&getTaskDates(t).includes(c.date))
-          .sort((a,b)=>a.type==='private'?-1:b.type==='private'?1:0);
-
-        return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}">
-          <div class="cal-num">${parseInt(c.date.split('-')[2])}</div>
-          ${dayTasks.slice(0,3).map(t=>{
-            const isPriv=t.type==='private';
-            const c2=isPriv?privHex(t.id):cHex(t.code);
-            const cm2=isPriv?privMid(t.id):cMid(t.code);
-            const dates=getTaskDates(t);
-            const isSpan=dates.length>1;
-            const isFirst=c.date===dates[0];
-            const isLast=c.date===dates[dates.length-1];
-            const inMiddle=isSpan&&!isFirst&&!isLast;
-            // Span styling: continuous block
-            let spanStyle='';
-            let spanText='';
-            if(isSpan){
-              if(isFirst){
-                spanStyle='border-radius:5px 0 0 5px;margin-right:-4px;padding-right:2px';
-                spanText=t.title.substring(0,7)+(t.title.length>7?'…':'');
-              } else if(isLast){
-                spanStyle='border-radius:0 5px 5px 0;margin-left:-4px;padding-left:4px;opacity:.85';
-                spanText=' ';
-              } else {
-                spanStyle='border-radius:0;margin-left:-4px;margin-right:-4px;padding:0 2px;opacity:.85';
-                spanText=' ';
-              }
-            } else {
-              spanText=t.title.substring(0,7)+(t.title.length>7?'…':'');
-            }
-            return`<div class="cal-ev-dot ${t.done?'done-dot':''}"
-              style="background:${cm2};color:${c2};${spanStyle};min-height:14px;line-height:14px"
-              title="${t.title}">${spanText}
-            </div>`;
-          }).join('')}
-          ${dayTasks.length>3?`<div style="font-size:9px;color:var(--text3)">+${dayTasks.length-3}</div>`:''}
-        </div>`;
-      }).join('')}</div>
+  document.getElementById('nav-label').textContent=`${S.calYear} / ${S.calMonth+1}`;
+  const first=new Date(S.calYear,S.calMonth,1);const last=new Date(S.calYear,S.calMonth+1,0);
+  let startDay=first.getDay()-1;if(startDay<0)startDay=6; let cells=[];
+  for(let i=0;i<startDay;i++){const d=new Date(S.calYear,S.calMonth,1-startDay+i);cells.push({date:fmtDate(d),other:true});}
+  for(let d=1;d<=last.getDate();d++)cells.push({date:`${S.calYear}-${String(S.calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,other:false});
+  while(cells.length%7!==0)cells.push({date:'',other:true});
+  
+  document.getElementById('main-view').innerHTML=`<div class="center-wrap"><div class="cal-grid">${cells.map(c=>{
+    if(!c.date)return`<div class="cal-cell other-month"></div>`;
+    const dayTasks=S.tasks.filter(t=>getTaskDates(t).includes(c.date));
+    const isToday=c.date===fmtDate(new Date());
+    const hasTravel=dayTasks.some(t=>t.isTravel);
+    return`<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}${hasTravel?' travel-day':''}">
+      <div class="cal-num">${parseInt(c.date.split('-')[2])}${isToday?'<span class="today-dot">●</span>':''}</div>
+      ${dayTasks.slice(0,3).map(t=>{
+        const ci=t.type==='private'?-1:getColor(t.code||'0000X'); const c2=t.type==='private'?'#FB8C00':COLORS[ci]||'#888';
+        return`<div class="cal-ev-dot" style="color:${c2}">${t.title}</div>`;
+      }).join('')}
     </div>`;
-  }
-
-  const el=document.getElementById('main-view');
-  el.innerHTML=months.map(m=>buildMonthHTML(m.yr,m.mo)).join('');
+  }).join('')}</div></div>`;
 }
 
-function openCalLink(task){
-  if(task.calEventId){window.open(`https://calendar.google.com/calendar/r/eventedit/${task.calEventId}`,'_blank');return;}
-  const title=encodeURIComponent(task.type==='work'?`[${task.code}] ${task.title}`:task.title);
-  const date=task.date.replace(/-/g,'');
-  const st=task.time?date+'T'+task.time.replace(':','')+'00':date;
-  const et=task.timeEnd?date+'T'+task.timeEnd.replace(':','')+'00':task.time?date+'T'+addH(task.time).replace(':','')+'00':date;
-  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${st}/${et}`,'_blank');
-}
-
-// ── SUGGESTION ──
 function buildSuggestion(){
-  const el=document.getElementById('sug-txt');
-  const tags=document.getElementById('sug-tags');
-  const today=fmtDate(new Date());
-  const pending=S.tasks.filter(t=>!t.done&&!t.archived).sort((a,b)=>a.date>b.date?1:-1);
-
-  let parts=[];
-  let tagHtml='';
-
-  if(!pending.length&&!S.research.length){el.textContent='目前沒有待辦任務，好好休息 ☕';tags.innerHTML='';return;}
-
-  if(pending.length){
-    const overdue=pending.filter(t=>t.date<today);
-    const todayT=pending.filter(t=>t.date===today);
-    const thisWeek=pending.filter(t=>{const diff=(new Date(t.date)-new Date())/86400000;return diff>=0&&diff<=7;});
-    const urgent=pending.filter(t=>t.priority==='high');
-    if(overdue.length)parts.push(`<b style="color:var(--red)">逾期 ${overdue.length} 件</b>，請優先處理：${overdue.map(t=>t.title).slice(0,2).join('、')}`);
-    if(todayT.length)parts.push(`今天有 <b>${todayT.length} 件</b>任務：${todayT.map(t=>t.title).slice(0,2).join('、')}`);
-    else if(urgent.length&&!overdue.length)parts.push(`緊急事項：<b>${urgent[0].title}</b>（${urgent[0].date}）`);
-    if(!parts.length&&pending.length)parts.push(`下一個截止：<b>${pending[0].title}</b>（${pending[0].date}）`);
-    if(overdue.length)tagHtml+=`<span class="stag stag-u">逾期 ${overdue.length} 件</span>`;
-    if(todayT.length)tagHtml+=`<span class="stag stag-s">今天 ${todayT.length} 件</span>`;
-    if(thisWeek.length)tagHtml+=`<span class="stag stag-o">本週 ${thisWeek.length} 件</span>`;
-  }
-
-  // Research dormancy nudge
-  const activeRes=S.research.filter(r=>r.status!=='done');
-  if(activeRes.length){
-    const dormant=activeRes.filter(r=>{
-      const last=r.lastTouchedAt||new Date(r.createdAt).toISOString().split('T')[0];
-      const diff=(new Date(today)-new Date(last))/86400000;
-      return diff>30;
-    });
-    if(dormant.length){
-      parts.push(`🔬 <b style="color:var(--teal2)">${dormant.length} 個研究</b>擱置超過 30 天：${dormant.map(r=>r.title).slice(0,2).join('、')}`);
-      tagHtml+=`<span class="stag" style="background:var(--teal-bg);color:var(--teal2);border:1px solid var(--teal-mid)">研究擱置 ${dormant.length}</span>`;
-    } else if(!pending.length){
-      // No tasks but have research: nudge
-      const r=activeRes.sort((a,b)=>(a.lastTouchedAt||'')>(b.lastTouchedAt||'')?1:-1)[0];
-      if(r)parts.push(`🔬 今天可以花點時間推進：<b>${r.title}</b>`);
-    }
-  }
-
-  el.innerHTML=parts.join('<br>')||'今天沒有緊急事項，保持進度 ☕';
-  tags.innerHTML=tagHtml;
+  const el=document.getElementById('sug-txt');const tags=document.getElementById('sug-tags');
+  const pending=S.tasks.filter(t=>!t.done).sort((a,b)=>a.date>b.date?1:-1);
+  if(!pending.length){el.textContent='休息一下 ☕';tags.innerHTML='';return;}
+  el.innerHTML=`下一個截止：<b>${pending[0].title}</b>`;
 }
 
-// ── PROJ MANAGER ──
 function openProjModal(){S.editingProj=null;renderProjList();document.getElementById('proj-modal').classList.add('show');}
 function renderProjList(){
-  const sorted=[...S.projects].sort((a,b)=>{
-    if(a.code==='0000X')return 1;
-    if(b.code==='0000X')return -1;
-    const na=parseInt(a.code)||0,nb=parseInt(b.code)||0;
-    return na-nb;
-  });
-  document.getElementById('proj-list').innerHTML=sorted.map((p,idx)=>{
-    const c=p.code==='0000X'?'#aaa':cHex(p.code);
-    const isEditing=S.editingProj===p.code;
-    return`<div>
-      <div class="proj-item-row">
-        <span class="proj-code-s" style="background:${c}">${p.code}</span>
-        <span class="proj-nm">${p.name}</span>
-        ${p.code!=='0000X'?`<button class="proj-edit-btn" onclick="startProjEdit('${p.code}')">✏️ 編輯</button>
-        <button class="pdel" onclick="delProj('${p.code}')">✕</button>`:''}
-      </div>
-      ${isEditing?`<div class="proj-edit-row">
-        <input type="text" id="pe-code" value="${p.code}" maxlength="5" style="max-width:80px;font-family:'JetBrains Mono',monospace;text-transform:uppercase">
+  document.getElementById('proj-list').innerHTML=S.projects.map((p)=>{
+    const c=p.code==='0000X'?'#888':COLORS[getColor(p.code)]||'#888';
+    if(S.editingProj===p.code){
+      return`<div class="proj-edit-box">
+        <input type="text" id="pe-code" value="${p.code}" maxlength="5">
         <input type="text" id="pe-name" value="${p.name}">
-        <button class="btn btn-ora" onclick="saveProjEdit('${p.code}')" style="font-size:12px;padding:6px 12px">儲存</button>
-        <button class="btn btn-soft" onclick="cancelProjEdit()" style="font-size:12px;padding:6px 12px">取消</button>
-      </div>`:''}
+        <button class="pbtn" onclick="saveProjEdit('${p.code}')">✓ 儲存</button>
+        <button class="pbtn" onclick="S.editingProj=null;renderProjList()">✕</button>
+      </div>`;
+    }
+    return`<div class="proj-item">
+      <div class="proj-item-row"><span class="proj-code-s" style="background:${c}">${p.code}</span><span class="proj-nm">${p.name}</span>
+      ${p.code!=='0000X'?`<button class="pbtn" onclick="S.editingProj='${p.code}';renderProjList()">✏️</button><button class="pbtn pdel" onclick="delProj('${p.code}')">✕</button>`:''}</div>
     </div>`;
   }).join('');
 }
-function startProjEdit(code){S.editingProj=code;renderProjList();}
-function cancelProjEdit(){S.editingProj=null;renderProjList();}
+
 async function saveProjEdit(oldCode){
   const newCode=document.getElementById('pe-code').value.trim().toUpperCase();
   const newName=document.getElementById('pe-name').value.trim();
-  if(!newCode||!newName){toast('請填寫代碼和名稱','err');return;}
-  if(!/^\d{4}[A-Z]$/.test(newCode)){toast('格式：4數字+1大寫英文，例如 1234A','err');return;}
-  if(newCode!==oldCode&&S.projects.find(p=>p.code===newCode)){toast('此代碼已存在','err');return;}
-  const p=S.projects.find(p=>p.code===oldCode);if(!p)return;
-  p.code=newCode;p.name=newName;
-  if(newCode!==oldCode){S.tasks.forEach(t=>{if(t.code===oldCode)t.code=newCode;});if(colorMap[oldCode]!==undefined){colorMap[newCode]=colorMap[oldCode];delete colorMap[oldCode];}}
-  S.editingProj=null;saveLocal();await saveProjectsToFirebase();await saveTasksToFirebase();renderProjList();fillCodeSel();renderView();
-  toast('✅ 案子已更新','ok');
+  if(!newCode||!newName)return;
+  const p=S.projects.find(x=>x.code===oldCode);if(!p)return;
+  p.code=newCode; p.name=newName;
+  if(newCode!==oldCode){S.tasks.forEach(t=>{if(t.code===oldCode)t.code=newCode;});}
+  S.editingProj=null; saveToSheet(); renderProjList(); fillCodeSel(); renderView();
 }
-async function addProj(){
+
+function addProj(){
   const code=document.getElementById('new-code').value.trim().toUpperCase();
   const name=document.getElementById('new-name').value.trim();
-  if(!code||!name){toast('請填寫代碼和名稱','err');return;}
-  if(!/^\d{4}[A-Z]$/.test(code)){toast('格式：4數字+1大寫英文，例如 1234A','err');return;}
-  if(S.projects.find(p=>p.code===code)){toast('此代碼已存在','err');return;}
-  S.projects.push({code,name});getCI(code);saveLocal();await saveProjectsToFirebase();renderProjList();fillCodeSel();
-  document.getElementById('new-code').value='';document.getElementById('new-name').value='';
-  toast('✅ 案子已新增','ok');
+  if(!code||!name)return;
+  S.projects.push({code,name});saveToSheet();renderProjList();fillCodeSel();
 }
-async function delProj(code){
-  S.projects=S.projects.filter(p=>p.code!==code);
-  saveLocal();await saveProjectsToFirebase();renderProjList();fillCodeSel();
-}
-// ── ARCHIVE ──
-function getArchivedTasks(){
-  const cutoff=new Date();
-  cutoff.setDate(cutoff.getDate()-7);
-  const cutoffStr=cutoff.toISOString().split('T')[0];
-  return S.tasks.filter(t=>
-    t.archived || // 手動封存
-    (t.done&&t.doneDate&&t.doneDate<=cutoffStr) // 完成超過7天
-  );
-}
-
-// Archive state
-let arcGroup='proj', arcSortDesc=true, arcDateUnit='month';
-
-function setArchiveGroup(g){
-  arcGroup=g;
-  document.getElementById('arc-grp-proj').style.background=g==='proj'?'var(--ora)':'var(--white)';
-  document.getElementById('arc-grp-proj').style.color=g==='proj'?'#fff':'var(--text2)';
-  document.getElementById('arc-grp-date').style.background=g==='date'?'var(--ora)':'var(--white)';
-  document.getElementById('arc-grp-date').style.color=g==='date'?'#fff':'var(--text2)';
-  const unitWrap=document.getElementById('arc-date-unit-wrap');
-  if(unitWrap)unitWrap.style.display=g==='date'?'flex':'none';
-  renderArchiveList();
-}
-
-function setArchiveDateUnit(u){
-  arcDateUnit=u;
-  document.getElementById('arc-unit-month').style.background=u==='month'?'var(--ora)':'var(--white)';
-  document.getElementById('arc-unit-month').style.color=u==='month'?'#fff':'var(--text2)';
-  document.getElementById('arc-unit-year').style.background=u==='year'?'var(--ora)':'var(--white)';
-  document.getElementById('arc-unit-year').style.color=u==='year'?'#fff':'var(--text2)';
-  renderArchiveList();
-}
-
-function toggleArchiveSort(){
-  arcSortDesc=!arcSortDesc;
-  const btn=document.getElementById('arc-sort-dir');
-  if(btn)btn.textContent=arcSortDesc?'近→遠 ↓':'遠→近 ↑';
-  renderArchiveList();
-}
-
-function openArchiveModal(){
-  arcGroup='proj';arcSortDesc=true;arcDateUnit='month';
-  document.getElementById('archive-modal').classList.add('show');
-  renderArchiveList();
-}
-
-function taskRowHTML(t){
-  const c=t.type==='private'?'#607D8B':cHex(t.code);
-  const cb=t.type==='private'?'#ECEFF1':cBg(t.code);
-  const cm=t.type==='private'?'#CFD8DC':cMid(t.code);
-  const badge=t.archived&&!t.done?`<span style="font-size:10px;background:var(--amber-bg);color:var(--amber);padding:1px 5px;border-radius:4px;margin-left:4px">封存</span>`:'';
-  return`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:${cb};border-radius:8px;margin-bottom:4px;border-left:2px solid ${cm}">
-    <span style="font-size:11px;color:${c};font-family:'JetBrains Mono',monospace;flex-shrink:0">${t.date}</span>
-    <span style="font-size:12px;color:var(--text);flex:1;${t.done?'text-decoration:line-through;':''}opacity:.8">${t.title}${badge}</span>
-    ${t.code&&arcGroup!=='proj'?`<span style="font-size:10px;background:${c};color:#fff;padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;flex-shrink:0">${t.code}</span>`:''}
-    <button onclick="restoreTask(${t.id})" style="font-size:11px;color:var(--blue);background:var(--white);border:1px solid var(--border2);border-radius:6px;cursor:pointer;padding:3px 8px;font-family:inherit;white-space:nowrap;flex-shrink:0">↩ 還原</button>
-  </div>`;
-}
-
-function renderArchiveList(){
-  const archived=getArchivedTasks();
-  const el=document.getElementById('archive-list');
-  const countEl=document.getElementById('arc-count');
-  if(countEl)countEl.textContent=`共 ${archived.length} 筆封存`;
-
-  if(!archived.length){
-    el.innerHTML='<div class="empty" style="padding:24px 0"><div class="empty-ico">📦</div>目前沒有封存任務</div>';
-    return;
-  }
-
-  // Sort
-  const sorted=[...archived].sort((a,b)=>{
-    const diff=a.date>b.date?1:a.date<b.date?-1:0;
-    return arcSortDesc?-diff:diff;
-  });
-
-  let html='';
-
-  if(arcGroup==='proj'){
-    // Group by project code, private at bottom
-    const wt=sorted.filter(t=>t.type==='work');
-    const pt=sorted.filter(t=>t.type==='private');
-    const groups={};
-    wt.forEach(t=>{const k=t.code||'0000X';if(!groups[k])groups[k]=[];groups[k].push(t);});
-
-    S.projects.forEach(p=>{
-      if(!groups[p.code])return;
-      const c=cHex(p.code==='0000X'?null:p.code);
-      html+=`<div style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;background:${c};color:#fff;padding:2px 8px;border-radius:6px">${p.code}</span>
-          <span style="font-size:12px;color:var(--text2);font-weight:500">${p.name}</span>
-          <span style="font-size:11px;color:var(--text3)">${groups[p.code].length} 筆</span>
-        </div>
-        ${groups[p.code].map(t=>taskRowHTML(t)).join('')}
-      </div>`;
-    });
-    const known=S.projects.map(p=>p.code);
-    const unk=wt.filter(t=>!known.includes(t.code));
-    if(unk.length){
-      html+=`<div style="margin-bottom:14px">
-        <div style="margin-bottom:6px"><span style="font-size:11px;background:var(--red-bg);color:var(--red);padding:2px 8px;border-radius:6px">未知代碼</span></div>
-        ${unk.map(t=>taskRowHTML(t)).join('')}
-      </div>`;
-    }
-    if(pt.length){
-      html+=`<div style="margin-bottom:14px">
-        <div style="margin-bottom:6px"><span style="font-size:11px;background:#ECEFF1;color:#607D8B;padding:2px 8px;border-radius:6px;font-family:'JetBrains Mono',monospace">私人</span></div>
-        ${pt.map(t=>taskRowHTML(t)).join('')}
-      </div>`;
-    }
-
-  } else {
-    // Group by date (year or month)
-    const groups={};
-    sorted.forEach(t=>{
-      const key=arcDateUnit==='year'?t.date.substring(0,4):t.date.substring(0,7);
-      if(!groups[key])groups[key]=[];
-      groups[key].push(t);
-    });
-    const keys=Object.keys(groups).sort((a,b)=>arcSortDesc?b>a?1:-1:a>b?1:-1);
-    keys.forEach(key=>{
-      const label=arcDateUnit==='year'?`${key} 年`:`${key.replace('-','年')}月`;
-      html+=`<div style="margin-bottom:16px">
-        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:8px">
-          📅 ${label}
-          <span style="font-size:11px;color:var(--text3);font-weight:400">${groups[key].length} 筆</span>
-          <span style="flex:1;height:1px;background:var(--border);display:block"></span>
-        </div>
-        ${groups[key].map(t=>taskRowHTML(t)).join('')}
-      </div>`;
-    });
-  }
-
-  el.innerHTML=html;
-}
-
-async function restoreTask(id){
-  const t=S.tasks.find(t=>t.id===id);
-  if(t){
-    t.done=false;
-    t.doneDate=null;
-    t.archived=false;
-    t.archivedDate=null;
-    await save();renderArchiveList();renderView();buildSuggestion();
-    toast('✅ 已還原任務','ok');
-  }
-}
-
-async function clearAllArchive(){
-  if(!confirm('確定要永久刪除所有封存任務嗎？'))return;
-  const archived=getArchivedTasks();
-  for(const t of archived){
-    if(t.calEventId)await deleteCal(t.calEventId);
-  }
-  S.tasks=S.tasks.filter(t=>!getArchivedTasks().find(a=>a.id===t.id));
-  await save();renderArchiveList();renderView();buildSuggestion();
-  toast('✅ 封存已清除','ok');
-}
-
-// ── XUN SUMMARY ──
-function openXunModal(){
-  const now=new Date();
-  // Fill year selector
-  const ySel=document.getElementById('xun-year');
-  ySel.innerHTML='';
-  for(let y=now.getFullYear()-1;y<=now.getFullYear()+1;y++){
-    ySel.innerHTML+=`<option value="${y}" ${y===now.getFullYear()?'selected':''}>${y}年</option>`;
-  }
-  // Set current month and period
-  document.getElementById('xun-month').value=now.getMonth()+1;
-  const day=now.getDate();
-  document.getElementById('xun-period').value=day<=10?'upper':day<=20?'mid':'lower';
-  document.getElementById('xun-result').textContent='';
-  document.getElementById('xun-modal').classList.add('show');
-}
-
-function genXunSummary(){
-  const year=parseInt(document.getElementById('xun-year').value);
-  const month=parseInt(document.getElementById('xun-month').value);
-  const period=document.getElementById('xun-period').value;
-
-  const periodMap={upper:{label:'上旬',start:1,end:10},mid:{label:'中旬',start:11,end:20},lower:{label:'下旬',start:21,end:31}};
-  const p=periodMap[period];
-  const startDate=`${year}-${String(month).padStart(2,'0')}-${String(p.start).padStart(2,'0')}`;
-  const endDate=`${year}-${String(month).padStart(2,'0')}-${String(Math.min(p.end,new Date(year,month,0).getDate())).padStart(2,'0')}`;
-
-  // Get tasks in range (work only)
-  const inRange=S.tasks.filter(t=>{
-    if(t.type!=='work')return false;
-    const dates=getTaskDates(t);
-    return dates.some(d=>d>=startDate&&d<=endDate);
-  }).sort((a,b)=>a.date>b.date?1:-1);
-
-  if(!inRange.length){
-    document.getElementById('xun-result').textContent=`【${year}年${month}月${p.label}（${p.start}-${p.end}日）】
-
-本旬無工作項目`;
-    return;
-  }
-
-  let text=`【${year}年${month}月${p.label}（${p.start}-${Math.min(p.end,new Date(year,month,0).getDate())}日）】
-
-`;
-
-  // Group by project
-  const grouped={};
-  inRange.forEach(t=>{
-    const key=t.code||'0000X';
-    if(!grouped[key])grouped[key]=[];
-    grouped[key].push(t);
-  });
-
-  S.projects.forEach(p=>{
-    if(!grouped[p.code])return;
-    text+=p.code+'  '+p.name+'\n';
-    grouped[p.code].forEach(t=>{
-      const dateStr=t.date+(t.endDate&&t.endDate!==t.date?` ～ ${t.endDate}`:'');
-      const timeStr=t.time?(` ${t.time}${t.timeEnd?' - '+t.timeEnd:''}`): '';
-      const doneStr=t.done?'  ✓':'';
-      text+='  • '+dateStr+timeStr+'  '+t.title+doneStr+'\n';
-    });
-    text+='\n';
-  });
-
-  // Unknown codes
-  const known=S.projects.map(p=>p.code);
-  const unk=inRange.filter(t=>!known.includes(t.code));
-  if(unk.length){
-    text+='（未分類）\n';
-    unk.forEach(t=>{
-      text+='  • '+t.date+'  '+t.title+'\n';
-    });
-  }
-
-  document.getElementById('xun-result').textContent=text.trim();
-}
-
-function copyXun(){
-  const text=document.getElementById('xun-result').textContent;
-  if(!text){toast('請先產生摘要','err');return;}
-  navigator.clipboard.writeText(text).then(()=>toast('✅ 已複製到剪貼簿','ok')).catch(()=>toast('請手動複製','err'));
-}
-
-// ── NOTES ──
-function fillNoteCodeSel(){
-  const s=document.getElementById('n-code');
-  if(!s)return;
-  const cur=s.value;
-  s.innerHTML='<option value="">私人備忘</option>'+S.projects.map(p=>`<option value="${p.code}">${p.code} — ${p.name}</option>`).join('');
-  if(cur)s.value=cur;
-}
-
-function toggleNoteType(){
-  const t=document.getElementById('n-type').value;
-  document.getElementById('n-meeting-fields').style.display=t==='meeting'?'block':'none';
-  document.getElementById('n-free-fields').style.display=t!=='meeting'?'block':'none';
-}
-
-function openNewNote(){
-  S.editingNote=null;
-  document.getElementById('note-modal-title').textContent='新增筆記';
-  const today=new Date().toISOString().split('T')[0];
-  document.getElementById('n-date').value=today;
-  document.getElementById('n-code').value='';
-  document.getElementById('n-type').value='meeting';
-  document.getElementById('n-title').value='';
-  document.getElementById('n-attendees').value='';
-  document.getElementById('n-agenda').value='';
-  document.getElementById('n-discussion').value='';
-  document.getElementById('n-decisions').value='';
-  document.getElementById('n-actions').value='';
-  document.getElementById('n-content').value='';
-  toggleNoteType();
-  fillNoteCodeSel();
-  document.getElementById('note-modal').classList.add('show');
-}
-
-function openEditNote(id){
-  const note=S.notes.find(n=>n.id===id);
-  if(!note)return;
-  S.editingNote=id;
-  document.getElementById('note-modal-title').textContent='編輯筆記';
-  document.getElementById('n-date').value=note.date||'';
-  fillNoteCodeSel();
-  document.getElementById('n-code').value=note.code||'';
-  document.getElementById('n-type').value=note.type||'free';
-  document.getElementById('n-title').value=note.title||'';
-  if(note.type==='meeting'){
-    document.getElementById('n-attendees').value=note.attendees||'';
-    document.getElementById('n-agenda').value=note.agenda||'';
-    document.getElementById('n-discussion').value=note.discussion||'';
-    document.getElementById('n-decisions').value=note.decisions||'';
-    document.getElementById('n-actions').value=note.actions||'';
-  } else {
-    document.getElementById('n-content').value=note.content||'';
-  }
-  toggleNoteType();
-  document.getElementById('note-modal').classList.add('show');
-}
-
-async function saveNote(){
-  const title=document.getElementById('n-title').value.trim();
-  const date=document.getElementById('n-date').value;
-  const code=document.getElementById('n-code').value||null;
-  const type=document.getElementById('n-type').value;
-  if(!title){toast('請輸入標題','err');return;}
-  if(!date){toast('請選擇日期','err');return;}
-
-  const note={
-    id:S.editingNote||Date.now(),
-    title,date,code,type,
-    createdAt:S.editingNote?S.notes.find(n=>n.id===S.editingNote)?.createdAt||Date.now():Date.now(),
-    updatedAt:Date.now(),
-  };
-
-  if(type==='meeting'){
-    note.attendees=document.getElementById('n-attendees').value;
-    note.agenda=document.getElementById('n-agenda').value;
-    note.discussion=document.getElementById('n-discussion').value;
-    note.decisions=document.getElementById('n-decisions').value;
-    note.actions=document.getElementById('n-actions').value;
-    note.content=[
-      note.attendees?'【出席】'+note.attendees:'',
-      note.agenda?'【議題】'+note.agenda:'',
-      note.discussion?'【討論】'+note.discussion:'',
-      note.decisions?'【決議】'+note.decisions:'',
-      note.actions?'【待辦】'+note.actions:'',
-    ].filter(Boolean).join(' ');
-  } else {
-    note.content=document.getElementById('n-content').value;
-  }
-
-  if(S.editingNote){
-    const idx=S.notes.findIndex(n=>n.id===S.editingNote);
-    if(idx>=0)S.notes[idx]=note;
-  } else {
-    S.notes.push(note);
-  }
-
-  await saveNotes();
-  closeModal('note-modal');
-  renderView();
-  toast('✅ 筆記已儲存','ok');
-}
-
-async function saveNotes(){
-  if(!db)return;
-  try{
-    setSyncStatus('syncing','儲存中…');
-    const obj={};
-    S.notes.forEach(n=>{obj[n.id]=n;});
-    await db.ref('cyy321_todo_9x7k/notes').set(obj.length===0?null:obj);
-    setSyncStatus('ok','已同步 ✓');
-  }catch(e){console.error(e);setSyncStatus('err','同步失敗');}
-}
-
-async function deleteNote(id){
-  if(!confirm('確定要刪除這篇筆記嗎？'))return;
-  S.notes=S.notes.filter(n=>n.id!==id);
-  await saveNotes();
-  renderView();
-  toast('✅ 筆記已刪除','ok');
-}
-
-function renderNotes(){
-  document.getElementById('nav-label').textContent='';
-  const el=document.getElementById('main-view');
-  const today=new Date().toISOString().split('T')[0];
-
-  const typeLabel={meeting:'📅 會議紀錄',free:'📝 工作筆記',decision:'✅ 決議事項',info:'📌 重要資訊'};
-
-  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div style="font-size:13px;color:var(--text2)">共 ${S.notes.length} 篇筆記</div>
-    <button class="btn btn-ora" onclick="openNewNote()" style="padding:7px 16px">＋ 新增筆記</button>
-  </div>`;
-
-  if(!S.notes.length){
-    el.innerHTML=html+`<div class="empty"><div class="empty-ico">📝</div>還沒有筆記，點「新增筆記」開始記錄！</div>`;
-    return;
-  }
-
-  // Group by code
-  const groups={};
-  S.notes.forEach(n=>{
-    const key=n.code||'__priv__';
-    if(!groups[key])groups[key]=[];
-    groups[key].push(n);
-  });
-
-  // Work notes by project order
-  S.projects.forEach(p=>{
-    if(!groups[p.code])return;
-    const notes=groups[p.code].sort((a,b)=>b.date>a.date?1:-1);
-    const c=cHex(p.code==='0000X'?null:p.code);
-    const cb=cBg(p.code==='0000X'?null:p.code);
-    const cm=cMid(p.code==='0000X'?null:p.code);
-    const isOpen=S.expandedProjs.has('note_'+p.code);
-    html+=`<div class="proj-block" style="--c:${c};--cb:${cb};--cm:${cm};margin-bottom:10px">
-      <div class="proj-header" onclick="toggleProj('note_${p.code}')">
-        <div class="proj-color-dot"></div>
-        <span class="proj-code-badge">${p.code}</span>
-        <span class="proj-name-text">${p.name}</span>
-        <div class="proj-stats"><span class="stat-pill stat-count">${notes.length} 篇</span></div>
-        <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-note_${p.code}">▶</span>
-      </div>
-      <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-note_${p.code}">
-        ${notes.map(n=>noteCardHTML(n,typeLabel)).join('')}
-      </div>
-    </div>`;
-  });
-
-  // Private notes
-  if(groups['__priv__']){
-    const notes=groups['__priv__'].sort((a,b)=>b.date>a.date?1:-1);
-    const isOpen=S.expandedProjs.has('note___priv__');
-    html+=`<div class="proj-block" style="--c:#607D8B;--cb:#ECEFF1;--cm:#CFD8DC;margin-bottom:10px">
-      <div class="proj-header" onclick="toggleProj('note___priv__')">
-        <div class="proj-color-dot"></div>
-        <span class="proj-code-badge">私人</span>
-        <span class="proj-name-text">私人備忘</span>
-        <div class="proj-stats"><span class="stat-pill stat-count">${notes.length} 篇</span></div>
-        <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-note___priv__">▶</span>
-      </div>
-      <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-note___priv__">
-        ${notes.map(n=>noteCardHTML(n,typeLabel)).join('')}
-      </div>
-    </div>`;
-  }
-
-  el.innerHTML=html;
-}
-
-function noteCardHTML(n,typeLabel){
-  const preview=n.content?n.content.substring(0,80)+(n.content.length>80?'…':''):'（無內容）';
-  return`<div class="note-card" onclick="openEditNote(${n.id})">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
-      <div style="flex:1">
-        <div class="note-title">${n.title}</div>
-        <div class="note-meta">
-          <span class="note-date">${n.date}</span>
-          <span class="note-type">${typeLabel[n.type]||n.type}</span>
-        </div>
-        <div class="note-preview">${preview}</div>
-      </div>
-      <button onclick="event.stopPropagation();deleteNote(${n.id})" style="font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;opacity:0;transition:opacity .15s" class="note-del">✕</button>
-    </div>
-  </div>`;
-}
-
-// ── SEARCH ──
-function renderSearch(){
-  document.getElementById('nav-label').textContent='';
-  const el=document.getElementById('main-view');
-  el.innerHTML=`<div>
-    <input type="text" class="search-input" id="search-input"
-      placeholder="搜尋任務、筆記內容、計畫代碼…"
-      oninput="doSearch(this.value)"
-      autofocus>
-    <div id="search-results"></div>
-  </div>`;
-  // Show recent notes on empty
-  doSearch('');
-}
-
-function doSearch(q){
-  const el=document.getElementById('search-results');
-  if(!el)return;
-  const query=q.trim().toLowerCase();
-
-  if(!query){
-    el.innerHTML=`<div style="font-size:12px;color:var(--text3);text-align:center;padding:24px 0">輸入關鍵字搜尋任務和筆記</div>`;
-    return;
-  }
-
-  const results=[];
-
-  // Search tasks
-  S.tasks.forEach(t=>{
-    const haystack=[t.title,t.code,t.note,t.rawInfo].filter(Boolean).join(' ').toLowerCase();
-    if(haystack.includes(query)){
-      results.push({
-        type:'task',id:t.id,
-        title:t.title,
-        meta:`${t.type==='work'?t.code||'公事':'私人'} · ${t.date}`,
-        preview:t.note||t.rawInfo||'',
-        score:t.title.toLowerCase().includes(query)?2:1,
-      });
-    }
-  });
-
-  // Search notes
-  S.notes.forEach(n=>{
-    const haystack=[n.title,n.code,n.content,n.attendees,n.agenda,n.discussion,n.decisions,n.actions].filter(Boolean).join(' ').toLowerCase();
-    if(haystack.includes(query)){
-      const typeLabel={meeting:'📅 會議紀錄',free:'📝 工作筆記',decision:'✅ 決議事項',info:'📌 重要資訊'};
-      results.push({
-        type:'note',id:n.id,
-        title:n.title,
-        meta:`${n.code||'私人'} · ${n.date} · ${typeLabel[n.type]||''}`,
-        preview:n.content||'',
-        score:n.title.toLowerCase().includes(query)?2:1,
-      });
-    }
-  });
-
-  results.sort((a,b)=>b.score-a.score);
-
-  if(!results.length){
-    el.innerHTML=`<div style="font-size:13px;color:var(--text3);text-align:center;padding:32px 0">找不到「${q}」的相關結果</div>`;
-    return;
-  }
-
-  function highlight(text,q){
-    if(!text||!q)return text||'';
-    const safe=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    return text.replace(new RegExp('('+safe+')','gi'),'<span class="search-highlight">$1</span>');
-  }
-
-  el.innerHTML=`<div style="font-size:12px;color:var(--text3);margin-bottom:12px">找到 ${results.length} 筆結果</div>`+
-  results.map(r=>{
-    const preview=r.preview?highlight(r.preview.substring(0,100)+(r.preview.length>100?'…':''),query):'';
-    return`<div class="search-result" onclick="${r.type==='note'?`setView('notes');openEditNote(${r.id})`:`setView('list')`}">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
-        <span style="font-size:10px;padding:1px 6px;border-radius:4px;background:${r.type==='note'?'var(--ora-bg)':'var(--blue-bg,#EFF6FF)'};color:${r.type==='note'?'var(--ora2)':'#1E88E5'};font-weight:500">${r.type==='note'?'筆記':'任務'}</span>
-      </div>
-      <div class="search-result-title">${highlight(r.title,query)}</div>
-      <div class="search-result-meta">${r.meta}</div>
-      ${preview?`<div class="search-result-preview">${preview}</div>`:''}
-    </div>`;
-  }).join('');
-}
-
-// ── RESEARCH ──
-async function saveResearchToFirebase(){
-  if(!db)return;
-  try{
-    setSyncStatus('syncing','儲存中…');
-    const obj={};
-    S.research.forEach(r=>{obj[r.id]=r;});
-    await db.ref('cyy321_todo_9x7k/research').set(Object.keys(obj).length===0?null:obj);
-    setSyncStatus('ok','已同步 ✓');
-  }catch(e){console.error(e);setSyncStatus('err','同步失敗');}
-}
-
-function openNewResearch(){
-  S.editingResearch=null;
-  document.getElementById('res-modal-title').textContent='新增研究項目';
-  document.getElementById('r-title').value='';
-  document.getElementById('r-field').value='';
-  document.getElementById('r-status').value='idea';
-  document.getElementById('r-deadline').value='';
-  document.getElementById('r-nextstep').value='';
-  document.getElementById('r-spark').value='';
-  document.getElementById('r-papers').value='';
-  document.getElementById('res-modal').classList.add('show');
-}
-
-function openEditResearch(id){
-  const r=S.research.find(r=>r.id===id);
-  if(!r)return;
-  S.editingResearch=id;
-  document.getElementById('res-modal-title').textContent='編輯研究項目';
-  document.getElementById('r-title').value=r.title||'';
-  document.getElementById('r-field').value=r.field||'';
-  document.getElementById('r-status').value=r.status||'idea';
-  document.getElementById('r-deadline').value=r.deadline||'';
-  document.getElementById('r-nextstep').value=r.nextStep||'';
-  document.getElementById('r-spark').value='';
-  document.getElementById('r-papers').value=(r.papers||[]).join('\n');
-  document.getElementById('res-modal').classList.add('show');
-}
-
-async function saveResearch(){
-  const title=document.getElementById('r-title').value.trim();
-  if(!title){toast('請輸入研究主題','err');return;}
-  const sparkTxt=document.getElementById('r-spark').value.trim();
-  const papersRaw=document.getElementById('r-papers').value.trim();
-  const papers=papersRaw?papersRaw.split('\n').map(s=>s.trim()).filter(Boolean):[];
-  const now=Date.now();
-  const today=fmtDate(new Date());
-
-  if(S.editingResearch){
-    const r=S.research.find(r=>r.id===S.editingResearch);
-    if(!r){closeModal('res-modal');return;}
-    r.title=title;
-    r.field=document.getElementById('r-field').value.trim();
-    r.status=document.getElementById('r-status').value;
-    r.deadline=document.getElementById('r-deadline').value||null;
-    r.nextStep=document.getElementById('r-nextstep').value.trim();
-    r.papers=papers;
-    r.updatedAt=now;
-    r.lastTouchedAt=today;
-    if(sparkTxt){
-      if(!r.sparks)r.sparks=[];
-      r.sparks.unshift({date:today,text:sparkTxt,ts:now});
-    }
-  } else {
-    const r={
-      id:now,
-      title,
-      field:document.getElementById('r-field').value.trim(),
-      status:document.getElementById('r-status').value,
-      deadline:document.getElementById('r-deadline').value||null,
-      nextStep:document.getElementById('r-nextstep').value.trim(),
-      papers,
-      sparks:sparkTxt?[{date:today,text:sparkTxt,ts:now}]:[],
-      createdAt:now,
-      updatedAt:now,
-      lastTouchedAt:today,
-    };
-    S.research.push(r);
-  }
-
-  // 先關 modal、更新畫面，再背景同步
-  closeModal('res-modal');
-  renderResearch();
-  toast('✅ 研究項目已儲存','ok');
-  saveResearchToFirebase();
-}
-
-async function addSparkQuick(id){
-  const txt=prompt('記下這個靈感：');
-  if(!txt||!txt.trim())return;
-  const r=S.research.find(r=>r.id===id);
-  if(!r)return;
-  const today=fmtDate(new Date());
-  if(!r.sparks)r.sparks=[];
-  r.sparks.unshift({date:today,text:txt.trim(),ts:Date.now()});
-  r.lastTouchedAt=today;
-  r.updatedAt=Date.now();
-  await saveResearchToFirebase();
-  renderResearch();
-  toast('💡 靈感已記錄','ok');
-}
-
-async function deleteResearch(id){
-  if(!confirm('確定要刪除此研究項目嗎？'))return;
-  S.research=S.research.filter(r=>r.id!==id);
-  await saveResearchToFirebase();
-  renderResearch();
-  toast('✅ 已刪除','ok');
-}
-
-function toggleResCard(id){
-  const el=document.getElementById('res-detail-'+id);
-  if(!el)return;
-  el.classList.toggle('open');
-}
-
-function renderResearch(){
-  document.getElementById('nav-label').textContent='';
-  const el=document.getElementById('main-view');
-  const today=fmtDate(new Date());
-
-  const statusLabel={idea:'💡 構思中',active:'🔬 進行中',dormant:'💤 擱置中',done:'✅ 完成'};
-  const statusClass={idea:'rs-idea',active:'rs-active',dormant:'rs-dormant',done:'rs-done'};
-
-  // Check dormancy: lastTouchedAt > 30 days ago
-  function isDormantWarn(r){
-    if(r.status==='done')return false;
-    const lastDate=r.lastTouchedAt||r.createdAt;
-    if(!lastDate)return false;
-    const diff=(new Date(today)-new Date(typeof lastDate==='number'?new Date(lastDate).toISOString().split('T')[0]:lastDate))/86400000;
-    return diff>30;
-  }
-
-  const active=S.research.filter(r=>r.status!=='done').sort((a,b)=>{
-    const order={active:0,idea:1,dormant:2};
-    return(order[a.status]??3)-(order[b.status]??3);
-  });
-  const done=S.research.filter(r=>r.status==='done');
-
-  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-    <div style="font-size:13px;color:var(--text2)">共 ${S.research.length} 個研究項目</div>
-    <button class="btn btn-ora" onclick="openNewResearch()" style="padding:7px 16px">＋ 新增研究</button>
-  </div>`;
-
-  if(!S.research.length){
-    el.innerHTML=html+`<div class="empty"><div class="empty-ico">🔬</div>還沒有研究項目<br><span style="font-size:11px;color:var(--text3)">把有興趣的題目、靈感記在這裡，避免遺忘</span></div>`;
-    return;
-  }
-
-  function resCardHTML(r){
-    const warn=isDormantWarn(r);
-    const daysSince=r.lastTouchedAt?(Math.floor((new Date(today)-new Date(r.lastTouchedAt))/86400000)):null;
-    const sparks=r.sparks||[];
-    const papers=r.papers||[];
-    return`<div class="res-card ${r.status==='done'?'done-res':warn?'dormant':''}" onclick="toggleResCard(${r.id})">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
-        <div style="flex:1">
-          <div class="res-title">${r.title}</div>
-          ${r.field?`<div class="res-field">📌 ${r.field}</div>`:''}
-          <div class="res-meta">
-            <span class="res-status ${statusClass[r.status]||'rs-idea'}">${statusLabel[r.status]||r.status}</span>
-            ${r.deadline?`<span class="res-deadline">📅 ${r.deadline}</span>`:''}
-            ${warn?`<span class="res-dormant-warn">⚠ 已 ${daysSince} 天未動</span>`:''}
-            ${sparks.length?`<span style="font-size:10px;color:var(--text3)">💡 ${sparks.length} 筆靈感</span>`:''}
-            ${papers.length?`<span style="font-size:10px;color:var(--text3)">📄 ${papers.length} 篇文獻</span>`:''}
-          </div>
-          ${r.nextStep?`<div class="res-next">→ ${r.nextStep}</div>`:''}
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
-          <button onclick="event.stopPropagation();addSparkQuick(${r.id})" class="t-btn" title="記下靈感">💡</button>
-          <button onclick="event.stopPropagation();openEditResearch(${r.id})" class="t-btn">✏️</button>
-          <button onclick="event.stopPropagation();deleteResearch(${r.id})" class="t-btn del">✕</button>
-        </div>
-      </div>
-
-      <div class="res-detail" id="res-detail-${r.id}">
-        ${sparks.length?`<div class="spark-list">
-          <div style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:6px;letter-spacing:.04em">SPARKS / 靈感記錄</div>
-          ${sparks.map(s=>`<div class="spark-item"><span class="spark-date">${s.date}</span><span class="spark-txt">${s.text}</span></div>`).join('')}
-        </div>`:'<div style="font-size:12px;color:var(--text3);padding:8px 0">還沒有靈感記錄，點 💡 按鈕快速記錄</div>'}
-        ${papers.length?`<div class="paper-list">
-          <div style="font-size:11px;font-weight:600;color:var(--text3);margin:10px 0 5px;letter-spacing:.04em">PAPERS / 文獻清單</div>
-          ${papers.map(p=>`<div class="paper-item">${p}</div>`).join('')}
-        </div>`:''}
-        <div class="res-act-row">
-          <button class="btn btn-soft" onclick="event.stopPropagation();openEditResearch(${r.id})" style="font-size:11px;padding:5px 12px">✏️ 編輯</button>
-          <button class="btn" onclick="event.stopPropagation();addSparkQuick(${r.id})" style="font-size:11px;padding:5px 12px;background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-mid)">💡 記下靈感</button>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  if(active.length){
-    html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🔬 進行中 / 構思中</div>`;
-    html+=active.map(resCardHTML).join('');
-  }
-  if(done.length){
-    html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin:16px 0 10px">✅ 已完成</div>`;
-    html+=done.map(resCardHTML).join('');
-  }
-
-  el.innerHTML=html;
-}
-
-
-
+function delProj(code){S.projects=S.projects.filter(p=>p.code!==code);saveToSheet();renderProjList();}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
-
-function openTypeModal(){renderTypeList();document.getElementById('type-modal').classList.add('show');}
-function renderTypeList(){
-  document.getElementById('type-list').innerHTML=S.taskTypes.map((t,i)=>`
-  <div class="proj-item-row">
-    <span style="font-size:16px">${t.icon}</span>
-    <span class="proj-nm">${t.name}</span>
-    <button class="pdel" onclick="delTaskType('${t.id}')">✕</button>
-  </div>`).join('');
-}
-function addTaskType(){
-  const icon=document.getElementById('new-type-icon').value.trim()||'📌';
-  const name=document.getElementById('new-type-name').value.trim();
-  if(!name){toast('請輸入類型名稱','err');return;}
-  const id='type_'+Date.now();
-  S.taskTypes.push({id,icon,name});
-  saveLocal();renderTypeList();fillCodeSel();
-  document.getElementById('new-type-icon').value='';
-  document.getElementById('new-type-name').value='';
-  toast('✅ 類型已新增','ok');
-}
-function delTaskType(id){
-  S.taskTypes=S.taskTypes.filter(t=>t.id!==id);
-  saveLocal();renderTypeList();fillCodeSel();
-}
-async function refreshData(){
-  if(!db){toast('尚未連線','err');return;}
-  setSyncStatus('syncing','重新整理中…');
-  // Firebase 即時監聽已自動同步，這裡只需要重新渲染
-  S.projects.forEach(p=>{if(p.code!=='0000X')getCI(p.code);});
-  fillCodeSel();renderView();buildSuggestion();
-  setSyncStatus('ok','已同步 ✓');
-  toast('✅ 已重新整理','ok');
-}
 function toast(msg,type='info'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.className=`toast ${type}`,3000);}
+
 </script>
 </body>
 </html>
