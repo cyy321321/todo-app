@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="My To Do List">
-<meta name="theme-color" content="#F59332">
+<meta name="theme-color" content="#3E8E9C">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -15,27 +15,29 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#FFF8F0;--white:#FFFFFF;--card:#FFFCF8;
-  --ora:#F59332;--ora2:#E07820;--ora-bg:#FFF3E0;--ora-mid:#FFD699;
-  --border:#EDD9C0;--border2:#D4B896;
-  --text:#2C1810;--text2:#6B4226;--text3:#B07850;
-  --red:#E53935;--red-bg:#FFF0F0;--red-mid:#FFCDD2;
-  --amber:#F59E0B;--amber-bg:#FFFBEB;
-  --green:#16A34A;--green-bg:#F0FDF4;--green-mid:#BBF7D0;
-  --shadow:0 2px 8px rgba(180,100,30,.10);
-  --shadow-md:0 4px 20px rgba(180,100,30,.14);
+  /* 冷色調藍綠主題（變數名沿用舊命名，避免大範圍改動） */
+  --bg:#F2F7F8;--white:#FFFFFF;--card:#F8FBFC;
+  --ora:#3E8E9C;--ora2:#2C7080;--ora-bg:#E7F2F4;--ora-mid:#A9D4DA;
+  --border:#DAE7EA;--border2:#B4CBD1;
+  --text:#1E3A40;--text2:#4C6B73;--text3:#8CA6AD;
+  --red:#C96B76;--red-bg:#FBF0F1;--red-mid:#EBCBD0;
+  --amber:#6F84C0;--amber-bg:#EFF1FA;
+  --green:#3E937C;--green-bg:#EAF5F1;--green-mid:#BCE0D4;
+  --blue:#3D7E9E;--blue-border:#BFD8E4;
+  --shadow:0 2px 8px rgba(30,80,95,.09);
+  --shadow-md:0 4px 20px rgba(30,80,95,.13);
   --r:14px;--r-sm:10px;--r-xs:8px;
   --max-w:860px;
 }
-/* 案子色板 */
-.cc0{--c:#E53935;--cb:#FFF0F0;--cm:#FFCDD2}
-.cc1{--c:#1E88E5;--cb:#E3F2FD;--cm:#BBDEFB}
-.cc2{--c:#43A047;--cb:#E8F5E9;--cm:#C8E6C9}
-.cc3{--c:#8E24AA;--cb:#F3E5F5;--cm:#E1BEE7}
-.cc4{--c:#F4511E;--cb:#FBE9E7;--cm:#FFCCBC}
-.cc5{--c:#00897B;--cb:#E0F2F1;--cm:#B2DFDB}
-.cc6{--c:#3949AB;--cb:#E8EAF6;--cm:#C5CAE9}
-.cc7{--c:#F9A825;--cb:#FFFDE7;--cm:#FFF9C4}
+/* 案子色板（冷色系、彼此仍可辨識） */
+.cc0{--c:#4A90C4;--cb:#E9F2FA;--cm:#C3DCF0}
+.cc1{--c:#3F9E8F;--cb:#E6F4F1;--cm:#BFE3DC}
+.cc2{--c:#6C7FC9;--cb:#EDEFFA;--cm:#CDD4F0}
+.cc3{--c:#8E7CC3;--cb:#F1EDF9;--cm:#DCD2F0}
+.cc4{--c:#4EA3B8;--cb:#E8F4F8;--cm:#C6E4EE}
+.cc5{--c:#5B9E6E;--cb:#EBF4EC;--cm:#CBE4CF}
+.cc6{--c:#C1737F;--cb:#FAEDEF;--cm:#EFD2D7}
+.cc7{--c:#7D93A8;--cb:#EEF2F5;--cm:#D2DCE4}
 .cc-priv{--c:#607D8B;--cb:#ECEFF1;--cm:#CFD8DC}
 
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
@@ -43,7 +45,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .center{max-width:var(--max-w);margin:0 auto;width:100%}
 
 /* LOGIN */
-#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#FFF8F0,#FFF0E0)}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#F4F9FA,#E3EFF1)}
 .login-card{background:var(--white);border-radius:24px;padding:48px 40px;box-shadow:var(--shadow-md);max-width:400px;width:100%;text-align:center;border:2px solid var(--ora-mid)}
 .login-ico{font-size:52px;margin-bottom:16px}
 .login-title{font-size:24px;font-weight:700;color:var(--ora2);margin-bottom:8px}
@@ -84,7 +86,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .sug-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 .stag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500}
 .stag-u{background:var(--red-bg);color:var(--red);border:1px solid var(--red-mid)}
-.stag-s{background:var(--amber-bg);color:var(--amber);border:1px solid #FDE68A}
+.stag-s{background:var(--amber-bg);color:var(--amber);border:1px solid #CBD3EE}
 .stag-o{background:var(--green-bg);color:var(--green);border:1px solid var(--green-mid)}
 .sug-refresh{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:8px;font-family:inherit;margin-top:6px;display:block}
 .sug-refresh:hover{background:var(--border)}
@@ -105,7 +107,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .footer-hidden-link span:hover{color:var(--text3)}
 .cycle-sub{font-size:11px;color:var(--text3);margin-top:2px;margin-bottom:10px;line-height:1.6}
 .cycle-pill{font-size:11px;padding:5px 8px;border-radius:999px;background:var(--ora-bg);color:var(--ora2);border:1px solid var(--ora-mid)}
-.cycle-pill.alt{background:var(--amber-bg);color:var(--amber);border-color:#FDE68A}
+.cycle-pill.alt{background:var(--amber-bg);color:var(--amber);border-color:#CBD3EE}
 .cycle-stat-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:10px}
 .cycle-stat-table th{text-align:left;color:var(--text3);font-weight:600;padding:4px 6px;border-bottom:1.5px solid var(--border)}
 .cycle-stat-table td{padding:4px 6px;border-bottom:1px solid var(--border);color:var(--text2)}
@@ -125,7 +127,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .t-arrow{font-size:10px;transition:transform .25s;margin-left:auto}
 .t-arrow.open{transform:rotate(180deg)}
 .input-panel{background:var(--white);border-bottom:2px solid var(--border);overflow:hidden;max-height:0;transition:max-height .3s ease;display:flex;justify-content:center}
-.input-panel.open{max-height:760px}
+.input-panel.open{max-height:900px}
 .input-inner{padding:16px 20px;width:100%;max-width:var(--max-w)}
 .seg-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap}
 .seg{font-size:12px;padding:5px 14px;border-radius:20px;border:1.5px solid var(--border2);background:none;cursor:pointer;font-family:inherit;color:var(--text2);font-weight:500;transition:all .15s}
@@ -139,15 +141,20 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .man-row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
 .fld{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
 .fld label{font-size:11px;font-weight:500;color:var(--text2)}
+/* 任務名稱：獨立一整列，輸入框加大 */
+.fld-title{flex:1 1 100%;min-width:100%}
+.fld-title input{font-size:15px;padding:12px 14px;border-radius:var(--r-sm)}
+.fld-title label{font-size:12px;font-weight:600;color:var(--text2)}
 .fld input,.fld select{border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--text);outline:none;transition:border .15s}
 .fld input:focus,.fld select:focus{border-color:var(--ora)}
+.fld-check{flex:0 1 200px}
 .fld-check .check-pill{display:flex;align-items:center;gap:8px;border:1.5px solid var(--border2);border-radius:var(--r-xs);padding:8px 10px;background:var(--bg);color:var(--text2);font-size:13px;min-height:41px;cursor:pointer}
 .fld-check input[type="checkbox"]{width:15px;height:15px;accent-color:var(--ora)}
 
 /* BUTTONS */
 .btn{border:none;border-radius:var(--r-xs);padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
 .btn-ora{background:var(--ora);color:#fff}.btn-ora:hover{background:var(--ora2)}
-.btn-grn{background:var(--green);color:#fff}.btn-grn:hover{background:#15803D}
+.btn-grn{background:var(--green);color:#fff}.btn-grn:hover{background:#2F7C67}
 .btn-soft{background:var(--ora-bg);color:var(--text2);border:1.5px solid var(--border2)}.btn-soft:hover{background:var(--border)}
 .btn-red{background:var(--red);color:#fff}
 
@@ -190,6 +197,8 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .task-card.done-card{opacity:.4}
 .task-card.done-card .task-title{text-decoration:line-through;color:var(--text3)}
 .task-card.overdue-card{border-left-color:var(--red)}
+.task-card.defer-card{border-left-color:var(--amber);border-style:dashed;background:var(--amber-bg);opacity:.92}
+.task-card.defer-card .task-title{color:var(--text2)}
 .chk{width:17px;height:17px;border-radius:50%;border:1.5px solid var(--border2);cursor:pointer;flex-shrink:0;margin-top:2px;background:none;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:transparent;transition:all .15s}
 .chk:hover{border-color:var(--ora)}
 .chk.on{background:var(--ora);border-color:var(--ora);color:#fff}
@@ -205,6 +214,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .synced{font-size:10px;color:var(--green);font-weight:500}
 .task-acts{display:flex;gap:3px;flex-shrink:0;opacity:0;transition:opacity .15s}
 .task-card:hover .task-acts{opacity:1}
+@media(hover:none){.task-acts{opacity:1}}
 .t-btn{font-size:11px;border:1px solid var(--border);background:var(--bg);border-radius:6px;cursor:pointer;padding:3px 7px;color:var(--text2);font-family:inherit;transition:all .15s}
 .t-btn:hover{background:var(--ora);border-color:var(--ora);color:#fff}
 .t-btn.del:hover{background:var(--red);border-color:var(--red);color:#fff}
@@ -265,7 +275,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .week-flag.travel{background:var(--amber)}
 
 /* MODAL */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(80,30,0,.4);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,55,65,.42);z-index:100;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
 .modal{background:var(--white);border-radius:20px;padding:24px;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-md);border:2px solid var(--ora-mid)}
 .modal-title{font-size:16px;font-weight:700;color:var(--ora2);margin-bottom:18px}
@@ -295,8 +305,8 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 /* TOAST */
 .toast{position:fixed;bottom:24px;right:20px;padding:10px 18px;border-radius:12px;font-size:13px;z-index:999;opacity:0;transform:translateY(60px);transition:all .3s;pointer-events:none;font-weight:500}
 .toast.show{opacity:1;transform:translateY(0)}
-.toast.ok{background:#15803D;color:#fff}
-.toast.err{background:#B91C1C;color:#fff}
+.toast.ok{background:#2F7C67;color:#fff}
+.toast.err{background:#B25A66;color:#fff}
 .toast.info{background:var(--ora2);color:#fff}
 
 .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:4px}
@@ -329,11 +339,11 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 .search-result:hover{border-color:var(--ora);box-shadow:var(--shadow)}
 .search-result-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
 .search-result-meta{font-size:11px;color:var(--text3);margin-bottom:4px}
-.search-highlight{background:#FFF3CD;color:var(--text);border-radius:2px;padding:0 2px}
+.search-highlight{background:#D8EDF2;color:var(--text);border-radius:2px;padding:0 2px}
 .search-result-preview{font-size:12px;color:var(--text2);line-height:1.5}
 
 /* RESEARCH */
-:root{--teal:#0D9488;--teal-bg:#F0FDFA;--teal-mid:#99F6E4;--teal2:#0F766E;--purple:#7C3AED;--purple-bg:#F5F3FF;--purple-mid:#DDD6FE;}
+:root{--teal:#3E9E96;--teal-bg:#EAF6F4;--teal-mid:#B7E0DA;--teal2:#2C7C77;--purple:#7C6FC4;--purple-bg:#F0EEF9;--purple-mid:#D5CFEE;}
 .res-card{background:var(--white);border-radius:var(--r);border:1.5px solid var(--border);padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);border-left:4px solid var(--teal);transition:all .15s;cursor:pointer}
 .res-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
 .res-card.dormant{border-left-color:var(--amber)}
@@ -380,6 +390,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
   .nav-btn{width:26px;height:26px;font-size:11px}
   .man-row{flex-direction:column;align-items:stretch}
   .fld{min-width:100%}
+  .fld-check{flex:0 0 auto}
   .edit-row{grid-template-columns:1fr}
   .cycle-inputs{flex-direction:column}
   .cycle-inputs>*{width:100%}
@@ -395,7 +406,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 
 <div id="login-screen">
   <div class="login-card">
-    <div class="login-ico">🍊</div>
+    <div class="login-ico">🌊</div>
     <div class="login-title">My To Do List</div>
     <div class="login-sub">整理公事與私人行程，同步 Google Calendar。<br>請使用指定 Google 帳號登入。</div>
     <div id="g-btn" style="display:flex;justify-content:center"></div>
@@ -407,7 +418,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
   <div class="hdr">
     <div class="hdr-inner">
       <div class="hdr-left">
-        <span class="hdr-logo">🍊</span>
+        <span class="hdr-logo">🌊</span>
         <span class="hdr-title">My To Do List</span>
       </div>
       <div class="hdr-right">
@@ -477,8 +488,13 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <div id="area-work" style="display:none">
         <div style="font-size:11px;color:var(--text3);margin-bottom:8px">✈️ 出差 / 商務：在新增表單右側勾選「這次是出差」，會在週曆與月曆上用不同底色標示</div>
         <div class="man-row">
-          <div class="fld"><label>任務名稱</label><input type="text" id="w-title" placeholder="例：審核合約文件"></div>
+          <div class="fld fld-title"><label>任務名稱</label><input type="text" id="w-title" placeholder="例：審核合約文件"></div>
           <div class="fld"><label>計畫代碼</label><select id="w-code"></select></div>
+          <div class="fld"><label>優先級</label><select id="w-prio">
+            <option value="high">🔴 緊急</option>
+            <option value="medium" selected>🟡 一般</option>
+            <option value="low">🟢 低</option>
+          </select></div>
           <div class="fld"><label>開始日期</label><input type="date" id="w-date"></div>
           <div class="fld"><label>結束日期（選填）</label><input type="date" id="w-edate"></div>
           <div class="fld"><label>任務類型（選填）</label><select id="w-type"><option value="">－ 選填 －</option></select></div>
@@ -491,7 +507,12 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
       <div id="area-priv" style="display:none">
         <div style="font-size:11px;color:var(--text3);margin-bottom:8px">✈️ 出差 / 商務：在新增表單右側勾選「這次是出差」，會在週曆與月曆上用不同底色標示</div>
         <div class="man-row">
-          <div class="fld"><label>行程名稱</label><input type="text" id="p-title" placeholder="例：台中旅遊、看診"></div>
+          <div class="fld fld-title"><label>行程名稱</label><input type="text" id="p-title" placeholder="例：台中旅遊、看診"></div>
+          <div class="fld"><label>優先級</label><select id="p-prio">
+            <option value="high">🔴 緊急</option>
+            <option value="medium" selected>🟡 一般</option>
+            <option value="low">🟢 低</option>
+          </select></div>
           <div class="fld"><label>開始日期</label><input type="date" id="p-date"></div>
           <div class="fld"><label>結束日期（選填）</label><input type="date" id="p-edate"></div>
           <div class="fld"><label>開始時間（選填）</label><input type="time" id="p-start"></div>
@@ -531,7 +552,7 @@ textarea::placeholder{font-family:'Noto Sans TC',sans-serif;color:var(--text3)}
 <!-- CONFIRM MODAL -->
 <div class="modal-overlay" id="confirm-modal">
   <div class="modal">
-    <div class="modal-title">🍊 確認並調整任務資訊</div>
+    <div class="modal-title">🌊 確認並調整任務資訊</div>
     <div id="parsed-list"></div>
     <div class="modal-actions">
       <button class="btn btn-soft" onclick="closeModal('confirm-modal')">取消</button>
@@ -787,14 +808,14 @@ const CLAUDE_PROMPT=`請幫我整理以下信件或訊息中的待辦事項，�
 ---
 （請將信件或Line訊息貼在這裡）`;
 
-const COLORS=['#E53935','#1E88E5','#43A047','#8E24AA','#F4511E','#00897B','#3949AB','#F9A825'];
-const COLOR_BG=['#FFF0F0','#E3F2FD','#E8F5E9','#F3E5F5','#FBE9E7','#E0F2F1','#E8EAF6','#FFFDE7'];
-const COLOR_MID=['#FFCDD2','#BBDEFB','#C8E6C9','#E1BEE7','#FFCCBC','#B2DFDB','#C5CAE9','#FFF9C4'];
+const COLORS=['#4A90C4','#3F9E8F','#6C7FC9','#8E7CC3','#4EA3B8','#5B9E6E','#C1737F','#7D93A8'];
+const COLOR_BG=['#E9F2FA','#E6F4F1','#EDEFFA','#F1EDF9','#E8F4F8','#EBF4EC','#FAEDEF','#EEF2F5'];
+const COLOR_MID=['#C3DCF0','#BFE3DC','#CDD4F0','#DCD2F0','#C6E4EE','#CBE4CF','#EFD2D7','#D2DCE4'];
 let colorMap={},colorIdx=0;
 function getCI(code){if(code===null||code===undefined)return -1;if(!colorMap[code]){colorMap[code]=colorIdx%COLORS.length;colorIdx++;}return colorMap[code];}
-const PRIV_COLORS=['#546E7A','#607D8B','#78909C','#455A64','#37474F','#4DB6AC','#5C6BC0','#6D4C41'];
-const PRIV_BG=['#ECEFF1','#E8EAF6','#E0F2F1','#E3F2FD','#F3E5F5','#E8F5E9','#EDE7F6','#EFEBE9'];
-const PRIV_MID=['#CFD8DC','#C5CAE9','#B2DFDB','#BBDEFB','#E1BEE7','#C8E6C9','#D1C4E9','#D7CCC8'];
+const PRIV_COLORS=['#546E7A','#607D8B','#78909C','#455A64','#4E7B8C','#4DB6AC','#5C6BC0','#5F8A93'];
+const PRIV_BG=['#ECEFF1','#E8EAF6','#E0F2F1','#E3F2FD','#E7EFF2','#E8F5E9','#EDE7F6','#EAF1F3'];
+const PRIV_MID=['#CFD8DC','#C5CAE9','#B2DFDB','#BBDEFB','#CDDDE3','#C8E6C9','#D1C4E9','#C9DBDF'];
 let privColorMap={},privColorIdx=0;
 function getPrivCI(id){if(privColorMap[id]===undefined){privColorMap[id]=privColorIdx%PRIV_COLORS.length;privColorIdx++;}return privColorMap[id];}
 function privHex(id){return PRIV_COLORS[getPrivCI(id)];}
@@ -852,7 +873,7 @@ let S={
   filterType:null,
   showUrgentOnly:false,
   _autoExpandDone:false,
-  sortMode:'proj',
+  sortMode:'date',
   notes:[],
   research:[],
   editingResearch:null,
@@ -1150,11 +1171,12 @@ async function addWork(){
   const start=document.getElementById('w-start').value||null;
   const end=document.getElementById('w-end').value||null;
   const taskType=document.getElementById('w-type')?.value||null;
+  const priority=document.getElementById('w-prio')?.value||'medium';
   const isTravel=document.getElementById('w-travel')?.checked||false;
   if(!title){toast('請輸入任務名稱','err');return;}
   if(!date){toast('請選擇日期','err');return;}
   if(edate&&edate<date){toast('結束日期不可早於開始日期，已自動清除','info');edate=null;}
-  const task={id:Date.now(),type:'work',title,code,date,endDate:edate,time:start,timeEnd:end,loc:'',priority:'medium',taskType:taskType,isTravel,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
+  const task={id:Date.now(),type:'work',title,code,date,endDate:edate,time:start,timeEnd:end,loc:'',priority,taskType:taskType,isTravel,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
   const evId=await pushCal(task);if(evId)task.calEventId=evId;
   S.tasks.push(task);await save();renderView();buildSuggestion();
   document.getElementById('w-title').value='';
@@ -1168,11 +1190,12 @@ async function addPriv(){
   const start=document.getElementById('p-start').value||null;
   const end=document.getElementById('p-end').value||null;
   const loc=document.getElementById('p-loc').value.trim();
+  const priority=document.getElementById('p-prio')?.value||'medium';
   const isTravel=document.getElementById('p-travel')?.checked||false;
   if(!title){toast('請輸入行程名稱','err');return;}
   if(!date){toast('請選擇日期','err');return;}
   if(edate&&edate<date){toast('結束日期不可早於開始日期，已自動清除','info');edate=null;}
-  const task={id:Date.now(),type:'private',title,date,endDate:edate,time:start,timeEnd:end,loc,code:null,priority:'medium',isTravel,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
+  const task={id:Date.now(),type:'private',title,date,endDate:edate,time:start,timeEnd:end,loc,code:null,priority,isTravel,done:false,calEventId:null,note:'',rawInfo:'',createdAt:Date.now()};
   const evId=await pushCal(task);if(evId)task.calEventId=evId;
   S.tasks.push(task);await save();renderView();buildSuggestion();
   document.getElementById('p-title').value='';document.getElementById('p-loc').value='';
@@ -1230,11 +1253,35 @@ function getTaskDates(task){
   return dates;
 }
 
+// ── 封存 / 暫緩 判定 ──
+const todayStr=()=>new Date().toISOString().split('T')[0];
+function daysAgoStr(n){const c=new Date();c.setDate(c.getDate()-n);return c.toISOString().split('T')[0];}
+
+// 已封存＝手動封存，或完成超過 7 天（與封存區認定一致，主頁一律不再顯示）
+function isArchived(t){
+  if(t.archived)return true;
+  return !!(t.done&&t.doneDate&&t.doneDate<=daysAgoStr(7));
+}
+// 暫緩中＝已放進「暫緩區」且尚未到重新檢視日
+function isDeferred(t){
+  if(!t.deferred||t.done||isArchived(t))return false;
+  return !t.deferUntil||t.deferUntil>todayStr();
+}
+// 暫緩到期＝已到重新檢視日，會自動回到主清單並標記提醒
+function isDeferDue(t){
+  return !!(t.deferred&&!t.done&&!isArchived(t)&&t.deferUntil&&t.deferUntil<=todayStr());
+}
+// 逾期天數
+function overdueDays(t){
+  const base=t.endDate&&t.endDate>t.date?t.endDate:t.date;
+  return Math.floor((new Date(todayStr()+'T00:00:00')-new Date(base+'T00:00:00'))/86400000);
+}
+
 function isTravelDay(date){
-  return S.tasks.some(t=>!t.archived&&t.isTravel&&getTaskDates(t).includes(date));
+  return S.tasks.some(t=>!isArchived(t)&&t.isTravel&&getTaskDates(t).includes(date));
 }
 function hasImportantDate(date){
-  return S.tasks.some(t=>!t.archived&&!t.done&&getTaskDates(t).includes(date)&&(t.priority==='high'||t.isTravel));
+  return S.tasks.some(t=>!isArchived(t)&&!t.done&&!isDeferred(t)&&getTaskDates(t).includes(date)&&(t.priority==='high'||t.isTravel));
 }
 
 function renderMiniCalendar(){
@@ -1359,7 +1406,7 @@ function toggleUrgent(){
   if(S.showUrgentOnly){
     const today=new Date().toISOString().split('T')[0];
     S.projects.forEach(p=>{
-      const pts=S.tasks.filter(t=>t.code===p.code&&!t.done);
+      const pts=S.tasks.filter(t=>t.code===p.code&&!t.done&&!isArchived(t)&&!isDeferred(t));
       if(pts.some(t=>t.date<today||t.priority==='high'))S.expandedProjs.add(p.code);
     });
     S.expandedProjs.add('__priv__');
@@ -1371,7 +1418,7 @@ function renderList(){
   document.getElementById('nav-label').textContent='';
   const el=document.getElementById('main-view');
   const today=new Date().toISOString().split('T')[0];
-  const allPending=S.tasks.filter(t=>!t.done);
+  const allPending=S.tasks.filter(t=>!t.done&&!isArchived(t)&&!isDeferred(t));
   const urgentCount=allPending.filter(t=>t.date<today||t.priority==='high').length;
 
   // Filters
@@ -1382,7 +1429,7 @@ function renderList(){
   if(!S._autoExpandDone){
     S._autoExpandDone=true;
     S.projects.forEach(p=>{
-      const pts=S.tasks.filter(t=>t.code===p.code&&!t.done);
+      const pts=S.tasks.filter(t=>t.code===p.code&&!t.done&&!isArchived(t)&&!isDeferred(t));
       if(pts.some(t=>t.date<today||t.priority==='high'))S.expandedProjs.add(p.code);
     });
   }
@@ -1390,8 +1437,8 @@ function renderList(){
   const sortBtnStyle=(m)=>`padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;border:1.5px solid var(--border2);background:${S.sortMode===m?'var(--ora)':'var(--white)'};color:${S.sortMode===m?'#fff':'var(--text2)'}`;
   const filterBar=`<div style="margin-bottom:14px">
     <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
-      <button onclick="setSortMode('proj')" style="${sortBtnStyle('proj')}">📁 依計畫</button>
       <button onclick="setSortMode('date')" style="${sortBtnStyle('date')}">📅 依日期</button>
+      <button onclick="setSortMode('proj')" style="${sortBtnStyle('proj')}">📁 依計畫</button>
       <button onclick="setSortMode('type')" style="${sortBtnStyle('type')}">📌 依類型</button>
       <div style="flex:1"></div>
       <button onclick="toggleUrgent()" style="display:flex;align-items:center;gap:5px;background:${S.showUrgentOnly?'var(--red)':'var(--red-bg)'};color:${S.showUrgentOnly?'#fff':'var(--red)'};border:1.5px solid var(--red-mid);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">
@@ -1403,28 +1450,55 @@ function renderList(){
     </select>
   </div>`;
 
-  // Archive notice
-  const archiveable=S.tasks.filter(t=>{
-    if(!t.done||!t.doneDate)return false;
-    const c=new Date();c.setDate(c.getDate()-7);
-    return t.doneDate<=c.toISOString().split('T')[0];
-  }).length;
-  const doneTotal=S.tasks.filter(t=>t.done).length;
+  // 封存統計（封存內容一律不在主頁列出）
+  const archivedTotal=S.tasks.filter(isArchived).length;
+  const doneRecent=S.tasks.filter(t=>t.done&&!isArchived(t)).length;
 
-  const wt=S.tasks.filter(t=>t.type==='work'&&ftasks(t)&&furgent(t)&&!t.archived);
-  const pt=S.tasks.filter(t=>t.type==='private'&&furgent(t)&&!t.archived);
+  // 主清單：排除已封存、排除暫緩中
+  const wt=S.tasks.filter(t=>t.type==='work'&&ftasks(t)&&furgent(t)&&!isArchived(t)&&!isDeferred(t));
+  const pt=S.tasks.filter(t=>t.type==='private'&&furgent(t)&&!isArchived(t)&&!isDeferred(t));
+
+  // 暫緩區：逾期但暫時無法處理的事，不混在主清單裡，但仍看得到
+  const deferredTasks=S.tasks.filter(isDeferred)
+    .sort((a,b)=>(a.deferUntil||'9999-12-31')>(b.deferUntil||'9999-12-31')?1:-1);
 
   if(!S.tasks.length){
-    el.innerHTML=filterBar+`<div class="empty"><div class="empty-ico">🍊</div>還沒有任務，點上方「新增任務」開始吧！</div>`;
+    el.innerHTML=filterBar+`<div class="empty"><div class="empty-ico">🌊</div>還沒有任務，點上方「新增任務」開始吧！</div>`;
     fillCodeSel();return;
   }
 
   let html=filterBar;
-  if(doneTotal>0){
+  if(doneRecent>0||archivedTotal>0){
     html+=`<div style="font-size:11px;color:var(--text3);margin-bottom:12px">
-      已完成 ${doneTotal} 件
-      ${archiveable?`<span style="color:var(--amber)"> · ${archiveable} 件可封存</span>`:''}
-      　<button onclick="openArchiveModal()" style="color:var(--blue);background:none;border:1px solid var(--blue-border,#BFDBFE);border-radius:10px;cursor:pointer;font-size:11px;font-family:inherit;padding:1px 8px">查看封存區 📦</button>
+      近 7 天完成 ${doneRecent} 件
+      ${archivedTotal?`<span> · 已封存 ${archivedTotal} 件（不顯示於主頁）</span>`:''}
+      　<button onclick="openArchiveModal()" style="color:var(--blue);background:none;border:1px solid var(--blue-border);border-radius:10px;cursor:pointer;font-size:11px;font-family:inherit;padding:1px 8px">查看封存區 📦</button>
+    </div>`;
+  }
+
+  // ── 暫緩區（釘在最上方，預設收合）──
+  if(deferredTasks.length){
+    const isOpen=S.expandedProjs.has('__defer__');
+    const overdueN=deferredTasks.filter(t=>overdueDays(t)>0).length;
+    const nextReview=deferredTasks.map(t=>t.deferUntil).filter(Boolean).sort()[0];
+    html+=`<div class="proj-block" style="--c:#6F84C0;--cb:var(--amber-bg);--cm:#CBD3EE;margin-bottom:14px">
+      <div class="proj-header" onclick="toggleProj('__defer__')">
+        <div class="proj-color-dot"></div>
+        <span class="proj-code-badge">⏸ 暫緩</span>
+        <span class="proj-name-text">暫時無法處理（不封存、之後再看）</span>
+        <div class="proj-stats">
+          ${overdueN?`<span class="stat-pill" style="background:var(--red-bg);color:var(--red)">逾期 ${overdueN}</span>`:''}
+          <span class="stat-pill stat-count">${deferredTasks.length} 件</span>
+          ${nextReview?`<span class="stat-date">下次檢視 ${nextReview}</span>`:''}
+        </div>
+        <span class="proj-arrow ${isOpen?'open':''}" id="proj-arrow-__defer__">▶</span>
+      </div>
+      <div class="proj-tasks ${isOpen?'open':''}" id="proj-tasks-__defer__">
+        <div style="font-size:11px;color:var(--text2);background:var(--white);border:1px solid var(--cm);border-radius:8px;padding:7px 10px;margin-bottom:8px;line-height:1.6">
+          這裡放「還不能處理、但也不想封存忘掉」的事。到了設定的重新檢視日，會自動跳回上面的主清單並標示 ⏰。
+        </div>
+        ${deferredTasks.map(t=>taskCardHTML(t,today,t.type==='private'?privHex(t.id):cHex(t.code))).join('')}
+      </div>
     </div>`;
   }
 
@@ -1469,14 +1543,29 @@ function renderList(){
     }
   }
 
-  // ── 依日期 ──
+  // ── 依日期（預設：逾期的排最前面）──
   else if(S.sortMode==='date'){
     if(wt.length){
+      const d7=new Date();d7.setDate(d7.getDate()+7);const in7=fmtDate(d7);
+      const eff=t=>(t.endDate&&t.endDate>t.date?t.endDate:t.date);
+      const pendingW=wt.filter(t=>!t.done);
+      const doneW=wt.filter(t=>t.done);
+      const dgroups=[
+        {label:'🚨 逾期未處理',color:'var(--red)',items:pendingW.filter(t=>eff(t)<today)},
+        {label:'📌 今天',color:'var(--ora2)',items:pendingW.filter(t=>t.date<=today&&eff(t)>=today)},
+        {label:'📅 未來 7 天',color:'var(--text2)',items:pendingW.filter(t=>t.date>today&&t.date<=in7)},
+        {label:'🗓 之後',color:'var(--text3)',items:pendingW.filter(t=>t.date>in7)},
+        {label:'✅ 近期已完成',color:'var(--green)',items:doneW},
+      ];
       html+=`<div style="font-size:12px;font-weight:600;color:var(--text3);letter-spacing:.05em;margin-bottom:10px">🏢 公事任務（依日期）</div>`;
-      const sorted=wt.sort((a,b)=>a.done===b.done?(a.date>b.date?1:-1):a.done?1:-1);
-      sorted.forEach(t=>{
-        const c=cHex(t.code);
-        html+=taskCardHTML(t,today,c);
+      dgroups.forEach(g=>{
+        if(!g.items.length)return;
+        html+=`<div style="display:flex;align-items:center;gap:8px;margin:12px 0 7px">
+          <span style="font-size:12px;font-weight:700;color:${g.color}">${g.label}</span>
+          <span style="font-size:11px;color:var(--text3)">${g.items.length} 件</span>
+          <span style="flex:1;height:1px;background:var(--border);display:block"></span>
+        </div>`;
+        html+=g.items.sort((a,b)=>a.date>b.date?1:-1).map(t=>taskCardHTML(t,today,cHex(t.code))).join('');
       });
     }
   }
@@ -1556,7 +1645,7 @@ function renderTravel(){
   document.getElementById('nav-label').textContent='';
   const el=document.getElementById('main-view');
   const today=new Date().toISOString().split('T')[0];
-  const trips=S.tasks.filter(t=>t.isTravel&&!t.archived).sort((a,b)=>a.date>b.date?1:-1);
+  const trips=S.tasks.filter(t=>t.isTravel&&!isArchived(t)).sort((a,b)=>a.date>b.date?1:-1);
   if(!trips.length){
     el.innerHTML=`<div class="empty"><div class="empty-ico">✈️</div>目前沒有標記「出差 / 商務」的行程。<br>新增任務時勾選「這次是出差」即可顯示在這裡。</div>`;
     return;
@@ -1590,20 +1679,26 @@ function toggleProj(code){
 }
 
 function taskCardHTML(t,today,color){
-  const overdue=t.date<today&&!t.done;
+  const effEnd=t.endDate&&t.endDate>t.date?t.endDate:t.date;
+  const overdue=effEnd<today&&!t.done;
+  const odays=overdue?overdueDays(t):0;
+  const deferred=isDeferred(t);
+  const deferDue=isDeferDue(t);
   const pc={high:'ph',medium:'pm',low:'pl'}[t.priority]||'pm';
   const pl={high:'緊急',medium:'一般',low:'低'}[t.priority]||'一般';
   const isExpanded=S.expandedCards.has(t.id);
   const isEditing=S.editingCard===t.id;
   const codeOpts=S.projects.map(p=>`<option value="${p.code}" ${p.code===t.code?'selected':''}>${p.code} — ${p.name}</option>`).join('');
   const dateDisplay=t.endDate&&t.endDate!==t.date?`${t.date} — ${t.endDate}`:t.date+(t.time?' '+t.time:'')+(t.timeEnd?' — '+t.timeEnd:'');
-  return`<div class="task-card ${t.type==='private'?'priv':''} ${t.done?'done-card':''} ${overdue?'overdue-card':''}" id="card-${t.id}" style="--c:${color}">
+  return`<div class="task-card ${t.type==='private'?'priv':''} ${t.done?'done-card':''} ${overdue&&!deferred?'overdue-card':''} ${deferred?'defer-card':''}" id="card-${t.id}" style="--c:${color}">
     <div class="chk ${t.done?'on '+(t.type==='private'?'gn':''):''}" onclick="toggleDone(${t.id})">${t.done?'✓':''}</div>
     <div class="task-body" onclick="toggleCard(${t.id})">
-      <div class="task-title">${overdue?'<span style="color:var(--red);font-size:10px">逾期 </span>':''}${t.title}${t.endDate&&t.endDate!==t.date?` <span style="font-size:10px;color:var(--text3);font-weight:400">(跨日)</span>`:''}</div>
+      <div class="task-title">${overdue?`<span style="color:var(--red);font-size:10px">逾期${odays>0?' '+odays+' 天':''} </span>`:''}${t.title}${t.endDate&&t.endDate!==t.date?` <span style="font-size:10px;color:var(--text3);font-weight:400">(跨日)</span>`:''}</div>
       <div class="task-meta">
         <span class="task-date">${dateDisplay}</span>
         <span class="prio ${pc}">${pl}</span>
+        ${deferred?`<span style="font-size:10px;background:var(--amber-bg);color:var(--amber);padding:1px 6px;border-radius:6px">⏸ 暫緩${t.deferUntil?` · ${t.deferUntil} 再看`:''}</span>`:''}
+        ${deferDue?`<span style="font-size:10px;background:var(--ora-bg);color:var(--ora2);padding:1px 6px;border-radius:6px">⏰ 該重新檢視了</span>`:''}
         ${t.code?`<span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text3)">${t.code}</span>`:''}
         ${t.isTravel?`<span style="font-size:10px;background:var(--amber-bg);color:var(--amber);padding:1px 6px;border-radius:6px">✈️ 出差</span>`:''}
         ${(()=>{const tt=t.taskType?S.taskTypes.find(x=>x.id===t.taskType):null;return tt?`<span style="font-size:10px;background:var(--border);color:var(--text2);padding:1px 6px;border-radius:6px">${tt.icon} ${tt.name}</span>`:''})()}
@@ -1612,6 +1707,9 @@ function taskCardHTML(t,today,color){
     </div>
     <div class="task-acts">
       <button class="t-btn" onclick="startEdit(${t.id})" title="編輯">✏️</button>
+      ${t.done?'':(deferred||deferDue
+        ?`<button class="t-btn" onclick="undeferTask(${t.id})" title="拿回主清單處理">▶</button>`
+        :`<button class="t-btn" onclick="deferTask(${t.id})" title="暫緩：暫時無法處理，移到暫緩區">⏸</button>`)}
       <button class="t-btn" onclick="archiveTask(${t.id})" title="封存（不做了但留記錄）">📦</button>
       <button class="t-btn del" onclick="delTask(${t.id})" title="刪除">✕</button>
     </div>
@@ -1676,6 +1774,32 @@ async function saveEdit(id){
   S.editingCard=null;await save();renderView();buildSuggestion();toast('✅ 已儲存','ok');
 }
 async function saveNote(id,val){const t=S.tasks.find(t=>t.id===id);if(t&&t.note!==val){t.note=val;await save();}}
+// ── 暫緩區：逾期但暫時無法處理，不封存也不佔用主清單 ──
+async function deferTask(id){
+  const t=S.tasks.find(x=>x.id===id);
+  if(!t)return;
+  const d=new Date();d.setDate(d.getDate()+14);
+  const suggest=fmtDate(d);
+  const input=prompt('「暫緩」：這件事暫時無法處理，先移到暫緩區（不會封存，也不會不見）。\n\n請設定重新檢視的日期（YYYY-MM-DD）；到期會自動回到主清單。\n留白＝無限期暫緩。',suggest);
+  if(input===null)return;
+  const v=(input||'').trim();
+  if(v&&!/^\d{4}-\d{2}-\d{2}$/.test(v)){toast('日期格式請用 YYYY-MM-DD','err');return;}
+  t.deferred=true;
+  t.deferUntil=v||null;
+  t.deferredAt=todayStr();
+  S.expandedProjs.add('__defer__');
+  await save();renderView();buildSuggestion();
+  toast(v?`⏸ 已暫緩，${v} 再提醒`:'⏸ 已移到暫緩區','ok');
+}
+
+async function undeferTask(id){
+  const t=S.tasks.find(x=>x.id===id);
+  if(!t)return;
+  t.deferred=false;t.deferUntil=null;
+  await save();renderView();buildSuggestion();
+  toast('▶ 已拿回主清單','ok');
+}
+
 async function archiveTask(id){
   const t=S.tasks.find(t=>t.id===id);
   if(!t)return;
@@ -1937,15 +2061,21 @@ function buildSuggestion(){
   const el=document.getElementById('sug-txt');
   const tags=document.getElementById('sug-tags');
   const today=fmtDate(new Date());
-  const pending=S.tasks.filter(t=>!t.done&&!t.archived).sort((a,b)=>a.date>b.date?1:-1);
+  const pending=S.tasks.filter(t=>!t.done&&!isArchived(t)&&!isDeferred(t)).sort((a,b)=>a.date>b.date?1:-1);
+  const deferredList=S.tasks.filter(isDeferred);
+  const reviewDue=S.tasks.filter(isDeferDue);
 
   let parts=[];
   let tagHtml='';
 
-  if(!pending.length&&!S.research.length){el.textContent='目前沒有待辦任務，好好休息 ☕';tags.innerHTML='';return;}
+  if(!pending.length&&!S.research.length&&!deferredList.length){el.textContent='目前沒有待辦任務，好好休息 ☕';tags.innerHTML='';return;}
+
+  if(reviewDue.length){
+    parts.push(`⏰ <b>${reviewDue.length} 件暫緩事項</b>到了重新檢視日：${reviewDue.map(t=>t.title).slice(0,2).join('、')}`);
+  }
 
   if(pending.length){
-    const overdue=pending.filter(t=>t.date<today);
+    const overdue=pending.filter(t=>(t.endDate&&t.endDate>t.date?t.endDate:t.date)<today);
     const todayT=pending.filter(t=>t.date===today);
     const thisWeek=pending.filter(t=>{const diff=(new Date(t.date)-new Date())/86400000;return diff>=0&&diff<=7;});
     const urgent=pending.filter(t=>t.priority==='high');
@@ -1957,6 +2087,7 @@ function buildSuggestion(){
     if(todayT.length)tagHtml+=`<span class="stag stag-s">今天 ${todayT.length} 件</span>`;
     if(thisWeek.length)tagHtml+=`<span class="stag stag-o">本週 ${thisWeek.length} 件</span>`;
   }
+  if(deferredList.length)tagHtml+=`<span class="stag" style="background:var(--amber-bg);color:var(--amber);border:1px solid #CBD3EE">⏸ 暫緩 ${deferredList.length} 件</span>`;
 
   // Research dormancy nudge
   const activeRes=S.research.filter(r=>r.status!=='done');
@@ -2038,13 +2169,8 @@ async function delProj(code){
 }
 // ── ARCHIVE ──
 function getArchivedTasks(){
-  const cutoff=new Date();
-  cutoff.setDate(cutoff.getDate()-7);
-  const cutoffStr=cutoff.toISOString().split('T')[0];
-  return S.tasks.filter(t=>
-    t.archived || // 手動封存
-    (t.done&&t.doneDate&&t.doneDate<=cutoffStr) // 完成超過7天
-  );
+  // 手動封存，或完成超過 7 天（判定集中在 isArchived，主頁與封存區一致）
+  return S.tasks.filter(isArchived);
 }
 
 // Archive state
@@ -2181,6 +2307,8 @@ async function restoreTask(id){
     t.doneDate=null;
     t.archived=false;
     t.archivedDate=null;
+    t.deferred=false;
+    t.deferUntil=null;
     await save();renderArchiveList();renderView();buildSuggestion();
     toast('✅ 已還原任務','ok');
   }
@@ -2192,7 +2320,8 @@ async function clearAllArchive(){
   for(const t of archived){
     if(t.calEventId)await deleteCal(t.calEventId);
   }
-  S.tasks=S.tasks.filter(t=>!getArchivedTasks().find(a=>a.id===t.id));
+  const ids=new Set(archived.map(t=>t.id));
+  S.tasks=S.tasks.filter(t=>!ids.has(t.id));
   await save();renderArchiveList();renderView();buildSuggestion();
   toast('✅ 封存已清除','ok');
 }
